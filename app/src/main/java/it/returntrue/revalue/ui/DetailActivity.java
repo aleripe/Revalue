@@ -1,32 +1,45 @@
 package it.returntrue.revalue.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.LinearLayout;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
 public class DetailActivity extends AppCompatActivity {
+    @Bind(R.id.toolbar) Toolbar mToolbar;
+    @Bind(R.id.layout_multipane) @Nullable LinearLayout mLayoutMultipane;
+    @Bind(R.id.fab) FloatingActionButton mFab;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        // Binds controls
+        ButterKnife.bind(this);
+
+        // Sets toolbar
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
+        // Sets floating action button
+        mFab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                Intent intent = new Intent(DetailActivity.this, ChatActivity.class);
+                startActivity(intent);
             }
         });
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
 
+        // Sets floating action button visibility
+        mFab.setVisibility((mLayoutMultipane != null) ? View.INVISIBLE : View.VISIBLE);
+    }
 }

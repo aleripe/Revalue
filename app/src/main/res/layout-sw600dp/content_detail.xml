@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,19 +9,19 @@
     android:orientation="horizontal"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
     <fragment
-        android:id="@+id/fragment_list"
-        android:name="it.returntrue.revalue.ui.ListFragment"
+        android:id="@+id/fragment_detail"
+        android:name="it.returntrue.revalue.ui.DetailFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        tools:context="ui.MainActivity"
-        tools:layout="@layout/fragment_list" />
+        tools:context="ui.DetailActivity"
+        tools:layout="@layout/fragment_detail" />
     <fragment
-        android:id="@+id/fragment_map"
-        android:name="it.returntrue.revalue.ui.MapFragment"
+        android:id="@+id/fragment_chat"
+        android:name="it.returntrue.revalue.ui.ChatFragment"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
-        tools:context="ui.MainActivity"
-        tools:layout="@layout/fragment_map" />
+        tools:context="ui.DetailActivity"
+        tools:layout="@layout/fragment_chat" />
 </LinearLayout>

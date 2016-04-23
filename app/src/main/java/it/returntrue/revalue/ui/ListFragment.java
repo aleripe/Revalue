@@ -19,7 +19,7 @@ import it.returntrue.revalue.adapters.ItemsAdapter;
 /**
  * Shows the list of items
  */
-public class ItemsFragment extends Fragment implements ItemsAdapter.OnItemClickListener {
+public class ListFragment extends Fragment implements ItemsAdapter.OnItemClickListener {
     private RecyclerView mRecyclerView;
     private ItemsAdapter mItemsAdapter;
     private OnItemClickListener mOnItemClickListener;
@@ -29,7 +29,11 @@ public class ItemsFragment extends Fragment implements ItemsAdapter.OnItemClickL
         void onItemClick(View view, Uri uri);
     }
 
-    public ItemsFragment() {
+    public ListFragment() {
+    }
+
+    public static Fragment newInstance() {
+        return new ListFragment();
     }
 
     @Override
@@ -42,7 +46,7 @@ public class ItemsFragment extends Fragment implements ItemsAdapter.OnItemClickL
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        View view = inflater.inflate(R.layout.fragment_list, container, false);
 
         // Creates list objects
         mRecyclerView = (RecyclerView)view.findViewById(R.id.list_items);
@@ -60,8 +64,7 @@ public class ItemsFragment extends Fragment implements ItemsAdapter.OnItemClickL
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-
-        inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_main_list, menu);
     }
 
     @Override

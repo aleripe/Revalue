@@ -3,27 +3,28 @@ package it.returntrue.revalue.ui;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.FrameLayout;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
-public class MainActivity extends AppCompatActivity implements ItemsFragment.OnItemClickListener {
-    private static final String TAG_FRAGMENT_DETAIL = DetailFragment.class.getSimpleName();
-
+public class MainActivity extends AppCompatActivity implements ListFragment.OnItemClickListener {
     private SessionPreferences mSessionPreferences;
-    private boolean mTwoPane;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.toolbar) Toolbar mToolbar;
+    @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
 
     @Override
@@ -49,7 +50,9 @@ public class MainActivity extends AppCompatActivity implements ItemsFragment.OnI
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                // Opens insert activity
+                Intent intent = new Intent(MainActivity.this, InsertActivity.class);
+                startActivity(intent);
             }
         });
 
@@ -59,21 +62,8 @@ public class MainActivity extends AppCompatActivity implements ItemsFragment.OnI
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Shows appropriate layout
-        if (findViewById(R.id.fragment_detail_container) != null) {
-            mTwoPane = true;
-
-            if (savedInstanceState == null) {
-                DetailFragment detailFragment = new DetailFragment();
-
-                getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_detail_container, detailFragment, TAG_FRAGMENT_DETAIL)
-                        .commit();
-            }
-        }
-        else {
-            mTwoPane = false;
-        }
+        // Shows list as default
+        showList();
     }
 
     @Override
@@ -86,20 +76,24 @@ public class MainActivity extends AppCompatActivity implements ItemsFragment.OnI
     }
 
     @Override
-    public void onItemClick(View view, Uri uri) {
-        if (mTwoPane) {
-            // Shows fragment for details
-            DetailFragment detailFragment = new DetailFragment();
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_list:
+                showList();
+                return true;
+            case R.id.action_map:
+                showMap();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 
-            getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_detail_container, detailFragment, TAG_FRAGMENT_DETAIL)
-                    .commit();
-        }
-        else {
-            // Opens details activity
-            Intent intent = new Intent(this, DetailActivity.class);
-            startActivity(intent);
-        }
+    @Override
+    public void onItemClick(View view, Uri uri) {
+        // Opens details activity
+        Intent intent = new Intent(this, DetailActivity.class);
+        startActivity(intent);
     }
 
     private void checkLogin() {
@@ -108,6 +102,22 @@ public class MainActivity extends AppCompatActivity implements ItemsFragment.OnI
             i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
+        }
+    }
+
+    private void showList() {
+        if (mFragmentContainer != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, ListFragment.newInstance())
+                    .commit();
+        }
+    }
+
+    private void showMap() {
+        if (mFragmentContainer != null) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, MapFragment.newInstance())
+                    .commit();
         }
     }
 }

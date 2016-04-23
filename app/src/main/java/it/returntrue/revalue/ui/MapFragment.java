@@ -9,16 +9,14 @@ import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
-public class DetailFragment extends Fragment {
-
-    public DetailFragment() {
+public class MapFragment extends Fragment {
+    public MapFragment() {
     }
 
     public static Fragment newInstance() {
-        return new DetailFragment();
+        return new MapFragment();
     }
 
     @Override
@@ -31,17 +29,13 @@ public class DetailFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_detail, container, false);
-
-        // Binds controls
-        ButterKnife.bind(this, view);
-
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
         return view;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.menu_detail, menu);
+        inflater.inflate(R.menu.menu_main_map, menu);
     }
 }
