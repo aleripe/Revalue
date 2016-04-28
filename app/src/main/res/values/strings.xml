@@ -1,12 +1,11 @@
 <resources>
     <string name="app_name">Revalue</string>
-    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_main">Revalue</string>
     <string name="title_activity_login">Sign in</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_in_with_facebook">Sign in with Facebook</string>
     <string name="action_favorites">Favorites</string>
     <string name="action_map">Map</string>
-    <string name="title_activity_detail">DetailActivity</string>
     <string name="action_share">Share</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -14,8 +13,34 @@
     <string name="nav_favorites">Favorites</string>
     <string name="nav_settings">Settings</string>
     <string name="nav_logout">Logout</string>
-    <string name="title_activity_insert">InsertActivity</string>
+    <string name="title_activity_insert">Insert new item</string>
     <string name="action_settings">Settings</string>
-    <string name="title_activity_chat">ChatActivity</string>
     <string name="action_list">List</string>
+    <string name="hint_title">Insert a title</string>
+    <string name="hint_description">Insert a description</string>
+    <string name="hint_filter">Insert a filter</string>
+    <string name="hint_category">Select a category</string>
+    <string name="title">Title</string>
+    <string name="required_title">Title is required</string>
+    <string name="description">Description</string>
+    <string name="required_description">Description is required</string>
+    <string name="category">Category</string>
+    <string name="required_category">Category is required</string>
+    <string name="display_location">Display your location on the map</string>
+    <string name="picture">Picture</string>
+    <string name="submit_item">Submit item</string>
+    <string name="action_send">Send</string>
+    <string name="search_filters">Search filters</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
+    <string name="distance">Distance</string>
+    <string-array name="array_categories">
+        <item>Sports</item>
+        <item>Cars</item>
+        <item>Bycicles</item>
+        <item>Electronics</item>
+        <item>Smartphones</item>
+        <item>Home</item>
+        <item>Furniture</item>
+    </string-array>
 </resources>

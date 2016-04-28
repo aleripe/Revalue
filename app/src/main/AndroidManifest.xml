@@ -5,6 +5,9 @@
         android:name="android.permission.INTERNET" />
     <uses-permission
         android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -25,7 +28,6 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".ui.DetailActivity"
-            android:label="@string/title_activity_detail"
             android:parentActivityName=".ui.MainActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
@@ -43,7 +45,6 @@
         </activity>
         <activity
             android:name=".ui.ChatActivity"
-            android:label="@string/title_activity_chat"
             android:parentActivityName=".ui.DetailActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data

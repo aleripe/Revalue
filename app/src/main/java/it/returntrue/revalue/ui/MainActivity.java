@@ -4,7 +4,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -13,6 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -23,7 +26,9 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnIt
     private SessionPreferences mSessionPreferences;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
+    @Bind(R.id.appbar) AppBarLayout mAppBar;
     @Bind(R.id.toolbar) Toolbar mToolbar;
+    @Bind(R.id.box_search) RelativeLayout mBoxSearch;
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
 
@@ -62,7 +67,16 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnIt
         mDrawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        // Shows list as default
+        mBoxSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getSupportFragmentManager();
+                FiltersFragment editNameDialog = new FiltersFragment();
+                editNameDialog.show(fm, "fragment_edit_name");
+            }
+        });
+
+        // Shows list as default //TODO: salvare la vista precedentemente utilizzata
         showList();
     }
 
@@ -115,6 +129,8 @@ public class MainActivity extends AppCompatActivity implements ListFragment.OnIt
 
     private void showMap() {
         if (mFragmentContainer != null) {
+            mAppBar.setExpanded(true);
+
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, MapFragment.newInstance())
                     .commit();

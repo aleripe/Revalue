@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.google.android.gms.common.GoogleApiAvailability;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
@@ -34,6 +36,10 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Sets listeners
         mButtonGoogleSignIn.setOnClickListener(this);
         mButtonFacebookSignIn.setOnClickListener(this);
+
+        // Gets Play Services availability
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int isGooglePlayServicesAvailable = apiAvailability.isGooglePlayServicesAvailable(this);
     }
 
     @Override
