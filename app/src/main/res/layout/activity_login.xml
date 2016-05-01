@@ -8,6 +8,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@color/colorPrimary"
+    android:fitsSystemWindows="true"
     tools:context=".ui.LoginActivity">
     <ImageView
         android:layout_width="200dp"
@@ -34,13 +35,12 @@
             android:text="@string/sign_in_with_facebook"
             android:layout_gravity="center_horizontal"/>
         <TextView
-            android:id="@+id/text_sign_in_status"
+            android:id="@+id/label_sign_in_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:textColor="#FFF"
             android:textStyle="bold"
-            android:text="Connecting, please wait..."
             android:layout_marginTop="32dp"/>
     </LinearLayout>
 </RelativeLayout>
