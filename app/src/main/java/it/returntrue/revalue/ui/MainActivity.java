@@ -13,6 +13,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -147,6 +148,8 @@ public class MainActivity extends AppCompatActivity
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(i);
         }
+
+        Log.v(MainActivity.class.getSimpleName(), mSessionPreferences.getToken());
     }
 
     private void setNavigationViewHeader() {

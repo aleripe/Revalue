@@ -11,7 +11,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.api.ItemModel;
 
 /**
  * Adapts data returned from cursor to show in a RecyclerView
@@ -19,8 +23,9 @@ import it.returntrue.revalue.R;
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
     public static final String TAG = ItemsAdapter.class.getSimpleName();
 
-    private final Context mContext;
     private OnItemClickListener mOnItemClickListener;
+    private final Context mContext;
+    private List<ItemModel> mItems;
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
@@ -30,6 +35,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
     public ItemsAdapter(Context context) {
         mContext = context;
+        mItems = new ArrayList<>();
     }
 
     /** Sets a new click events listener */
@@ -61,7 +67,17 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        return 20;
+        if (mItems != null) {
+            return mItems.size();
+        }
+        else {
+            return 0;
+        }
+    }
+
+    public void setItems(List<ItemModel> items) {
+        mItems = items;
+        notifyDataSetChanged();
     }
 
     /** Represents a ViewHolder for a RecyclerView item */
