@@ -22,29 +22,21 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 
 import java.util.Arrays;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ExternalTokenModel;
 import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.api.TokenModel;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int RC_SIGN_IN = 9001;
-
-    private final List<String> facebookPermissions = Arrays.asList("public_profile", "email");
-    private final Retrofit retrofit = new Retrofit.Builder()
-            .baseUrl("http://10.0.2.2/Revalue.Api/api/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build();
 
     private SessionPreferences mSessionPreferences;
     private CallbackManager mCallbackManager;
@@ -120,7 +112,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void facebookLogin() {
         // Starts Facebook login process
-        LoginManager.getInstance().logInWithReadPermissions(this, facebookPermissions);
+        LoginManager.getInstance().logInWithReadPermissions(this,
+                Arrays.asList("public_profile", "email"));
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
@@ -140,7 +133,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         externalTokenModel.Token = token;
 
         // Calls API to log user
-        RevalueService service = retrofit.create(RevalueService.class);
+        RevalueService service = RevalueServiceGenerator.createService();
         Call<TokenModel> call = service.ExternalLogin(externalTokenModel);
         call.clone().enqueue(new Callback<TokenModel>() {
             @Override

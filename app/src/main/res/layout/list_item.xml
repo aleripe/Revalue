@@ -37,16 +37,15 @@
                 android:singleLine="true"
                 android:lines="1"
                 android:ellipsize="end"
-                android:text="Bicicletta - City Bike"
                 android:textStyle="bold"/>
             <TextView
                 android:id="@+id/text_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textSize="12sp"
                 android:singleLine="true"
                 android:lines="1"
-                android:ellipsize="end"
-                android:text="Milano - 250km da te"/>
+                android:ellipsize="end"/>
         </LinearLayout>
     </RelativeLayout>
 </android.support.v7.widget.CardView>

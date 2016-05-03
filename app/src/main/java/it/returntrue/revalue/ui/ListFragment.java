@@ -24,14 +24,9 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.adapters.ItemsAdapter;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 import retrofit2.Call;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Shows the list of items
@@ -129,36 +124,16 @@ public class ListFragment extends Fragment
     }
 
     private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
+        private final SessionPreferences mSessionPreferences = new SessionPreferences(getContext());
+
         public ListAsyncTaskLoader(Context context) {
             super(context);
         }
 
         @Override
         public List<ItemModel> loadInBackground() {
-            final SessionPreferences sessionPreferences = new SessionPreferences(getContext());
 
-            OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.addInterceptor(new Interceptor() {
-                  @Override
-                  public Response intercept(Interceptor.Chain chain) throws IOException {
-                      Request original = chain.request();
-
-                      Request request = original.newBuilder()
-                              .header("Authorization", "Bearer " + sessionPreferences.getToken())
-                              .method(original.method(), original.body())
-                              .build();
-
-                      return chain.proceed(request);
-                  }
-            });
-
-            OkHttpClient client = httpClient.build();
-            Retrofit retrofit = new Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2/Revalue.Api/api/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(client)
-                    .build();
-            RevalueService service = retrofit.create(RevalueService.class);
+            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
             Call<List<ItemModel>> call = service.GetNearestItems(45.553629, 9.197735, 0);
 
             try {
