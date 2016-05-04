@@ -59,7 +59,7 @@ public class ListFragment extends Fragment
         setHasOptionsMenu(true);
 
         // Initializes loader
-        getActivity().getSupportLoaderManager().initLoader(1, null, this).forceLoad();
+        getActivity().getSupportLoaderManager().initLoader(LOADER_ITEMS, null, this).forceLoad();
     }
 
     @Override
@@ -115,12 +115,16 @@ public class ListFragment extends Fragment
 
     @Override
     public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
-        mItemsAdapter.setItems(data);
+        if (mItemsAdapter != null) {
+            mItemsAdapter.setItems(data);
+        }
     }
 
     @Override
     public void onLoaderReset(Loader<List<ItemModel>> loader) {
-        mItemsAdapter.setItems(new ArrayList<ItemModel>());
+        if (mItemsAdapter != null) {
+            mItemsAdapter.setItems(new ArrayList<ItemModel>());
+        }
     }
 
     private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {

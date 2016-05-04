@@ -10,7 +10,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +69,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         ItemModel itemModel = mItems.get(position);
+
+        Glide.with(mContext)
+                .load(itemModel.PictureUrl)
+                .into(holder.imageCover);
+
         holder.textTitle.setText(itemModel.Title);
         holder.textLocation.setText(itemModel.City + " / " +
                 (int)(itemModel.Distance / 1000) + " km");
@@ -82,12 +90,15 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     }
 
     public void setItems(List<ItemModel> items) {
-        mItems = items;
-        notifyDataSetChanged();
+        if (items != null) {
+            mItems = items;
+            notifyDataSetChanged();
+        }
     }
 
     /** Represents a ViewHolder for a RecyclerView item */
     public final class ViewHolder extends RecyclerView.ViewHolder {
+        @Bind(R.id.image_cover) public ImageView imageCover;
         @Bind(R.id.text_title) public TextView textTitle;
         @Bind(R.id.text_location) public TextView textLocation;
 

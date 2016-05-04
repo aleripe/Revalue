@@ -8,7 +8,7 @@ public class ItemModel {
     public double Longitude;
     public double Distance;
     public String City;
-    public byte[] Picture;
+    public String PictureUrl;
     public int CategoryId;
     public String CategoryName;
     public int UserId;
