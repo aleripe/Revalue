@@ -14,6 +14,8 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
 public class DetailActivity extends AppCompatActivity {
+    public static final String EXTRA_ID = "id";
+
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.layout_multipane) @Nullable LinearLayout mLayoutMultipane;
     @Bind(R.id.fab) FloatingActionButton mFab;

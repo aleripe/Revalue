@@ -5,7 +5,6 @@
 package it.returntrue.revalue.adapters;
 
 import android.content.Context;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,7 +35,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
         void onFavoriteClick(View view, long id);
-        void onItemClick(View view, Uri uri);
+        void onItemClick(View view, long id);
     }
 
     public ItemsAdapter(Context context) {
@@ -52,17 +51,6 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.list_item, parent, false);
-
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mOnItemClickListener != null) {
-                    mOnItemClickListener.onItemClick(view, null);
-
-                }
-            }
-        });
-
         return new ViewHolder(view);
     }
 
@@ -104,7 +92,19 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
         public ViewHolder(View view) {
             super(view);
+
+            // Binds controls
             ButterKnife.bind(this, view);
+
+            view.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.onItemClick(view,
+                                mItems.get(getAdapterPosition()).Id);
+                    }
+                }
+            });
         }
     }
 }

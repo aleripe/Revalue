@@ -20,7 +20,6 @@
             android:id="@+id/text_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Bicicletta - City Bike"
             android:textSize="24sp"
             android:textStyle="bold"
             android:layout_below="@id/image_cover"
@@ -29,7 +28,6 @@
             android:id="@+id/text_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Milano - 250km"
             android:textSize="18sp"
             android:layout_below="@id/text_title"
             android:layout_marginTop="4dp" />
@@ -37,7 +35,6 @@
             android:id="@+id/text_description"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce vel quam nisl. Nullam et venenatis quam, ut finibus orci. In dictum tincidunt magna. Quisque efficitur hendrerit sapien, eget feugiat nulla tristique eu. Proin tincidunt efficitur turpis vel scelerisque. Curabitur bibendum est velit, eget tristique nulla elementum quis. Mauris sed augue eget turpis lobortis commodo sollicitudin non odio. Praesent at quam ante. Praesent vel sem interdum, vehicula enim at, dictum ligula.\n\nNulla tortor elit, suscipit et ornare at, fringilla in arcu. Vestibulum eget sem vestibulum, fermentum orci vel, molestie lacus. Praesent eu dapibus eros, non convallis orci. Phasellus mattis erat ornare est semper, ut faucibus nulla aliquam. Ut quis elementum dolor. Fusce augue dui, interdum ut tellus quis, molestie interdum justo. Duis varius elementum pharetra. Phasellus turpis mauris, efficitur a congue a, efficitur ac enim. Sed quis purus odio. Mauris feugiat rhoncus aliquet. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Morbi at maximus sem. Aliquam sit amet metus ut quam blandit placerat ac nec diam. Donec ut enim id diam gravida bibendum eget vitae turpis. Donec consectetur augue eget leo pulvinar, in ullamcorper ligula malesuada."
             android:layout_below="@id/text_location"
             android:layout_marginTop="16dp" />
         <fragment
@@ -46,6 +43,11 @@
             android:layout_height="200dp"
             android:name="com.google.android.gms.maps.SupportMapFragment"
             android:layout_below="@id/text_description"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="16dp"
+            app:uiRotateGestures="false"
+            app:uiScrollGestures="false"
+            app:uiTiltGestures="false"
+            app:uiZoomControls="false"
+            app:uiZoomGestures="false" />
     </RelativeLayout>
 </android.support.v4.widget.NestedScrollView>

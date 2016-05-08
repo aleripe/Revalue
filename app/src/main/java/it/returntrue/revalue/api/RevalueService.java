@@ -17,8 +17,10 @@ public interface RevalueService {
                                           @Path("longitude") double longitude,
                                           @Path("page") int page);
 
-    @GET("Items/GetItemById/{id}")
-    Call<ItemModel> GetItemById(@Path("id") int id);
+    @GET("Items/GetItem/{latitude}/{longitude}/{id}")
+    Call<ItemModel> GetItem(@Path("latitude") double latitude,
+                            @Path("longitude") double longitude,
+                            @Path("id") long id);
 
     @GET("Items/InsertItem")
     Call InsertUser(@Body ItemModel itemModel);

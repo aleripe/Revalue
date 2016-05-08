@@ -1,8 +1,8 @@
 package it.returntrue.revalue.ui;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -27,10 +27,19 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.ui.base.MainFragment;
 
-public class MainActivity extends AppCompatActivity
-        implements ListFragment.OnItemClickListener,
-            NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends AppCompatActivity implements MainFragment.OnItemClickListener,
+        NavigationView.OnNavigationItemSelectedListener {
+    private static final String KEY_MODE = "mode";
+
+    // Defines allowed modes as a fake enumeration
+    @IntDef({ LIST_MODE, MAP_MODE })
+    public @interface Modes {}
+    public static final int LIST_MODE = 1;
+    public static final int MAP_MODE = 2;
+
+    private @Modes int mMode = LIST_MODE;
     private SessionPreferences mSessionPreferences;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
@@ -45,7 +54,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Creates session preferences manager
+        // Creates preferences managers
         mSessionPreferences = new SessionPreferences(this);
 
         // Checks login
@@ -91,8 +100,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        // Shows list as default //TODO: salvare la vista precedentemente utilizzata
-        showList();
+        if (savedInstanceState != null) {
+            // Shows appropriate mode
+            // noinspection ResourceType (we're sure mMode is one of the allowed values)
+            mMode = savedInstanceState.getInt(KEY_MODE, LIST_MODE);
+        }
+
+        // noinspection ResourceType (we're sure mMode is one of the allowed values)
+        setMode(mMode);
     }
 
     @Override
@@ -130,10 +145,17 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onItemClick(View view, Uri uri) {
+    public void onItemClick(View view, long id) {
         // Opens details activity
         Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra(DetailActivity.EXTRA_ID, id);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putInt(KEY_MODE, mMode);
+        super.onSaveInstanceState(outState);
     }
 
     private void logout() {
@@ -164,11 +186,24 @@ public class MainActivity extends AppCompatActivity
         Glide.with(this).load(mSessionPreferences.getAvatar()).into(mImagePicture);
     }
 
+    private void setMode(@Modes int mode) {
+        switch (mode) {
+            case LIST_MODE:
+                showList();
+                break;
+            case MAP_MODE:
+                showMap();
+                break;
+        }
+    }
+
     private void showList() {
         if (mFragmentContainer != null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, ListFragment.newInstance())
                     .commit();
+
+            mMode = LIST_MODE;
         }
     }
 
@@ -179,6 +214,8 @@ public class MainActivity extends AppCompatActivity
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, MapFragment.newInstance())
                     .commit();
+
+            mMode = MAP_MODE;
         }
     }
 }
