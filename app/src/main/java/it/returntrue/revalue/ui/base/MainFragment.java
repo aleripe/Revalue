@@ -41,6 +41,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     protected OnItemClickListener mOnItemClickListener;
     protected Location mLastLocation;
 
+    private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
 
     /** Provides listeners for click events */
@@ -55,14 +56,18 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Sets a location request
+        mLocationRequest = new LocationRequest();
+        mLocationRequest.setInterval(10000);
+        mLocationRequest.setFastestInterval(5000);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+
         // Create an instance of GoogleAPIClient.
-        if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(getContext())
-                    .addConnectionCallbacks(this)
-                    .addOnConnectionFailedListener(this)
-                    .addApi(LocationServices.API)
-                    .build();
-        }
+        mGoogleApiClient = new GoogleApiClient.Builder(getContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
     }
 
     @Override
@@ -78,8 +83,26 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
 
     @Override
     public void onStart() {
-        mGoogleApiClient.connect();
         super.onStart();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        if (mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+        }
     }
 
     @Override
@@ -113,13 +136,11 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
 
     @Override
     public void onLocationChanged(Location location) {
-        if (mLastLocation == null) {
-            // Stores last location
-            mLastLocation = location;
+        // Stores last location
+        mLastLocation = location;
 
-            // Initializes loader
-            getActivity().getSupportLoaderManager().initLoader(LOADER_ITEMS, null, this).forceLoad();
-        }
+        // Loads items
+        loadItems();
     }
 
     @Override
@@ -148,21 +169,29 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     @Override
     public abstract void onLoaderReset(Loader<List<ItemModel>> loader);
 
-    private void getLastLocation() {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-
-        if (mLastLocation != null) {
+    private void loadItems() {
+        if (mLocationRequest != null) {
             // Initializes loader
             getActivity().getSupportLoaderManager().initLoader(LOADER_ITEMS, null, this).forceLoad();
         }
+    }
 
-        LocationRequest mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+    private void getLastLocation() {
+        if (mLastLocation == null) {
+            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+            loadItems();
+        }
 
+        startLocationUpdates();
+    }
+
+    private void startLocationUpdates() {
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
+    }
+
+    private void stopLocationUpdates() {
+        LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
     private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
