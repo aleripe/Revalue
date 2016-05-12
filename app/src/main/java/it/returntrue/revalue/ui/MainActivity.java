@@ -1,13 +1,17 @@
 package it.returntrue.revalue.ui;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -24,32 +28,43 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.api.CategoryModel;
+import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceGenerator;
+import it.returntrue.revalue.preferences.InterfacePreferences;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.ui.base.MainFragment;
+import retrofit2.Call;
 
 public class MainActivity extends AppCompatActivity implements MainFragment.OnItemClickListener,
-        NavigationView.OnNavigationItemSelectedListener {
-    private static final String KEY_MODE = "mode";
+        NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<List<CategoryModel>> {
+    protected static final int LOADER_CATEGORIES = 1;
 
-    // Defines allowed modes as a fake enumeration
-    @IntDef({ LIST_MODE, MAP_MODE })
-    public @interface Modes {}
-    public static final int LIST_MODE = 1;
-    public static final int MAP_MODE = 2;
-
-    private @Modes int mMode = LIST_MODE;
     private SessionPreferences mSessionPreferences;
+    private InterfacePreferences mInterfacePreferences;
+    private List<CategoryModel> mCategories;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.nav_view) NavigationView mNavigationView;
     @Bind(R.id.appbar) AppBarLayout mAppBar;
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.box_search) RelativeLayout mBoxSearch;
+    @Bind(R.id.text_filter_title) TextView mTextFilterTitle;
+    @Bind(R.id.text_filter_categories) TextView mTextFilterCategories;
+    @Bind(R.id.text_filter_distance) TextView mTextFilterDistance;
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
+
+    private String mFilterTitle;
+    private ArrayList<Integer> mFilterCategories;
+    private Integer mFilterDistance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(this);
+        mInterfacePreferences = new InterfacePreferences(this);
 
         // Checks login
         checkLogin();
@@ -69,6 +85,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
         // Sets toolbar
         setSupportActionBar(mToolbar);
+
+        // Setup the available loader
+        getSupportLoaderManager().initLoader(LOADER_CATEGORIES, null, this).forceLoad();
 
         // Sets informations on NavigationView header
         setNavigationViewHeader();
@@ -97,18 +116,23 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
                 FiltersFragment editNameDialog = new FiltersFragment();
+                editNameDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        setFilters();
+                    }
+                });
                 editNameDialog.show(fm, "fragment_edit_name");
             }
         });
 
-        if (savedInstanceState != null) {
-            // Shows appropriate mode
-            // noinspection ResourceType (we're sure mMode is one of the allowed values)
-            mMode = savedInstanceState.getInt(KEY_MODE, LIST_MODE);
-        }
+        setMode(mInterfacePreferences.getMainMode());
+    }
 
-        // noinspection ResourceType (we're sure mMode is one of the allowed values)
-        setMode(mMode);
+    @Override
+    protected void onDestroy() {
+        mInterfacePreferences.clearAll();
+        super.onDestroy();
     }
 
     @Override
@@ -154,9 +178,24 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putInt(KEY_MODE, mMode);
-        super.onSaveInstanceState(outState);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
+    public Loader<List<CategoryModel>> onCreateLoader(int id, Bundle args) {
+        return new CategoryAsyncTaskLoader(this, mSessionPreferences);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<CategoryModel>> loader, List<CategoryModel> data) {
+        mCategories = data;
+        setFilters();
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<CategoryModel>> loader) {
+
     }
 
     private void logout() {
@@ -177,6 +216,18 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         if (!TextUtils.isEmpty(token)) Log.v(MainActivity.class.getSimpleName(), token);
     }
 
+    private void setFilters() {
+        mTextFilterTitle.setText(mInterfacePreferences.getFilterTitleDescription());
+        mTextFilterDistance.setText(mInterfacePreferences.getFilterDistanceDescription());
+
+        for (CategoryModel categoryModel : mCategories) {
+            // Sets previous selection
+            if (categoryModel.Id == mInterfacePreferences.getFilterCategory()) {
+                mTextFilterCategories.setText(categoryModel.Name);
+            }
+        }
+    }
+
     private void setNavigationViewHeader() {
         View header = mNavigationView.getHeaderView(0);
 
@@ -189,12 +240,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         Glide.with(this).load(mSessionPreferences.getAvatar()).into(mImagePicture);
     }
 
-    private void setMode(@Modes int mode) {
+    private void setMode(@InterfacePreferences.Modes int mode) {
         switch (mode) {
-            case LIST_MODE:
+            case InterfacePreferences.LIST_MODE:
                 showList();
                 break;
-            case MAP_MODE:
+            case InterfacePreferences.MAP_MODE:
                 showMap();
                 break;
         }
@@ -206,7 +257,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
                     .replace(R.id.fragment_container, ListFragment.newInstance())
                     .commit();
 
-            mMode = LIST_MODE;
+            mInterfacePreferences.setMainMode(InterfacePreferences.LIST_MODE);
         }
     }
 
@@ -218,7 +269,30 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
                     .replace(R.id.fragment_container, MapFragment.newInstance())
                     .commit();
 
-            mMode = MAP_MODE;
+            mInterfacePreferences.setMainMode(InterfacePreferences.MAP_MODE);
+        }
+    }
+
+    private static class CategoryAsyncTaskLoader extends AsyncTaskLoader<List<CategoryModel>> {
+        private SessionPreferences mSessionPreferences;
+
+        public CategoryAsyncTaskLoader(Context context, SessionPreferences sessionPreferences) {
+            super(context);
+            mSessionPreferences = sessionPreferences;
+        }
+
+        @Override
+        public List<CategoryModel> loadInBackground() {
+            RevalueService service = RevalueServiceGenerator.createService(
+                    mSessionPreferences.getToken());
+            Call<List<CategoryModel>> call = service.GetAllCategories();
+
+            try {
+                return call.execute().body();
+            }
+            catch (IOException e) {
+                return new ArrayList<>();
+            }
         }
     }
 }

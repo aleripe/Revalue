@@ -7,8 +7,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
 public class MapUtilities {
-    public static Circle getCenteredCircle(GoogleMap map, LatLng center, int radius) {
-        return map.addCircle(new CircleOptions().center(center).radius(radius).strokeColor(Color.TRANSPARENT));
+    public static Circle getCenteredCircle(GoogleMap map, LatLng center, int radiusKm) {
+        return map.addCircle(new CircleOptions()
+                .center(center)
+                .radius(radiusKm * 1000)
+                .strokeColor(Color.TRANSPARENT));
     }
 
     public static int getCircleZoomLevel(Circle circle) {

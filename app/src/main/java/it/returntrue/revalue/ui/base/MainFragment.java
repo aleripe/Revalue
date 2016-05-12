@@ -7,6 +7,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -14,7 +15,6 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.view.View;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,9 +26,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.ButterKnife;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
+import it.returntrue.revalue.preferences.InterfacePreferences;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import retrofit2.Call;
 
@@ -38,11 +40,17 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     protected static final int LOADER_ITEMS = 1;
     protected static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
+    private static final int FASTEST_INTERVAL = 1000;
+    private static final int INTERVAL = FASTEST_INTERVAL * 2;
+
     protected OnItemClickListener mOnItemClickListener;
     protected Location mLastLocation;
 
+    private SessionPreferences mSessionPreferences;
+    private InterfacePreferences mInterfacePreferences;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
+    private ListAsyncTaskLoader mListLoader;
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
@@ -56,11 +64,15 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Creates preferences managers
+        mSessionPreferences = new SessionPreferences(getContext());
+        mInterfacePreferences = new InterfacePreferences(getContext());
+
         // Sets a location request
         mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(5000);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setInterval(INTERVAL);
+        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // Create an instance of GoogleAPIClient.
         mGoogleApiClient = new GoogleApiClient.Builder(getContext())
@@ -88,15 +100,6 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-
-        if (mGoogleApiClient.isConnected()) {
-            startLocationUpdates();
-        }
-    }
-
-    @Override
     public void onPause() {
         super.onPause();
 
@@ -106,9 +109,29 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        if (mGoogleApiClient.isConnected()) {
+            startLocationUpdates();
+        }
+    }
+
+    @Override
     public void onStop() {
         mGoogleApiClient.disconnect();
         super.onStop();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        // Binds controls
+        ButterKnife.bind(this, getView());
+
+        // Setup the available loader
+        getLoaderManager().initLoader(LOADER_ITEMS, null, this);
     }
 
     @Override
@@ -120,7 +143,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
         else {
-            getLastLocation();
+            startLocationUpdates();
         }
     }
 
@@ -137,10 +160,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     @Override
     public void onLocationChanged(Location location) {
         // Stores last location
-        mLastLocation = location;
-
-        // Loads items
-        loadItems();
+        setLastLocation(location);
     }
 
     @Override
@@ -149,10 +169,10 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
         switch (requestCode) {
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getLastLocation();
+                    startLocationUpdates();
                 }
                 else {
-                    Toast.makeText(getContext(), "Can't get last location", Toast.LENGTH_LONG).show();
+                    Snackbar.make(getView(), "Can't get last location", Snackbar.LENGTH_LONG).show();
                 }
             }
         }
@@ -160,7 +180,8 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
 
     @Override
     public Loader<List<ItemModel>> onCreateLoader(int id, Bundle args) {
-        return new ListAsyncTaskLoader(getContext(), mLastLocation);
+        mListLoader = new ListAsyncTaskLoader(getContext(), mSessionPreferences, mInterfacePreferences);
+        return mListLoader;
     }
 
     @Override
@@ -169,23 +190,10 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     @Override
     public abstract void onLoaderReset(Loader<List<ItemModel>> loader);
 
-    private void loadItems() {
-        if (mLocationRequest != null) {
-            // Initializes loader
-            getActivity().getSupportLoaderManager().initLoader(LOADER_ITEMS, null, this).forceLoad();
-        }
-    }
-
-    private void getLastLocation() {
-        if (mLastLocation == null) {
-            mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            loadItems();
-        }
-
-        startLocationUpdates();
-    }
-
     private void startLocationUpdates() {
+        // Stores last location
+        setLastLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
+
         LocationServices.FusedLocationApi.requestLocationUpdates(
                 mGoogleApiClient, mLocationRequest, this);
     }
@@ -194,13 +202,25 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
     }
 
-    private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
-        private final SessionPreferences mSessionPreferences = new SessionPreferences(getContext());
-        private final Location mLastLocation;
+    private void setLastLocation(Location location) {
+        mLastLocation = location;
 
-        public ListAsyncTaskLoader(Context context, Location lastLocation) {
+        if (mLastLocation != null) {
+            mInterfacePreferences.setLocationLatitude((float) location.getLatitude());
+            mInterfacePreferences.setLocationLongitude((float) location.getLongitude());
+            mListLoader.onContentChanged();
+        }
+    }
+
+    private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
+        private SessionPreferences mSessionPreferences;
+        private InterfacePreferences mInterfacePreferences;
+
+        public ListAsyncTaskLoader(Context context, SessionPreferences sessionPreferences,
+                                   InterfacePreferences interfacePreferences) {
             super(context);
-            mLastLocation = lastLocation;
+            mSessionPreferences = sessionPreferences;
+            mInterfacePreferences = interfacePreferences;
         }
 
         @Override
@@ -208,7 +228,9 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
             RevalueService service = RevalueServiceGenerator.createService(
                     mSessionPreferences.getToken());
             Call<List<ItemModel>> call = service.GetNearestItems(
-                    mLastLocation.getLatitude(), mLastLocation.getLongitude(), 0);
+                    mInterfacePreferences.getLocationLatitude(),
+                    mInterfacePreferences.getLocationLongitude(),
+                    mInterfacePreferences.getCurrentPage());
 
             try {
                 return call.execute().body();

@@ -30,6 +30,7 @@ import java.util.List;
 
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ItemModel;
+import it.returntrue.revalue.preferences.InterfacePreferences;
 import it.returntrue.revalue.ui.base.MainFragment;
 import it.returntrue.revalue.utilities.MapUtilities;
 
@@ -38,6 +39,7 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
     private static final String KEY_LONGITUDE = "longitude";
     private static final String KEY_ZOOM = "zoom";
 
+    private InterfacePreferences mInterfacePreferences;
     private SupportMapFragment mMapFragment;
     private HashMap<Marker, Integer> mMarkerIDs = new HashMap<>();
     private double mLatitude;
@@ -54,6 +56,9 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Creates preferences managers
+        mInterfacePreferences = new InterfacePreferences(getActivity());
 
         // Sets option menu
         setHasOptionsMenu(true);
@@ -115,13 +120,16 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
                     mMarkerIDs.put(marker, itemModel.Id);
             }
 
-            LatLng position = new LatLng(mLastLocation.getLatitude(), mLastLocation.getLongitude());
+            LatLng position = new LatLng(
+                    mInterfacePreferences.getLocationLatitude(),
+                    mInterfacePreferences.getLocationLongitude());
 
             if (mLatitude != 0 && mLongitude != 0) {
                 position = new LatLng(mLatitude, mLongitude);
             }
 
-            Circle circle = MapUtilities.getCenteredCircle(map, position, 20000);
+            Circle circle = MapUtilities.getCenteredCircle(map, position,
+                    mInterfacePreferences.getFilterDistance());
 
             if (mZoom == 0) {
                 mZoom = MapUtilities.getCircleZoomLevel(circle);

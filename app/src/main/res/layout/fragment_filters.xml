@@ -63,20 +63,24 @@
             android:textSize="12sp"
             android:layout_marginBottom="2dp" />
         <RadioGroup
+            android:id="@+id/radio_distance"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
             <RadioButton
+                android:id="@+id/radio_distance_50"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="50 km" />
             <RadioButton
+                android:id="@+id/radio_distance_100"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="100 km" />
             <RadioButton
+                android:id="@+id/radio_distance_200"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
