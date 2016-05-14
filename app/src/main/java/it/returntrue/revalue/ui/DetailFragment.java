@@ -78,9 +78,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         // Binds controls
         mImageCover = (ImageView)getActivity().findViewById(R.id.image_cover);
-        ButterKnife.bind(this, getView());
 
         // Binds controls
+        ButterKnife.bind(this, getView());
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
 
         // Initializes loader

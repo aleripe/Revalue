@@ -9,6 +9,7 @@ public class ItemModel {
     public double Distance;
     public String City;
     public String PictureUrl;
+    public String PictureData;
     public int CategoryId;
     public String CategoryName;
     public int UserId;

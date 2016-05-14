@@ -1,8 +1,24 @@
 package it.returntrue.revalue.ui;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.location.Address;
+import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -10,21 +26,54 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.RevalueApplication;
+import it.returntrue.revalue.api.CategoryModel;
+import it.returntrue.revalue.api.ItemModel;
+import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceGenerator;
+import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.utilities.MapUtilities;
 
 public class InsertFragment extends Fragment {
-    @Bind(R.id.spinner_category) Spinner mCategory;
+    private static final int ACTION_CAMERA = 1;
+    private static final int ACTION_GALLERY = 2;
+    private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+
+    private RevalueApplication mApplication;
+    private SessionPreferences mSessionPreferences;
+    private ArrayAdapter<CategoryModel> mAdapter;
+    private SupportMapFragment mMapFragment;
+    private Bitmap mPicture;
+
+    @Bind(R.id.spinner_category) Spinner mSpinnerCategory;
     @Bind(R.id.label_title) TextView mLabelTitle;
     @Bind(R.id.text_title) EditText mTextTitle;
-    @Bind(R.id.button_choose_picture) ImageButton mChoosePicture;
+    @Bind(R.id.text_description) EditText mTextDescription;
+    @Bind(R.id.button_choose_picture) ImageButton mButtonChoosePicture;
+    @Bind(R.id.switch_location) Switch mSwitchLocation;
 
     public InsertFragment() {
     }
@@ -35,6 +84,20 @@ public class InsertFragment extends Fragment {
 
         // Sets option menu
         setHasOptionsMenu(true);
+
+        // Sets application context
+        mApplication = (RevalueApplication)getActivity().getApplicationContext();
+
+        // Creates preferences managers
+        mSessionPreferences = new SessionPreferences(getContext());
+
+        // Creates adapter and inserts empty default value
+        mAdapter = new ArrayAdapter<CategoryModel>(
+                getContext(), android.R.layout.simple_list_item_1);
+        mAdapter.clear();
+        mAdapter.addAll(mApplication.getCategories());
+        mAdapter.insert(createEmptyCategoryModel(), 0);
+        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     }
 
     @Override
@@ -43,17 +106,38 @@ public class InsertFragment extends Fragment {
 
         // Binds controls
         ButterKnife.bind(this, view);
+        mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
 
         // Sets adapter
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(getContext(),
-                R.array.array_categories, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mCategory.setAdapter(adapter);
+        mSpinnerCategory.setAdapter(mAdapter);
 
-        mChoosePicture.setOnClickListener(new View.OnClickListener() {
+        mButtonChoosePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getContext(), "Choose a picture", Toast.LENGTH_SHORT).show();
+                selectPicture();
+            }
+        });
+
+        mSwitchLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                GoogleMap map = mMapFragment.getMap();
+                if (map != null) {
+                    map.clear();
+
+                    if (isChecked) {
+                        LatLng coordinates = new LatLng(mApplication.getLocationLatitude(),
+                                mApplication.getLocationLongitude());
+                        map.addMarker(new MarkerOptions().position(coordinates));
+
+                        Circle circle = MapUtilities.getCenteredCircle(map, coordinates, 5);
+                        int zoom = MapUtilities.getCircleZoomLevel(circle);
+
+                        if (zoom > 0) {
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                        }
+                    }
+                }
             }
         });
 
@@ -77,7 +161,199 @@ public class InsertFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == ACTION_CAMERA) {
+                actionCameraResult(data);
+            }
+            if (requestCode == ACTION_GALLERY) {
+                actionGalleryResult(data);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    dispatchGalleryIntent();
+                }
+                else {
+                    Snackbar.make(getView(), "Can't read pictures from gallery", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
+    private void actionCameraResult(Intent data) {
+        mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 400);
+
+        if (mPicture != null) {
+            mButtonChoosePicture.setImageBitmap(mPicture);
+        }
+    }
+
+    private Bitmap resizeImage(Bitmap bitmap, int newWidth) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        float scale = ((float)newWidth) / width;
+        int newHeight = (int)(height * scale);
+
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+    }
+
+    private void actionGalleryResult(Intent data) {
+        if (data != null) {
+            try {
+                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), data.getData()), 400);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (mPicture != null) {
+            mButtonChoosePicture.setImageBitmap(mPicture);
+        }
+    }
+
+    private void selectPicture() {
+        final CharSequence[] items = { "Take Photo", "Choose from Library", "Cancel" };
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        builder.setTitle("Add Photo!");
+        builder.setItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int item) {
+                if (items[item].equals("Take Photo")) {
+                    dispatchCameraIntent();
+                } else if (items[item].equals("Choose from Library")) {
+                    if (ContextCompat.checkSelfPermission(getActivity(),
+                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(getActivity(),
+                                new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
+                                PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                    }
+                    else {
+                        dispatchGalleryIntent();
+                    }
+                } else if (items[item].equals("Cancel")) {
+                    dialog.dismiss();
+                }
+            }
+        });
+        builder.show();
+    }
+
+    private void dispatchCameraIntent() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent, ACTION_CAMERA);
+    }
+
+    private void dispatchGalleryIntent() {
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        startActivityForResult(intent, ACTION_GALLERY);
+    }
+
     private void sendItem() {
-        Toast.makeText(getContext(), "Send item", Toast.LENGTH_SHORT).show();
+        String text = mTextTitle.getText().toString();
+        String description = mTextDescription.getText().toString();
+        Double latitude = null;
+        Double longitude = null;
+        String city = null;
+        Integer categoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
+        String token = mSessionPreferences.getToken();
+
+        if (mSwitchLocation.isChecked() && mMapFragment.getMap() != null) {
+            Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+
+            latitude = mMapFragment.getMap().getCameraPosition().target.latitude;
+            longitude = mMapFragment.getMap().getCameraPosition().target.longitude;
+
+            try {
+                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+
+                if (addresses != null || addresses.size() > 0) {
+                    Address address = addresses.get(0);
+                    city = address.getLocality();
+                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        new SaveItemAsyncTask(text, description, latitude, longitude, city, categoryId, mPicture, token)
+                .execute();
+    }
+
+    private CategoryModel createEmptyCategoryModel() {
+        CategoryModel category = new CategoryModel();
+        category.Id = 0;
+        category.Name = getString(R.string.hint_category);
+        return category;
+    }
+
+    class SaveItemAsyncTask extends AsyncTask {
+        private final String mText;
+        private final String mDescription;
+        private final Double mLatitude;
+        private final Double mLongitude;
+        private final String mCity;
+        private final Integer mCategoryId;
+        private final Bitmap mPicture;
+        private final String mToken;
+
+        public SaveItemAsyncTask(String text, String description, Double latitude,
+                                 Double longitude, String city, Integer categoryId,
+                                 Bitmap picture, String token) {
+            mText = text;
+            mDescription = description;
+            mLatitude = latitude;
+            mLongitude = longitude;
+            mCity = city;
+            mCategoryId = categoryId;
+            mPicture = picture;
+            mToken = token;
+        }
+
+        @Override
+        protected Object doInBackground(Object[] params) {
+            ItemModel item = new ItemModel();
+            item.Title = mText;
+            item.Description = mDescription;
+            item.Latitude = mLatitude;
+            item.Longitude = mLongitude;
+            item.City = mCity;
+            item.CategoryId = mCategoryId;
+
+            if (mPicture != null) {
+                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+                mPicture.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
+                byte[] byteArray = byteArrayOutputStream.toByteArray();
+                item.PictureData = Base64.encodeToString(byteArray, Base64.DEFAULT);
+            }
+
+            RevalueService service = RevalueServiceGenerator.createService(mToken);
+
+            try {
+                service.InsertItem(item).execute();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return item;
+        }
+
+        @Override
+        protected void onPostExecute(Object o) {
+            Toast.makeText(InsertFragment.this.getContext(), "Done!", Toast.LENGTH_LONG).show();
+        }
     }
 }

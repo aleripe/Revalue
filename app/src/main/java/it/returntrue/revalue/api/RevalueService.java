@@ -26,8 +26,8 @@ public interface RevalueService {
                             @Path("longitude") double longitude,
                             @Path("id") long id);
 
-    @GET("Items/InsertItem")
-    Call InsertUser(@Body ItemModel itemModel);
+    @POST("Items/InsertItem")
+    Call<Void> InsertItem(@Body ItemModel itemModel);
 
     @GET("Items/GetAllCategories")
     Call<List<CategoryModel>> GetAllCategories();
