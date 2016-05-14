@@ -92,6 +92,12 @@ public class RevalueApplication extends Application {
         return String.valueOf(filterDistance) + " " + getString(R.string.km);
     }
 
+    public void clearFilters() {
+        setFilterTitle(null);
+        setFilterCategory(null);
+        setFilterDistance(DEFAULT_DISTANCE);
+    }
+
     public void setLocationLatitude(Double latitude) {
         mLocationLatitude = latitude;
     }
@@ -132,7 +138,7 @@ public class RevalueApplication extends Application {
         if (id != null) {
             for (int i = 0; i < mCategories.size(); i++) {
                 CategoryModel categoryModel = mCategories.get(i);
-                if (categoryModel.Id == id) return i;
+                if (categoryModel.Id == id) return i + 1;
             }
         }
 

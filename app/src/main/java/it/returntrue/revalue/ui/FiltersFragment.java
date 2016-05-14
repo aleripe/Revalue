@@ -92,6 +92,13 @@ public class FiltersFragment extends DialogFragment {
                             }
                         }
                 )
+                .setNeutralButton(R.string.clear,
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                mApplication.clearFilters();
+                            }
+                        })
                 .setNegativeButton(R.string.cancel,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {

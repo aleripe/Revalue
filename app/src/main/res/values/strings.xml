@@ -56,4 +56,5 @@
     <string name="text_filter_title_empty">No filter</string>
     <string name="text_filter_category_empty">All categories</string>
     <string name="km">km</string>
+    <string name="clear">Clear</string>
 </resources>

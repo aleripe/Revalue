@@ -3,7 +3,6 @@ package it.returntrue.revalue.ui;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -95,6 +94,7 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
         GoogleMap map = mMapFragment.getMap();
 
         if (map != null) {
+            map.clear();
             map.setOnInfoWindowClickListener(this);
 
             for (ItemModel itemModel : data) {
