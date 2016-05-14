@@ -27,10 +27,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
+import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.preferences.InterfacePreferences;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import retrofit2.Call;
 
@@ -46,8 +46,8 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     protected OnItemClickListener mOnItemClickListener;
     protected Location mLastLocation;
 
+    private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
-    private InterfacePreferences mInterfacePreferences;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private ListAsyncTaskLoader mListLoader;
@@ -64,9 +64,11 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Sets application context
+        mApplication = (RevalueApplication)getActivity().getApplicationContext();
+
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(getContext());
-        mInterfacePreferences = new InterfacePreferences(getContext());
 
         // Sets a location request
         mLocationRequest = new LocationRequest();
@@ -180,7 +182,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
 
     @Override
     public Loader<List<ItemModel>> onCreateLoader(int id, Bundle args) {
-        mListLoader = new ListAsyncTaskLoader(getContext(), mSessionPreferences, mInterfacePreferences);
+        mListLoader = new ListAsyncTaskLoader(mApplication, mSessionPreferences);
         return mListLoader;
     }
 
@@ -206,21 +208,25 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
         mLastLocation = location;
 
         if (mLastLocation != null) {
-            mInterfacePreferences.setLocationLatitude((float) location.getLatitude());
-            mInterfacePreferences.setLocationLongitude((float) location.getLongitude());
-            mListLoader.onContentChanged();
+            mApplication.setLocationLatitude(location.getLatitude());
+            mApplication.setLocationLongitude(location.getLongitude());
+            updateItems();
         }
     }
 
-    private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
-        private SessionPreferences mSessionPreferences;
-        private InterfacePreferences mInterfacePreferences;
+    public void updateItems() {
+        mListLoader.onContentChanged();
+    }
 
-        public ListAsyncTaskLoader(Context context, SessionPreferences sessionPreferences,
-                                   InterfacePreferences interfacePreferences) {
-            super(context);
+    private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
+        private RevalueApplication mApplication;
+        private SessionPreferences mSessionPreferences;
+
+        public ListAsyncTaskLoader(RevalueApplication application,
+                                   SessionPreferences sessionPreferences) {
+            super(application);
+            mApplication = application;
             mSessionPreferences = sessionPreferences;
-            mInterfacePreferences = interfacePreferences;
         }
 
         @Override
@@ -228,9 +234,12 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
             RevalueService service = RevalueServiceGenerator.createService(
                     mSessionPreferences.getToken());
             Call<List<ItemModel>> call = service.GetNearestItems(
-                    mInterfacePreferences.getLocationLatitude(),
-                    mInterfacePreferences.getLocationLongitude(),
-                    mInterfacePreferences.getCurrentPage());
+                    mApplication.getLocationLatitude(),
+                    mApplication.getLocationLongitude(),
+                    mApplication.getCurrentPage(),
+                    mApplication.getFilterTitle(),
+                    mApplication.getFilterCategory(),
+                    mApplication.getFilterDistance());
 
             try {
                 return call.execute().body();

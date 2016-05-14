@@ -30,7 +30,7 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     public ListFragment() {
     }
 
-    public static Fragment newInstance() {
+    public static ListFragment newInstance() {
         return new ListFragment();
     }
 

@@ -1,6 +1,5 @@
 package it.returntrue.revalue.ui;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -29,6 +28,7 @@ import java.io.IOException;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
@@ -40,8 +40,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private final static int LOADER_ITEM = 1;
     private long mId;
 
+    private RevalueApplication mApplication;
     private SupportMapFragment mMapFragment;
     private ImageView mImageCover;
+
     @Bind(R.id.text_title) public TextView mTextTitle;
     @Bind(R.id.text_location) public TextView mTextLocation;
     @Bind(R.id.text_description) public TextView mTextDescription;
@@ -57,6 +59,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Sets application context
+        mApplication = (RevalueApplication)getActivity().getApplicationContext();
+
         // Gets extra data from intent
         mId = getActivity().getIntent().getLongExtra(DetailActivity.EXTRA_ID, 0);
 
@@ -66,9 +71,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_detail, container, false);
-
-        return view;
+        return inflater.inflate(R.layout.fragment_detail, container, false);
     }
 
     @Override
@@ -94,7 +97,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<ItemModel> onCreateLoader(int id, Bundle args) {
-        return new DetailAsyncTaskLoader(getContext(), mId);
+        return new DetailAsyncTaskLoader(mApplication, mId);
     }
 
     @Override
@@ -126,7 +129,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
             map.addMarker(new MarkerOptions().position(coordinates));
 
-            Circle circle = MapUtilities.getCenteredCircle(map, coordinates, 20000);
+            Circle circle = MapUtilities.getCenteredCircle(map, coordinates,
+                    mApplication.getFilterDistance());
             int zoom = MapUtilities.getCircleZoomLevel(circle);
 
             if (zoom > 0) {
@@ -140,18 +144,22 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private static class DetailAsyncTaskLoader extends AsyncTaskLoader<ItemModel> {
-        private final SessionPreferences mSessionPreferences = new SessionPreferences(getContext());
+        private final RevalueApplication mApplication;
+        private final SessionPreferences mSessionPreferences;
         private final long mId;
 
-        public DetailAsyncTaskLoader(Context context, long id) {
-            super(context);
+        public DetailAsyncTaskLoader(RevalueApplication application, long id) {
+            super(application);
+            mApplication = application;
+            mSessionPreferences = new SessionPreferences(application);
             mId = id;
         }
 
         @Override
         public ItemModel loadInBackground() {
             RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-            Call<ItemModel> call = service.GetItem(45.553629, 9.197735, mId);
+            Call<ItemModel> call = service.GetItem(mApplication.getLocationLatitude(),
+                    mApplication.getLocationLongitude(), mId);
 
             try {
                 return call.execute().body();

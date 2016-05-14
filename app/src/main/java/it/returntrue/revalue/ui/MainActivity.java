@@ -35,10 +35,10 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.preferences.InterfacePreferences;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.ui.base.MainFragment;
 import retrofit2.Call;
@@ -47,9 +47,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<List<CategoryModel>> {
     protected static final int LOADER_CATEGORIES = 1;
 
+    private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
-    private InterfacePreferences mInterfacePreferences;
-    private List<CategoryModel> mCategories;
+    private MainFragment mMainFragment;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.nav_view) NavigationView mNavigationView;
@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.box_search) RelativeLayout mBoxSearch;
     @Bind(R.id.text_filter_title) TextView mTextFilterTitle;
-    @Bind(R.id.text_filter_categories) TextView mTextFilterCategories;
+    @Bind(R.id.text_filter_category) TextView mTextFilterCategory;
     @Bind(R.id.text_filter_distance) TextView mTextFilterDistance;
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
@@ -70,9 +70,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Sets application context
+        mApplication = (RevalueApplication)getApplicationContext();
+
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(this);
-        mInterfacePreferences = new InterfacePreferences(this);
 
         // Checks login
         checkLogin();
@@ -115,24 +117,19 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
             @Override
             public void onClick(View v) {
                 FragmentManager fm = getSupportFragmentManager();
-                FiltersFragment editNameDialog = new FiltersFragment();
-                editNameDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                FiltersFragment filtersDialog = new FiltersFragment();
+                filtersDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
                         setFilters();
+                        updateListAndMap();
                     }
                 });
-                editNameDialog.show(fm, "fragment_edit_name");
+                filtersDialog.show(fm, "fragment_edit_name");
             }
         });
 
-        setMode(mInterfacePreferences.getMainMode());
-    }
-
-    @Override
-    protected void onDestroy() {
-        mInterfacePreferences.clearAll();
-        super.onDestroy();
+        setMode(mApplication.getMainMode());
     }
 
     @Override
@@ -188,8 +185,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     }
 
     @Override
-    public void onLoadFinished(Loader<List<CategoryModel>> loader, List<CategoryModel> data) {
-        mCategories = data;
+    public void onLoadFinished(Loader<List<CategoryModel>> loader, List<CategoryModel> categories) {
+        mApplication.setCategories(categories);
         setFilters();
     }
 
@@ -217,15 +214,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     }
 
     private void setFilters() {
-        mTextFilterTitle.setText(mInterfacePreferences.getFilterTitleDescription());
-        mTextFilterDistance.setText(mInterfacePreferences.getFilterDistanceDescription());
-
-        for (CategoryModel categoryModel : mCategories) {
-            // Sets previous selection
-            if (categoryModel.Id == mInterfacePreferences.getFilterCategory()) {
-                mTextFilterCategories.setText(categoryModel.Name);
-            }
-        }
+        mTextFilterTitle.setText(mApplication.getFilterTitleDescription());
+        mTextFilterCategory.setText(mApplication.getFilterCategoryDescription());
+        mTextFilterDistance.setText(mApplication.getFilterDistanceDescription());
     }
 
     private void setNavigationViewHeader() {
@@ -240,12 +231,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         Glide.with(this).load(mSessionPreferences.getAvatar()).into(mImagePicture);
     }
 
-    private void setMode(@InterfacePreferences.Modes int mode) {
+    private void setMode(@RevalueApplication.Modes int mode) {
         switch (mode) {
-            case InterfacePreferences.LIST_MODE:
+            case RevalueApplication.LIST_MODE:
                 showList();
                 break;
-            case InterfacePreferences.MAP_MODE:
+            case RevalueApplication.MAP_MODE:
                 showMap();
                 break;
         }
@@ -253,23 +244,32 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
     private void showList() {
         if (mFragmentContainer != null) {
+            mMainFragment = ListFragment.newInstance();
+
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, ListFragment.newInstance())
+                    .replace(R.id.fragment_container, mMainFragment)
                     .commit();
 
-            mInterfacePreferences.setMainMode(InterfacePreferences.LIST_MODE);
+            mApplication.setMainMode(RevalueApplication.LIST_MODE);
         }
     }
 
     private void showMap() {
         if (mFragmentContainer != null) {
             mAppBar.setExpanded(true);
+            mMainFragment = MapFragment.newInstance();
 
             getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, MapFragment.newInstance())
+                    .replace(R.id.fragment_container, mMainFragment)
                     .commit();
 
-            mInterfacePreferences.setMainMode(InterfacePreferences.MAP_MODE);
+            mApplication.setMainMode(RevalueApplication.MAP_MODE);
+        }
+    }
+
+    private void updateListAndMap() {
+        if (mMainFragment != null) {
+            mMainFragment.updateItems();
         }
     }
 

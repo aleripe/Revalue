@@ -47,7 +47,7 @@
                     android:layout_below="@id/image_search_filter"
                     android:src="@drawable/ic_label_white_18dp" />
                 <TextView
-                    android:id="@+id/text_filter_categories"
+                    android:id="@+id/text_filter_category"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/text_filter_title"
@@ -64,7 +64,7 @@
                     android:id="@+id/text_filter_distance"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/text_filter_categories"
+                    android:layout_below="@id/text_filter_category"
                     android:layout_marginLeft="24dp"
                     android:textColor="#FFF" />
             </RelativeLayout>
