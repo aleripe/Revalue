@@ -2,8 +2,8 @@ package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -15,6 +15,8 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.adapters.ItemsAdapter;
 import it.returntrue.revalue.api.ItemModel;
@@ -23,12 +25,14 @@ import it.returntrue.revalue.ui.base.MainFragment;
 /**
  * Shows the list of items
  */
-public class ListFragment extends MainFragment implements ItemsAdapter.OnItemClickListener {
-    private RecyclerView mRecyclerView;
+public class ListFragment extends MainFragment implements ItemsAdapter.OnItemClickListener,
+        SwipeRefreshLayout.OnRefreshListener {
     private ItemsAdapter mItemsAdapter;
 
-    public ListFragment() {
-    }
+    @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
+    @Bind(R.id.list_items) RecyclerView mRecyclerView;
+
+    public ListFragment() { }
 
     public static ListFragment newInstance() {
         return new ListFragment();
@@ -46,8 +50,13 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
+        // Binds controls
+        ButterKnife.bind(this, view);
+
+        // Sets refresh listener
+        mSwipeRefreshLayout.setOnRefreshListener(this);
+
         // Creates list objects
-        mRecyclerView = (RecyclerView)view.findViewById(R.id.list_items);
         mRecyclerView.setHasFixedSize(true);
         mItemsAdapter = new ItemsAdapter(getContext());
         mItemsAdapter.setOnItemClickListener(this);
@@ -62,8 +71,8 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_main_list, menu);
+        super.onCreateOptionsMenu(menu, inflater);
     }
 
     @Override
@@ -83,6 +92,8 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
         if (mItemsAdapter != null) {
             mItemsAdapter.setItems(data);
         }
+
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override
@@ -90,5 +101,10 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
         if (mItemsAdapter != null) {
             mItemsAdapter.setItems(new ArrayList<ItemModel>());
         }
+    }
+
+    @Override
+    public void onRefresh() {
+        updateItems();
     }
 }

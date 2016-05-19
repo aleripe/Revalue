@@ -7,8 +7,10 @@ public class ItemModel {
     public double Latitude;
     public double Longitude;
     public double Distance;
+    public boolean ShowOnMap;
     public String City;
     public String PictureUrl;
+    public String MarkerUrl;
     public String PictureData;
     public int CategoryId;
     public String CategoryName;

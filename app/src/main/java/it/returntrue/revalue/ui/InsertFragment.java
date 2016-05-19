@@ -18,6 +18,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -68,11 +69,15 @@ public class InsertFragment extends Fragment {
     private SupportMapFragment mMapFragment;
     private Bitmap mPicture;
 
-    @Bind(R.id.spinner_category) Spinner mSpinnerCategory;
     @Bind(R.id.label_title) TextView mLabelTitle;
     @Bind(R.id.text_title) EditText mTextTitle;
+    @Bind(R.id.required_title) TextView mRequiredTitle;
     @Bind(R.id.text_description) EditText mTextDescription;
+    @Bind(R.id.required_description) TextView mRequiredDescription;
+    @Bind(R.id.spinner_category) Spinner mSpinnerCategory;
+    @Bind(R.id.required_category) TextView mRequiredCategory;
     @Bind(R.id.button_choose_picture) ImageButton mButtonChoosePicture;
+    @Bind(R.id.required_picture) TextView mRequiredPicture;
     @Bind(R.id.switch_location) Switch mSwitchLocation;
 
     public InsertFragment() {
@@ -190,6 +195,8 @@ public class InsertFragment extends Fragment {
         }
     }
 
+
+
     private void actionCameraResult(Intent data) {
         mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 400);
 
@@ -266,8 +273,14 @@ public class InsertFragment extends Fragment {
         Double latitude = null;
         Double longitude = null;
         String city = null;
+        Boolean showOnMap = mSwitchLocation.isChecked();
         Integer categoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
         String token = mSessionPreferences.getToken();
+
+        if (!validateItem(text, description, categoryId, mPicture)) {
+            Toast.makeText(getContext(), R.string.item_validation_failed, Toast.LENGTH_LONG).show();
+            return;
+        }
 
         if (mSwitchLocation.isChecked() && mMapFragment.getMap() != null) {
             Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
@@ -288,8 +301,29 @@ public class InsertFragment extends Fragment {
             }
         }
 
-        new SaveItemAsyncTask(text, description, latitude, longitude, city, categoryId, mPicture, token)
-                .execute();
+        new SaveItemAsyncTask(text, description, latitude, longitude,
+                city, showOnMap,categoryId, mPicture, token).execute();
+    }
+
+    private boolean validateItem(String title, String description,
+                                 Integer categoryId, Bitmap picture) {
+        boolean isValid = true;
+        isValid &= validate(mRequiredTitle, TextUtils.isEmpty(title));
+        isValid &= validate(mRequiredDescription, TextUtils.isEmpty(description));
+        isValid &= validate(mRequiredCategory, categoryId == null);
+        isValid &= validate(mRequiredPicture, mPicture == null);
+        return isValid;
+    }
+
+    private boolean validate(TextView textView, boolean condition) {
+        if (condition) {
+            textView.setVisibility(View.VISIBLE);
+            return false;
+        }
+        else {
+            textView.setVisibility(View.GONE);
+            return true;
+        }
     }
 
     private CategoryModel createEmptyCategoryModel() {
@@ -299,37 +333,40 @@ public class InsertFragment extends Fragment {
         return category;
     }
 
-    class SaveItemAsyncTask extends AsyncTask {
+    class SaveItemAsyncTask extends AsyncTask<Void, Void, Boolean> {
         private final String mText;
         private final String mDescription;
         private final Double mLatitude;
         private final Double mLongitude;
         private final String mCity;
+        private final Boolean mShowOnMap;
         private final Integer mCategoryId;
         private final Bitmap mPicture;
         private final String mToken;
 
         public SaveItemAsyncTask(String text, String description, Double latitude,
-                                 Double longitude, String city, Integer categoryId,
-                                 Bitmap picture, String token) {
+                                 Double longitude, String city, Boolean showOnMap,
+                                 Integer categoryId, Bitmap picture, String token) {
             mText = text;
             mDescription = description;
             mLatitude = latitude;
             mLongitude = longitude;
             mCity = city;
+            mShowOnMap = showOnMap;
             mCategoryId = categoryId;
             mPicture = picture;
             mToken = token;
         }
 
         @Override
-        protected Object doInBackground(Object[] params) {
+        protected Boolean doInBackground(Void... params) {
             ItemModel item = new ItemModel();
             item.Title = mText;
             item.Description = mDescription;
             item.Latitude = mLatitude;
             item.Longitude = mLongitude;
             item.City = mCity;
+            item.ShowOnMap = mShowOnMap;
             item.CategoryId = mCategoryId;
 
             if (mPicture != null) {
@@ -348,11 +385,11 @@ public class InsertFragment extends Fragment {
                 e.printStackTrace();
             }
 
-            return item;
+            return true;
         }
 
         @Override
-        protected void onPostExecute(Object o) {
+        protected void onPostExecute(Boolean result) {
             Toast.makeText(InsertFragment.this.getContext(), "Done!", Toast.LENGTH_LONG).show();
         }
     }

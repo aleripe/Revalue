@@ -1,6 +1,11 @@
 package it.returntrue.revalue.ui;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -10,12 +15,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -43,13 +51,13 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private RevalueApplication mApplication;
     private SupportMapFragment mMapFragment;
     private ImageView mImageCover;
+    private ItemModel mItemModel;
 
     @Bind(R.id.text_title) public TextView mTextTitle;
     @Bind(R.id.text_location) public TextView mTextLocation;
     @Bind(R.id.text_description) public TextView mTextDescription;
 
-    public DetailFragment() {
-    }
+    public DetailFragment() { }
 
     public static Fragment newInstance() {
         return new DetailFragment();
@@ -96,6 +104,17 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_share:
+                share();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
     public Loader<ItemModel> onCreateLoader(int id, Bundle args) {
         return new DetailAsyncTaskLoader(mApplication, mId);
     }
@@ -111,36 +130,70 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void setDetails(ItemModel itemModel) {
-        Glide.with(getContext())
-                .load(itemModel.PictureUrl)
-                .into(mImageCover);
+        if (itemModel != null) {
+            mItemModel = itemModel;
 
-        // Sets toolbar title
-        AppCompatActivity activity = (AppCompatActivity)getActivity();
-        activity.getSupportActionBar().setTitle(itemModel.Title);
+            Glide.with(getContext())
+                    .load(itemModel.PictureUrl)
+                    .into(mImageCover);
 
-        mTextTitle.setText(itemModel.Title);
-        mTextLocation.setText(itemModel.City + " / " +
-                (int)(itemModel.Distance / 1000) + " km");
-        mTextDescription.setText(itemModel.Description);
+            // Sets toolbar title
+            AppCompatActivity activity = (AppCompatActivity) getActivity();
+            activity.getSupportActionBar().setTitle(itemModel.Title);
 
-        GoogleMap map = mMapFragment.getMap();
-        if (map != null) {
-            LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
-            map.addMarker(new MarkerOptions().position(coordinates));
+            mTextTitle.setText(itemModel.Title);
+            mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
+            mTextDescription.setText(itemModel.Description);
 
-            Circle circle = MapUtilities.getCenteredCircle(map, coordinates,
-                    mApplication.getFilterDistance());
-            int zoom = MapUtilities.getCircleZoomLevel(circle);
+            if (itemModel.ShowOnMap) {
+                GoogleMap map = mMapFragment.getMap();
+                if (map != null) {
+                    LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
+                    map.addMarker(new MarkerOptions().position(coordinates));
 
-            if (zoom > 0) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                    Circle circle = MapUtilities.getCenteredCircle(map, coordinates,
+                            mApplication.getFilterDistance());
+                    int zoom = MapUtilities.getCircleZoomLevel(circle);
+
+                    if (zoom > 0) {
+                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                    }
+                }
+            } else {
+                mMapFragment.getView().setVisibility(View.GONE);
             }
         }
     }
 
     private void clearDetails() {
 
+    }
+
+    private void share() {
+        if (mItemModel != null) {
+            Glide.with(getContext())
+                    .load(mItemModel.PictureUrl)
+                    .asBitmap()
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                            View view = new View(getContext());
+                            view.draw(new Canvas(resource));
+                            String path = MediaStore.Images.Media.insertImage(
+                                    getActivity().getContentResolver(), resource, "Nur", null);
+                            Uri uri = Uri.parse(path);
+
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("image/*");
+                            intent.putExtra(Intent.EXTRA_SUBJECT, mItemModel.Title);
+                            intent.putExtra(Intent.EXTRA_TEXT, mItemModel.Description);
+                            intent.putExtra(Intent.EXTRA_STREAM, uri);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                            startActivity(Intent.createChooser(intent,
+                                    getResources().getText(R.string.share_with)));
+                        }
+                    });
+        }
     }
 
     private static class DetailAsyncTaskLoader extends AsyncTaskLoader<ItemModel> {

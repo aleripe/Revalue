@@ -13,10 +13,9 @@ public interface RevalueService {
     @POST("Account/ExternalLogin")
     Call<TokenModel> ExternalLogin(@Body ExternalTokenModel externalTokenModel);
 
-    @GET("Items/GetNearestItems/{latitude}/{longitude}/{page}")
+    @GET("Items/GetNearestItems/{latitude}/{longitude}/")
     Call<List<ItemModel>> GetNearestItems(@Path("latitude") double latitude,
                                           @Path("longitude") double longitude,
-                                          @Path("page") int page,
                                           @Query("filterTitle") String filterTitle,
                                           @Query("filterCategory") Integer filterCategory,
                                           @Query("filterDistance") Integer filterDistance);

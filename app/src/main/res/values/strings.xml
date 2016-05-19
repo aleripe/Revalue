@@ -57,4 +57,7 @@
     <string name="text_filter_category_empty">All categories</string>
     <string name="km">km</string>
     <string name="clear">Clear</string>
+    <string name="required_picture">Picture is required</string>
+    <string name="item_validation_failed">Plase check form validation and retry</string>
+    <string name="share_with">Share with</string>
 </resources>

@@ -22,7 +22,6 @@ public class RevalueApplication extends Application {
     public static final int DEFAULT_DISTANCE = 50;
 
     @Modes private int mMainMode = LIST_MODE;
-    private int mCurrentPage = 0;
     private String mFilterTitle = null;
     private Integer mFilterCategory = null;
     private Integer mFilterDistance = DEFAULT_DISTANCE;
@@ -42,14 +41,6 @@ public class RevalueApplication extends Application {
 
     public @Modes int getMainMode() {
         return mMainMode;
-    }
-
-    public void setCurrentPage(int page) {
-        mCurrentPage = page;
-    }
-
-    public int getCurrentPage() {
-        return mCurrentPage;
     }
 
     public void setFilterTitle(String title) {

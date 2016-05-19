@@ -236,7 +236,6 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
             Call<List<ItemModel>> call = service.GetNearestItems(
                     mApplication.getLocationLatitude(),
                     mApplication.getLocationLongitude(),
-                    mApplication.getCurrentPage(),
                     mApplication.getFilterTitle(),
                     mApplication.getFilterCategory(),
                     mApplication.getFilterDistance());

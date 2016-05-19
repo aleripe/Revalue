@@ -33,6 +33,7 @@
                 android:textSize="16sp"
                 android:hint="@string/hint_title" />
             <TextView
+                android:id="@+id/required_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/required_title"
@@ -62,6 +63,7 @@
                 android:textSize="16sp"
                 android:hint="@string/hint_description" />
             <TextView
+                android:id="@+id/required_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/required_description"
@@ -90,6 +92,7 @@
                 android:layout_marginLeft="-8dp"
                 android:hint="@string/hint_category" />
             <TextView
+                android:id="@+id/required_category"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/required_category"
@@ -119,6 +122,15 @@
                 android:scaleType="centerInside"
                 android:adjustViewBounds="true"
                 android:src="@drawable/ic_add_a_photo_white_36dp" />
+            <TextView
+                android:id="@+id/required_picture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/required_picture"
+                android:textSize="12sp"
+                android:textColor="#FF0000"
+                android:layout_marginTop="2dp"
+                android:visibility="gone" />
         </LinearLayout>
         <LinearLayout
             android:id="@+id/layout_location"

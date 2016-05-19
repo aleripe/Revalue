@@ -11,7 +11,7 @@
         app:uiRotateGestures="true"
         app:uiScrollGestures="true"
         app:uiTiltGestures="true"
-        app:uiZoomControls="true"
+        app:uiZoomControls="false"
         app:uiZoomGestures="true"
         android:name="com.google.android.gms.maps.SupportMapFragment" />
 </FrameLayout>
