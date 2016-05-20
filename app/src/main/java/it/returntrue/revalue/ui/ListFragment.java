@@ -11,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Bind(R.id.list_items) RecyclerView mRecyclerView;
+    @Bind(R.id.text_empty) TextView mTextEmpty;
 
     public ListFragment() { }
 
@@ -66,6 +68,8 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
                 StaggeredGridLayoutManager.VERTICAL));
 
+        setEmptyText("Waiting for a GPS fix...");
+
         return view;
     }
 
@@ -76,12 +80,21 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     }
 
     @Override
-    public void onFavoriteClick(View view, long id) {
-
+    public void onAddFavoriteClick(View view, int itemId) {
+        if (mOnItemClickListener != null) {
+            mOnItemClickListener.onAddFavoriteClick(view, itemId);
+        }
     }
 
     @Override
-    public void onItemClick(View view, long id) {
+    public void onRemoveFavoriteClick(View view, int id) {
+        if (mOnItemClickListener != null) {
+            mOnItemClickListener.onRemoveFavoriteClick(view, id);
+        }
+    }
+
+    @Override
+    public void onItemClick(View view, int id) {
         if (mOnItemClickListener != null) {
             mOnItemClickListener.onItemClick(view, id);
         }
@@ -90,7 +103,13 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     @Override
     public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
         if (mItemsAdapter != null) {
-            mItemsAdapter.setItems(data);
+            if (data.size() > 0) {
+                mItemsAdapter.setItems(data);
+                clearEmptyText();
+            }
+            else {
+                setEmptyText("No results found.");
+            }
         }
 
         mSwipeRefreshLayout.setRefreshing(false);
@@ -106,5 +125,15 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     @Override
     public void onRefresh() {
         updateItems();
+    }
+
+    private void setEmptyText(String text) {
+        mTextEmpty.setVisibility(View.VISIBLE);
+        mTextEmpty.setText(text);
+    }
+
+    private void clearEmptyText() {
+        mTextEmpty.setVisibility(View.INVISIBLE);
+        mTextEmpty.setText("");
     }
 }

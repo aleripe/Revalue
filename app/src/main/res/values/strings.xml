@@ -4,7 +4,8 @@
     <string name="title_activity_login">Sign in</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="sign_in_with_facebook">Sign in with Facebook</string>
-    <string name="action_favorites">Favorites</string>
+    <string name="action_add_favorite">Add favorite</string>
+    <string name="action_remove_favorite">Remove favorite</string>
     <string name="action_map">Map</string>
     <string name="action_share">Share</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

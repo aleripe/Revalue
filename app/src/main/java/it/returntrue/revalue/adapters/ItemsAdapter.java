@@ -34,8 +34,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
-        void onFavoriteClick(View view, long id);
-        void onItemClick(View view, long id);
+        void onAddFavoriteClick(View view, int id);
+        void onRemoveFavoriteClick(View view, int id);
+        void onItemClick(View view, int id);
     }
 
     public ItemsAdapter(Context context) {
@@ -62,6 +63,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                 .load(itemModel.PictureUrl)
                 .into(holder.imageCover);
 
+        holder.imageAddFavorite.setVisibility(itemModel.IsFavorite ? View.GONE : View.VISIBLE);
+        holder.imageRemoveFavorite.setVisibility(itemModel.IsFavorite ? View.VISIBLE : View.GONE);
         holder.textTitle.setText(itemModel.Title);
         holder.textLocation.setText(itemModel.City + " / " +
                 (int)(itemModel.Distance / 1000) + " km");
@@ -87,6 +90,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     /** Represents a ViewHolder for a RecyclerView item */
     public final class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.image_cover) public ImageView imageCover;
+        @Bind(R.id.image_add_favorite) public ImageView imageAddFavorite;
+        @Bind(R.id.image_remove_favorite) public ImageView imageRemoveFavorite;
         @Bind(R.id.text_title) public TextView textTitle;
         @Bind(R.id.text_location) public TextView textLocation;
 
@@ -95,6 +100,26 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
             // Binds controls
             ButterKnife.bind(this, view);
+
+            imageAddFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.onAddFavoriteClick(view,
+                                mItems.get(getAdapterPosition()).Id);
+                    }
+                }
+            });
+
+            imageRemoveFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mOnItemClickListener != null) {
+                        mOnItemClickListener.onRemoveFavoriteClick(view,
+                                mItems.get(getAdapterPosition()).Id);
+                    }
+                }
+            });
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override

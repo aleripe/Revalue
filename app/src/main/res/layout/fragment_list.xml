@@ -24,5 +24,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:fontFamily="sans-serif-thin"
+        android:textColor="#000"
         android:visibility="invisible"/>
 </FrameLayout>

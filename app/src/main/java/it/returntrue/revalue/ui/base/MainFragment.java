@@ -54,11 +54,12 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
-        void onItemClick(View view, long id);
+        void onAddFavoriteClick(View view, int id);
+        void onRemoveFavoriteClick(View view, int id);
+        void onItemClick(View view, int id);
     }
 
-    public MainFragment() {
-    }
+    public MainFragment() { }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {

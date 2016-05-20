@@ -16,4 +16,5 @@ public class ItemModel {
     public String CategoryName;
     public int UserId;
     public String UserName;
+    public boolean IsFavorite;
 }

@@ -3,9 +3,15 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".ui.DetailActivity">
     <item
-        android:id="@+id/action_favorites"
+        android:id="@+id/action_add_favorite"
         android:orderInCategory="99"
-        android:title="@string/action_favorites"
+        android:title="@string/action_add_favorite"
+        android:icon="@drawable/ic_favorite_border_white_24dp"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_remove_favorite"
+        android:orderInCategory="99"
+        android:title="@string/action_remove_favorite"
         android:icon="@drawable/ic_favorite_white_24dp"
         app:showAsAction="always" />
     <item

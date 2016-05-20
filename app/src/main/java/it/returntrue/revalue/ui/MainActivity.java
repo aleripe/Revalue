@@ -25,6 +25,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
@@ -42,6 +43,8 @@ import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.ui.base.MainFragment;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements MainFragment.OnItemClickListener,
         NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<List<CategoryModel>> {
@@ -167,11 +170,49 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     }
 
     @Override
-    public void onItemClick(View view, long id) {
+    public void onItemClick(View view, int id) {
         // Opens details activity
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_ID, id);
         startActivity(intent);
+    }
+
+    @Override
+    public void onAddFavoriteClick(View view, int id) {
+        RevalueService service = RevalueServiceGenerator.createService(
+                mSessionPreferences.getToken());
+        Call<Void> call = service.AddFavorite(id);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(MainActivity.this, "Favorite item added.", Toast.LENGTH_LONG).show();
+                updateListAndMap();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Could not add favorite item.", Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+
+    @Override
+    public void onRemoveFavoriteClick(View view, int id) {
+        RevalueService service = RevalueServiceGenerator.createService(
+            mSessionPreferences.getToken());
+        Call<Void> call = service.RemoveFavorite(id);
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                Toast.makeText(MainActivity.this, "Favorite item removed.", Toast.LENGTH_LONG).show();
+                updateListAndMap();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Could not remove favorite item.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     @Override

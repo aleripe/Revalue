@@ -28,6 +28,12 @@ public interface RevalueService {
     @POST("Items/InsertItem")
     Call<Void> InsertItem(@Body ItemModel itemModel);
 
+    @GET("Items/AddFavorite/{id}")
+    Call<Void> AddFavorite(@Path("id") int id);
+
+    @GET("Items/RemoveFavorite/{id}")
+    Call<Void> RemoveFavorite(@Path("id") int id);
+
     @GET("Items/GetAllCategories")
     Call<List<CategoryModel>> GetAllCategories();
 }

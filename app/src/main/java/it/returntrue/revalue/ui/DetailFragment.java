@@ -20,6 +20,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
@@ -43,12 +44,17 @@ import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.utilities.MapUtilities;
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<ItemModel> {
     private final static int LOADER_ITEM = 1;
     private long mId;
 
     private RevalueApplication mApplication;
+    private SessionPreferences mSessionPreferences;
+    private DetailAsyncTaskLoader mDetailAsyncTaskLoader;
+    private Menu mMenu;
     private SupportMapFragment mMapFragment;
     private ImageView mImageCover;
     private ItemModel mItemModel;
@@ -70,8 +76,11 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Sets application context
         mApplication = (RevalueApplication)getActivity().getApplicationContext();
 
+        // Creates preferences managers
+        mSessionPreferences = new SessionPreferences(getContext());
+
         // Gets extra data from intent
-        mId = getActivity().getIntent().getLongExtra(DetailActivity.EXTRA_ID, 0);
+        mId = getActivity().getIntent().getIntExtra(DetailActivity.EXTRA_ID, 0);
 
         // Sets option menu
         setHasOptionsMenu(true);
@@ -101,11 +110,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_detail, menu);
+        mMenu = menu;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_add_favorite:
+                addFavorite();
+                return true;
+            case R.id.action_remove_favorite:
+                removeFavorite();
+                return true;
             case R.id.action_share:
                 share();
                 return true;
@@ -116,7 +132,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<ItemModel> onCreateLoader(int id, Bundle args) {
-        return new DetailAsyncTaskLoader(mApplication, mId);
+        mDetailAsyncTaskLoader = new DetailAsyncTaskLoader(mApplication, mId);
+        return mDetailAsyncTaskLoader;
     }
 
     @Override
@@ -140,6 +157,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // Sets toolbar title
             AppCompatActivity activity = (AppCompatActivity) getActivity();
             activity.getSupportActionBar().setTitle(itemModel.Title);
+
+            // Shows only appropriate favorite button
+            mMenu.findItem(R.id.action_add_favorite).setVisible(!itemModel.IsFavorite);
+            mMenu.findItem(R.id.action_remove_favorite).setVisible(itemModel.IsFavorite);
 
             mTextTitle.setText(itemModel.Title);
             mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
@@ -167,6 +188,52 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     private void clearDetails() {
 
+    }
+
+    public void addFavorite() {
+        if (mItemModel != null) {
+            RevalueService service = RevalueServiceGenerator.createService(
+                    mSessionPreferences.getToken());
+            Call<Void> call = service.AddFavorite(mItemModel.Id);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    Toast.makeText(DetailFragment.this.getContext(), "Favorite item added.", Toast.LENGTH_LONG).show();
+
+                    if (mDetailAsyncTaskLoader != null) {
+                        mDetailAsyncTaskLoader.onContentChanged();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(DetailFragment.this.getContext(), "Could not add favorite item.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    public void removeFavorite() {
+        if (mItemModel != null) {
+            RevalueService service = RevalueServiceGenerator.createService(
+                    mSessionPreferences.getToken());
+            Call<Void> call = service.RemoveFavorite(mItemModel.Id);
+            call.enqueue(new Callback<Void>() {
+                @Override
+                public void onResponse(Call<Void> call, Response<Void> response) {
+                    Toast.makeText(DetailFragment.this.getContext(), "Favorite item removed.", Toast.LENGTH_LONG).show();
+
+                    if (mDetailAsyncTaskLoader != null) {
+                        mDetailAsyncTaskLoader.onContentChanged();
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Void> call, Throwable t) {
+                    Toast.makeText(DetailFragment.this.getContext(), "Could not remove favorite item.", Toast.LENGTH_LONG).show();
+                }
+            });
+        }
     }
 
     private void share() {
