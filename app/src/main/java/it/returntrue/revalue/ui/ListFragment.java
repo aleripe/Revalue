@@ -36,8 +36,10 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     public ListFragment() { }
 
-    public static ListFragment newInstance() {
-        return new ListFragment();
+    public static ListFragment newInstance(@MainFragment.ItemMode int itemMode) {
+        ListFragment fragment = new ListFragment();
+        fragment.ItemMode = itemMode;
+        return fragment;
     }
 
     @Override
@@ -81,22 +83,22 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Override
     public void onAddFavoriteClick(View view, int itemId) {
-        if (mOnItemClickListener != null) {
-            mOnItemClickListener.onAddFavoriteClick(view, itemId);
+        if (OnItemClickListener != null) {
+            OnItemClickListener.onAddFavoriteClick(view, itemId);
         }
     }
 
     @Override
     public void onRemoveFavoriteClick(View view, int id) {
-        if (mOnItemClickListener != null) {
-            mOnItemClickListener.onRemoveFavoriteClick(view, id);
+        if (OnItemClickListener != null) {
+            OnItemClickListener.onRemoveFavoriteClick(view, id);
         }
     }
 
     @Override
     public void onItemClick(View view, int id) {
-        if (mOnItemClickListener != null) {
-            mOnItemClickListener.onItemClick(view, id);
+        if (OnItemClickListener != null) {
+            OnItemClickListener.onItemClick(view, id);
         }
     }
 
@@ -104,12 +106,13 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
         if (mItemsAdapter != null) {
             if (data.size() > 0) {
-                mItemsAdapter.setItems(data);
                 clearEmptyText();
             }
             else {
                 setEmptyText("No results found.");
             }
+
+            mItemsAdapter.setItems(data);
         }
 
         mSwipeRefreshLayout.setRefreshing(false);
@@ -124,7 +127,7 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Override
     public void onRefresh() {
-        updateItems();
+        updateItems(null);
     }
 
     private void setEmptyText(String text) {

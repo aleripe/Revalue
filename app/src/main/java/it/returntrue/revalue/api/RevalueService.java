@@ -20,6 +20,20 @@ public interface RevalueService {
                                           @Query("filterCategory") Integer filterCategory,
                                           @Query("filterDistance") Integer filterDistance);
 
+    @GET("Items/GetFavoriteItems/{latitude}/{longitude}/")
+    Call<List<ItemModel>> GetFavoriteItems(@Path("latitude") double latitude,
+                                           @Path("longitude") double longitude,
+                                           @Query("filterTitle") String filterTitle,
+                                           @Query("filterCategory") Integer filterCategory,
+                                           @Query("filterDistance") Integer filterDistance);
+
+    @GET("Items/GetPersonalItems/{latitude}/{longitude}/")
+    Call<List<ItemModel>> GetPersonalItems(@Path("latitude") double latitude,
+                                           @Path("longitude") double longitude,
+                                           @Query("filterTitle") String filterTitle,
+                                           @Query("filterCategory") Integer filterCategory,
+                                           @Query("filterDistance") Integer filterDistance);
+
     @GET("Items/GetItem/{latitude}/{longitude}/{id}")
     Call<ItemModel> GetItem(@Path("latitude") double latitude,
                             @Path("longitude") double longitude,

@@ -54,11 +54,12 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
     private double mLongitude;
     private float mZoom;
 
-    public MapFragment() {
-    }
+    public MapFragment() { }
 
-    public static MapFragment newInstance() {
-        return new MapFragment();
+    public static MapFragment newInstance(@MainFragment.ItemMode int itemMode) {
+        MapFragment fragment = new MapFragment();
+        fragment.ItemMode = itemMode;
+        return fragment;
     }
 
     @Override
@@ -177,8 +178,8 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        if (mOnItemClickListener != null) {
-            mOnItemClickListener.onItemClick(null, mMarkerIDs.get(marker));
+        if (OnItemClickListener != null) {
+            OnItemClickListener.onItemClick(null, mMarkerIDs.get(marker));
         }
     }
 

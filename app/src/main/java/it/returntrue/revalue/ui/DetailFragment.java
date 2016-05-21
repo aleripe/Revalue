@@ -1,15 +1,21 @@
 package it.returntrue.revalue.ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
@@ -48,9 +54,10 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<ItemModel> {
-    private final static int LOADER_ITEM = 1;
-    private long mId;
+    private static final int LOADER_ITEM = 1;
+    private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
+    private long mId;
     private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
     private DetailAsyncTaskLoader mDetailAsyncTaskLoader;
@@ -111,6 +118,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_detail, menu);
         mMenu = menu;
+        updateMenuItems();
     }
 
     @Override
@@ -123,7 +131,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 removeFavorite();
                 return true;
             case R.id.action_share:
-                share();
+                requestShare();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -146,6 +154,21 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         clearDetails();
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    share();
+                }
+                else {
+                    Snackbar.make(getView(), "Could not share item", Snackbar.LENGTH_LONG).show();
+                }
+            }
+        }
+    }
+
     private void setDetails(ItemModel itemModel) {
         if (itemModel != null) {
             mItemModel = itemModel;
@@ -159,8 +182,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             activity.getSupportActionBar().setTitle(itemModel.Title);
 
             // Shows only appropriate favorite button
-            mMenu.findItem(R.id.action_add_favorite).setVisible(!itemModel.IsFavorite);
-            mMenu.findItem(R.id.action_remove_favorite).setVisible(itemModel.IsFavorite);
+            updateMenuItems();
 
             mTextTitle.setText(itemModel.Title);
             mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
@@ -233,6 +255,25 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     Toast.makeText(DetailFragment.this.getContext(), "Could not remove favorite item.", Toast.LENGTH_LONG).show();
                 }
             });
+        }
+    }
+
+    private void updateMenuItems() {
+        if (mMenu != null && mItemModel != null) {
+            mMenu.findItem(R.id.action_add_favorite).setVisible(!mItemModel.IsFavorite);
+            mMenu.findItem(R.id.action_remove_favorite).setVisible(mItemModel.IsFavorite);
+        }
+    }
+
+    private void requestShare() {
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{ Manifest.permission.WRITE_EXTERNAL_STORAGE },
+                    PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE);
+        }
+        else {
+            share();
         }
     }
 

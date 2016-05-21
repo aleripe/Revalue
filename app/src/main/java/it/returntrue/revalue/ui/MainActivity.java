@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -65,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
 
+    private @MainFragment.ItemMode int mItemMode;
     private String mFilterTitle;
     private ArrayList<Integer> mFilterCategories;
     private Integer mFilterDistance;
@@ -78,6 +80,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(this);
+
+        // Sets default item mode
+        mItemMode = MainFragment.NEAREST_ITEMS_MODE;
 
         // Checks login
         checkLogin();
@@ -138,7 +143,20 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.nav_search:
+                mDrawerLayout.closeDrawers();
+                showNearestItems();
+                return true;
+            case R.id.nav_favorites:
+                mDrawerLayout.closeDrawers();
+                showFavoriteItems();
+                return true;
+            case R.id.nav_personal:
+                mDrawerLayout.closeDrawers();
+                showPersonalItems();
+                return true;
             case R.id.nav_logout:
+                mDrawerLayout.closeDrawers();
                 logout();
                 return true;
             default:
@@ -236,6 +254,21 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
     }
 
+    private void showNearestItems() {
+        mItemMode = MainFragment.NEAREST_ITEMS_MODE;
+        updateListAndMap();
+    }
+
+    private void showFavoriteItems() {
+        mItemMode = MainFragment.FAVORITE_ITEMS_MODE;
+        updateListAndMap();
+    }
+
+    private void showPersonalItems() {
+        mItemMode = MainFragment.PERSONAL_MOVIES_MODE;
+        updateListAndMap();
+    }
+
     private void logout() {
         mSessionPreferences.logout();
         checkLogin();
@@ -285,7 +318,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
     private void showList() {
         if (mFragmentContainer != null) {
-            mMainFragment = ListFragment.newInstance();
+            mMainFragment = ListFragment.newInstance(mItemMode);
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mMainFragment)
@@ -298,7 +331,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     private void showMap() {
         if (mFragmentContainer != null) {
             mAppBar.setExpanded(true);
-            mMainFragment = MapFragment.newInstance();
+            mMainFragment = MapFragment.newInstance(mItemMode);
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mMainFragment)
@@ -310,7 +343,18 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
     private void updateListAndMap() {
         if (mMainFragment != null) {
-            mMainFragment.updateItems();
+            mMainFragment.updateItems(mItemMode);
+        }
+
+        Fragment listFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_list);
+        Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+
+        if (listFragment != null) {
+            ((MainFragment)listFragment).updateItems(mItemMode);
+        }
+
+        if (mapFragment != null) {
+            ((MainFragment)mapFragment).updateItems(mItemMode);
         }
     }
 

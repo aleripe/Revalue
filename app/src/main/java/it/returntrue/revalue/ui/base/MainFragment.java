@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -37,14 +38,21 @@ import retrofit2.Call;
 public abstract class MainFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LoaderManager.LoaderCallbacks<List<ItemModel>>,
         LocationListener {
+    @IntDef({ NEAREST_ITEMS_MODE, FAVORITE_ITEMS_MODE, PERSONAL_MOVIES_MODE })
+    public @interface ItemMode {}
+    public static final int NEAREST_ITEMS_MODE = 1;
+    public static final int FAVORITE_ITEMS_MODE = 2;
+    public static final int PERSONAL_MOVIES_MODE = 3;
+
     protected static final int LOADER_ITEMS = 1;
     protected static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static final int FASTEST_INTERVAL = 1000;
     private static final int INTERVAL = FASTEST_INTERVAL * 2;
 
-    protected OnItemClickListener mOnItemClickListener;
-    protected Location mLastLocation;
+    protected @ItemMode int ItemMode;
+    protected OnItemClickListener OnItemClickListener;
+    protected Location LastLocation;
 
     private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
@@ -90,7 +98,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
         super.onAttach(context);
 
         try {
-            mOnItemClickListener = (OnItemClickListener)context;
+            OnItemClickListener = (OnItemClickListener)context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnItemClickListener");
         }
@@ -183,7 +191,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
 
     @Override
     public Loader<List<ItemModel>> onCreateLoader(int id, Bundle args) {
-        mListLoader = new ListAsyncTaskLoader(mApplication, mSessionPreferences);
+        mListLoader = new ListAsyncTaskLoader(mApplication, mSessionPreferences, ItemMode);
         return mListLoader;
     }
 
@@ -206,40 +214,75 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
     }
 
     private void setLastLocation(Location location) {
-        mLastLocation = location;
+        LastLocation = location;
 
-        if (mLastLocation != null) {
+        if (LastLocation != null) {
             mApplication.setLocationLatitude(location.getLatitude());
             mApplication.setLocationLongitude(location.getLongitude());
-            updateItems();
+            updateItems(null);
         }
     }
 
-    public void updateItems() {
-        mListLoader.onContentChanged();
+    public void updateItems(@ItemMode Integer itemMode) {
+        if (itemMode != null) {
+            ItemMode = itemMode;
+            mListLoader.setItemMode(itemMode);
+        }
+
+        if (mListLoader != null) {
+            mListLoader.onContentChanged();
+        }
     }
 
     private static class ListAsyncTaskLoader extends AsyncTaskLoader<List<ItemModel>> {
         private RevalueApplication mApplication;
         private SessionPreferences mSessionPreferences;
+        private @ItemMode int mItemMode;
 
         public ListAsyncTaskLoader(RevalueApplication application,
-                                   SessionPreferences sessionPreferences) {
+                                   SessionPreferences sessionPreferences,
+                                   @ItemMode int itemMode) {
             super(application);
             mApplication = application;
             mSessionPreferences = sessionPreferences;
+            mItemMode = itemMode;
+        }
+
+        public void setItemMode(@ItemMode int itemMode) {
+            mItemMode = itemMode;
         }
 
         @Override
         public List<ItemModel> loadInBackground() {
             RevalueService service = RevalueServiceGenerator.createService(
                     mSessionPreferences.getToken());
-            Call<List<ItemModel>> call = service.GetNearestItems(
-                    mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude(),
-                    mApplication.getFilterTitle(),
-                    mApplication.getFilterCategory(),
-                    mApplication.getFilterDistance());
+            Call<List<ItemModel>> call;
+
+            switch (mItemMode) {
+                case FAVORITE_ITEMS_MODE:
+                    call = service.GetFavoriteItems(
+                            mApplication.getLocationLatitude(),
+                            mApplication.getLocationLongitude(),
+                            mApplication.getFilterTitle(),
+                            mApplication.getFilterCategory(),
+                            mApplication.getFilterDistance());
+                    break;
+                case PERSONAL_MOVIES_MODE:
+                    call = service.GetPersonalItems(
+                            mApplication.getLocationLatitude(),
+                            mApplication.getLocationLongitude(),
+                            mApplication.getFilterTitle(),
+                            mApplication.getFilterCategory(),
+                            mApplication.getFilterDistance());
+                    break;
+                default:
+                    call = service.GetNearestItems(
+                        mApplication.getLocationLatitude(),
+                        mApplication.getLocationLongitude(),
+                        mApplication.getFilterTitle(),
+                        mApplication.getFilterCategory(),
+                        mApplication.getFilterDistance());
+            }
 
             try {
                 return call.execute().body();
