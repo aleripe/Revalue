@@ -70,7 +70,8 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
         mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,
                 StaggeredGridLayoutManager.VERTICAL));
 
-        setEmptyText("Waiting for a GPS fix...");
+        // Sets waiting text
+        setEmptyText(getString(R.string.waiting_gps_fix));
 
         return view;
     }

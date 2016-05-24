@@ -69,6 +69,11 @@
             android:label="@string/app_name"
             android:configChanges= "keyboard|keyboardHidden|screenLayout|screenSize|orientation"
             android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+        <provider
+            android:name=".provider.MessageProvider"
+            android:authorities="@string/content_provider_authority"
+            android:exported="false"
+            android:syncable="true" />
         <meta-data
             android:name="com.facebook.sdk.ApplicationId"
             android:value="@string/facebook_app_id"/>
