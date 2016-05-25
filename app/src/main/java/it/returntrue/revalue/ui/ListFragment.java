@@ -19,6 +19,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.adapters.ItemsAdapter;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.ui.base.MainFragment;
@@ -28,6 +29,7 @@ import it.returntrue.revalue.ui.base.MainFragment;
  */
 public class ListFragment extends MainFragment implements ItemsAdapter.OnItemClickListener,
         SwipeRefreshLayout.OnRefreshListener {
+    private RevalueApplication mApplication;
     private ItemsAdapter mItemsAdapter;
 
     @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
@@ -53,6 +55,9 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
+
+        // Sets application context
+        mApplication = (RevalueApplication)getActivity().getApplicationContext();
 
         // Binds controls
         ButterKnife.bind(this, view);
@@ -128,7 +133,13 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Override
     public void onRefresh() {
-        updateItems(null);
+        if (mApplication.getLocationLatitude() != null &&
+                mApplication.getLocationLongitude() != null) {
+            updateItems(null);
+        }
+        else {
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
     }
 
     private void setEmptyText(String text) {
