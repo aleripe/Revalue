@@ -15,12 +15,13 @@ public class MessageDbHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_MESSAGE =
         "CREATE TABLE " + MessageEntry.TABLE + " (" +
-        MessageEntry._ID + " INTEGER PRIMARY KEY ON CONFLICT REPLACE," +
-        MessageEntry.COLUMN_FROM + " TEXT NOT NULL," +
-        MessageEntry.COLUMN_TO + " TEXT NOT NULL," +
-        MessageEntry.COLUMN_MESSAGE + " TEXT NOT NULL," +
-        MessageEntry.COLUMN_DATE + " TEXT NOT NULL" +
-    ")";
+            MessageEntry._ID + " INTEGER PRIMARY KEY ON CONFLICT REPLACE," +
+            MessageEntry.COLUMN_ITEM_ID + " INTEGER NOT NULL," +
+            MessageEntry.COLUMN_ISSENT + " INTEGER NOT NULL," +
+            MessageEntry.COLUMN_ISRECEIVED + " INTEGER NOT NULL," +
+            MessageEntry.COLUMN_TEXT + " TEXT NOT NULL," +
+            MessageEntry.COLUMN_DATE + " TEXT NOT NULL" +
+        ")";
 
     public MessageDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

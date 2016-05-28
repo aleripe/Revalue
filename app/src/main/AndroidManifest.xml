@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="it.returntrue.revalue">
+    <permission
+        android:name="it.returntrue.revalue.gcm.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
     <uses-permission
         android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="android.permission.WAKE_LOCK" />
     <uses-permission
         android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission
@@ -11,6 +17,8 @@
         android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission
+        android:name="it.returntrue.revalue.gcm.permission.C2D_MESSAGE" />
 
     <application
         android:allowBackup="true"
@@ -82,6 +90,29 @@
             android:value="@integer/google_play_services_version" />
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_geo_api_key"/>
+            android:value="@string/google_api_key"/>
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="info.androidhive.gcm" />
+            </intent-filter>
+        </receiver>
+        <service
+            android:name=".gcm.RevalueGcmListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".gcm.RevalueGcmIntentService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.gms.iid.InstanceID" />
+            </intent-filter>
+        </service>
     </application>
 </manifest>

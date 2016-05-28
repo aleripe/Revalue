@@ -15,6 +15,7 @@ public class ItemModel {
     public int CategoryId;
     public String CategoryName;
     public int UserId;
-    public String UserName;
+    public String UserAlias;
     public boolean IsFavorite;
+    public boolean IsOwned;
 }

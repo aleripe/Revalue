@@ -13,6 +13,9 @@ public interface RevalueService {
     @POST("Account/ExternalLogin")
     Call<TokenModel> ExternalLogin(@Body ExternalTokenModel externalTokenModel);
 
+    @POST("Account/UpdateGcmRegistrationId")
+    Call<Void> UpdateGcmRegistrationId(@Body GcmTokenModel gcmTokenModel);
+
     @GET("Items/GetNearestItems/{latitude}/{longitude}/")
     Call<List<ItemModel>> GetNearestItems(@Path("latitude") double latitude,
                                           @Path("longitude") double longitude,
@@ -41,6 +44,12 @@ public interface RevalueService {
 
     @POST("Items/InsertItem")
     Call<Void> InsertItem(@Body ItemModel itemModel);
+
+    @GET("Items/SetItemAsRevalued/{id}")
+    Call<Void> SetItemAsRevalued(@Path("id") int id);
+
+    @POST("Messages/SendMessage")
+    Call<Void> SendMessage(@Body MessageModel messageModel);
 
     @GET("Items/AddFavorite/{id}")
     Call<Void> AddFavorite(@Path("id") int id);

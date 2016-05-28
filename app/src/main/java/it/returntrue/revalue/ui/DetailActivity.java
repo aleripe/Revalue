@@ -1,6 +1,5 @@
 package it.returntrue.revalue.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -13,19 +12,22 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity implements DetailFragment.OnSetFabVisibilityListener {
     public static final String EXTRA_ID = "id";
-
-    private long mId;
 
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.layout_multipane) @Nullable LinearLayout mLayoutMultipane;
-    @Bind(R.id.fab) FloatingActionButton mFab;
+    @Bind(R.id.fab_chat) FloatingActionButton mFabChat;
+    @Bind(R.id.fab_revalue) FloatingActionButton mFabRevalue;
+    @Bind(R.id.fab_remove) FloatingActionButton mFabRemove;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
+        final DetailFragment detailFragment =
+                (DetailFragment)getSupportFragmentManager().findFragmentById(R.id.fragment);
 
         // Binds controls
         ButterKnife.bind(this);
@@ -34,20 +36,46 @@ public class DetailActivity extends AppCompatActivity {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Gets extra data from intent
-        mId = getIntent().getIntExtra(DetailActivity.EXTRA_ID, 0);
-
-        // Sets floating action button
-        mFab.setOnClickListener(new View.OnClickListener() {
+        // Sets chat floating action button
+        mFabChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(DetailActivity.this, ChatActivity.class);
-                intent.putExtra(DetailActivity.EXTRA_ID, mId);
-                startActivity(intent);
+                detailFragment.goToChatActivity();
             }
         });
 
-        // Sets floating action button visibility
-        mFab.setVisibility((mLayoutMultipane != null) ? View.INVISIBLE : View.VISIBLE);
+        // Sets revalue floating action button
+        mFabRevalue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                detailFragment.setItemAsRevalued();
+            }
+        });
+
+        // Sets remove floating action button
+        mFabRemove.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onSetChatFab(boolean isOwner) {
+        // Sets floating action buttons visibility
+        mFabChat.setVisibility((mLayoutMultipane != null || isOwner) ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    @Override
+    public void onSetRevalueFab(boolean isOwner) {
+        // Sets floating action buttons visibility
+        mFabRevalue.setVisibility(isOwner ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public void onSetRemoveFab(boolean isOwner) {
+        // Sets floating action buttons visibility
+        mFabRemove.setVisibility(isOwner ? View.VISIBLE : View.INVISIBLE);
     }
 }

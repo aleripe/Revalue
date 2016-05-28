@@ -1,8 +1,10 @@
 package it.returntrue.revalue.ui;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -13,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -41,6 +44,7 @@ import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
+import it.returntrue.revalue.gcm.RevalueGcmIntentService;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.ui.base.MainFragment;
 import retrofit2.Call;
@@ -51,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<List<CategoryModel>> {
     protected static final int LOADER_CATEGORIES = 1;
 
+    private BroadcastReceiver mBroadcastReceiver;
     private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
     private MainFragment mMainFragment;
@@ -64,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     @Bind(R.id.text_filter_category) TextView mTextFilterCategory;
     @Bind(R.id.text_filter_distance) TextView mTextFilterDistance;
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
-    @Bind(R.id.fab) FloatingActionButton mFloatingActionButton;
+    @Bind(R.id.fab_chat) FloatingActionButton mFloatingActionButton;
 
     private @MainFragment.ItemMode int mItemMode;
     private String mFilterTitle;
@@ -74,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Creates GCM broadcast receiver
+        mBroadcastReceiver = createBroadcastReceiver();
 
         // Sets application context
         mApplication = (RevalueApplication)getApplicationContext();
@@ -138,6 +146,26 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         });
 
         setMode(mApplication.getMainMode());
+
+        registerGCM();
+    }
+
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
+
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("registrationComplete"));
+
+        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
+                new IntentFilter("pushNotification"));
+
+        super.onResume();
     }
 
     @Override
@@ -356,6 +384,20 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         if (mapFragment != null) {
             ((MainFragment)mapFragment).updateItems(mItemMode);
         }
+    }
+
+    private BroadcastReceiver createBroadcastReceiver() {
+        return new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+            }
+        };
+    }
+
+    private void registerGCM() {
+        Intent intent = new Intent(this, RevalueGcmIntentService.class);
+        startService(intent);
     }
 
     private static class CategoryAsyncTaskLoader extends AsyncTaskLoader<List<CategoryModel>> {

@@ -10,6 +10,12 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
 public class ChatActivity extends AppCompatActivity {
+    public static final String EXTRA_ID = "id";
+    public static final String EXTRA_USER_ID = "user_id";
+    public static final String EXTRA_USER_ALIAS = "user_alias";
+
+    private String mUserAlias;
+
     @Bind(R.id.toolbar) Toolbar mToolbar;
 
     @Override
@@ -22,9 +28,13 @@ public class ChatActivity extends AppCompatActivity {
         // Binds controls
         ButterKnife.bind(this);
 
+        // Gets extra data from intent
+        mUserAlias = getIntent().getStringExtra(ChatActivity.EXTRA_USER_ALIAS);
+
         // Sets toolbar
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setTitle(mUserAlias);
     }
 
     @Override

@@ -46,7 +46,7 @@
     </string-array>
     <string name="facebook_app_id">1556315897995518</string>
     <string name="google_client_id">559968920325-fgf6frk206vt01a4m4n0e3c0kvi8hcui.apps.googleusercontent.com</string>
-    <string name="google_geo_api_key">AIzaSyAh70ETfM-SwaWrsmk-o_uVkm909Vs4Q4w</string>
+    <string name="google_api_key">AIzaSyAh70ETfM-SwaWrsmk-o_uVkm909Vs4Q4w</string>
     <string name="token_unavailable">Could not get access token</string>
     <string name="response_null">Response from server is empty</string>
     <string name="call_failed">Call to server failed</string>

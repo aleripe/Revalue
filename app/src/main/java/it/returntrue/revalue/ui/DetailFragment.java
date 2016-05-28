@@ -1,6 +1,8 @@
 package it.returntrue.revalue.ui;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -17,6 +19,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -57,7 +60,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int LOADER_ITEM = 1;
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
-    private long mId;
+    private int mId;
+    private OnSetFabVisibilityListener mSetFabVisibilityListener;
     private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
     private DetailAsyncTaskLoader mDetailAsyncTaskLoader;
@@ -74,6 +78,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public static Fragment newInstance() {
         return new DetailFragment();
+    }
+
+    public interface OnSetFabVisibilityListener {
+        public void onSetChatFab(boolean isOwner);
+        public void onSetRevalueFab(boolean isOwner);
+        public void onSetRemoveFab(boolean isOwner);
     }
 
     @Override
@@ -111,6 +121,18 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         getLoaderManager().initLoader(LOADER_ITEM, null, this).forceLoad();
 
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        try {
+            mSetFabVisibilityListener = (OnSetFabVisibilityListener)context;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(context.toString() +
+                    " must implement OnSetFabVisibilityListener");
+        }
     }
 
     @Override
@@ -205,6 +227,10 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             } else {
                 mMapFragment.getView().setVisibility(View.GONE);
             }
+
+            mSetFabVisibilityListener.onSetChatFab(mItemModel.IsOwned);
+            mSetFabVisibilityListener.onSetRevalueFab(mItemModel.IsOwned);
+            mSetFabVisibilityListener.onSetRemoveFab(mItemModel.IsOwned);
         }
     }
 
@@ -258,10 +284,47 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+    public void goToChatActivity() {
+        if (mItemModel != null) {
+            Intent intent = new Intent(getActivity(), ChatActivity.class);
+            intent.putExtra(ChatActivity.EXTRA_ID, mItemModel.Id);
+            intent.putExtra(ChatActivity.EXTRA_USER_ID, mItemModel.UserId);
+            intent.putExtra(ChatActivity.EXTRA_USER_ALIAS, mItemModel.UserAlias);
+            startActivity(intent);
+        }
+    }
+
+    public void setItemAsRevalued() {
+        if (mItemModel != null) {
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Revalue item")
+                    .setMessage("Do you really revalued this item?")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
+                            Call<Void> call = service.SetItemAsRevalued(mId);
+                            call.enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                                    startActivity(intent);
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }})
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
+        }
+    }
+
     private void updateMenuItems() {
         if (mMenu != null && mItemModel != null) {
-            mMenu.findItem(R.id.action_add_favorite).setVisible(!mItemModel.IsFavorite);
-            mMenu.findItem(R.id.action_remove_favorite).setVisible(mItemModel.IsFavorite);
+            mMenu.findItem(R.id.action_add_favorite).setVisible(!mItemModel.IsOwned && !mItemModel.IsFavorite);
+            mMenu.findItem(R.id.action_remove_favorite).setVisible(!mItemModel.IsOwned && mItemModel.IsFavorite);
         }
     }
 

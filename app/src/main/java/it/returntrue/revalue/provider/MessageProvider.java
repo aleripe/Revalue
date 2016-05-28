@@ -170,6 +170,11 @@ public class MessageProvider extends ContentProvider {
         return totalRowCount;
     }
 
+    public static Uri buildMessageUri() {
+        return CONTENT_URI.buildUpon()
+                .appendPath(PATH_MESSAGE)
+                .build();
+    }
 
     public static Uri buildMessageUri(long id) {
         return CONTENT_URI.buildUpon()

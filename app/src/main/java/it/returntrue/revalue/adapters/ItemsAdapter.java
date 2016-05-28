@@ -51,7 +51,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(mContext).inflate(R.layout.list_item, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.items_list_item, parent, false);
         return new ViewHolder(view);
     }
 
@@ -63,8 +63,10 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                 .load(itemModel.PictureUrl)
                 .into(holder.imageCover);
 
-        holder.imageAddFavorite.setVisibility(itemModel.IsFavorite ? View.GONE : View.VISIBLE);
-        holder.imageRemoveFavorite.setVisibility(itemModel.IsFavorite ? View.VISIBLE : View.GONE);
+        holder.imageAddFavorite.setVisibility(itemModel.IsOwned || itemModel.IsFavorite ?
+                View.GONE : View.VISIBLE);
+        holder.imageRemoveFavorite.setVisibility(itemModel.IsFavorite && !itemModel.IsFavorite ?
+                View.VISIBLE : View.GONE);
         holder.textTitle.setText(itemModel.Title);
         holder.textLocation.setText(itemModel.City + " / " +
                 (int)(itemModel.Distance / 1000) + " km");
