@@ -56,7 +56,7 @@ public class DetailActivity extends AppCompatActivity implements DetailFragment.
         mFabRemove.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                detailFragment.setItemAsRemoved();
             }
         });
     }

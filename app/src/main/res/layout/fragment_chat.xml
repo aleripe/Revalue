@@ -30,13 +30,11 @@
             android:layout_marginRight="10dp"
             android:layout_marginLeft="16dp"
             android:lines="1" />
-        <Button
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/button_send"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Send"
-            android:textSize="16dp"
-            android:textColor="@color/colorPrimary" />
+            android:src="@drawable/ic_send_white_24dp" />
     </LinearLayout>
 </LinearLayout>

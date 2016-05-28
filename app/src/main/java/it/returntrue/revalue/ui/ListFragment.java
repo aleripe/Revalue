@@ -23,6 +23,7 @@ import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.adapters.ItemsAdapter;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.ui.base.MainFragment;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 
 /**
  * Shows the list of items
@@ -34,7 +35,7 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
     @Bind(R.id.list_items) RecyclerView mRecyclerView;
-    @Bind(R.id.text_empty) TextView mTextEmpty;
+    @Bind(R.id.label_status) TextView mLabelStatus;
 
     public ListFragment() { }
 
@@ -76,7 +77,7 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
                 StaggeredGridLayoutManager.VERTICAL));
 
         // Sets waiting text
-        setEmptyText(getString(R.string.waiting_gps_fix));
+        setStatus(getString(R.string.waiting_gps_fix));
 
         return view;
     }
@@ -110,15 +111,11 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Override
     public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
-        if (mItemsAdapter != null) {
-            if (data.size() > 0) {
-                clearEmptyText();
-            }
-            else {
-                setEmptyText("No results found.");
-            }
-
-            mItemsAdapter.setItems(data);
+        if (data != null) {
+            loadItems(data);
+        }
+        else {
+            clearItems();
         }
 
         mSwipeRefreshLayout.setRefreshing(false);
@@ -133,22 +130,47 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     @Override
     public void onRefresh() {
-        if (mApplication.getLocationLatitude() != null &&
-                mApplication.getLocationLongitude() != null) {
-            updateItems(null);
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            if (mApplication.getLocationLatitude() != null && mApplication.getLocationLongitude() != null) {
+                updateItems(null);
+            }
+            else {
+                mSwipeRefreshLayout.setRefreshing(false);
+            }
         }
         else {
+            clearItems();
+            setStatus(getString(R.string.check_connection));
             mSwipeRefreshLayout.setRefreshing(false);
         }
     }
 
-    private void setEmptyText(String text) {
-        mTextEmpty.setVisibility(View.VISIBLE);
-        mTextEmpty.setText(text);
+    @Override
+    public void setStatus(String text) {
+        mLabelStatus.setVisibility(View.VISIBLE);
+        mLabelStatus.setText(text);
     }
 
-    private void clearEmptyText() {
-        mTextEmpty.setVisibility(View.INVISIBLE);
-        mTextEmpty.setText("");
+    private void loadItems(List<ItemModel> items) {
+        if (mItemsAdapter != null) {
+            if (items.size() > 0) {
+                clearStatus();
+            } else {
+                setStatus(getString(R.string.no_results_found));
+            }
+
+            mItemsAdapter.setItems(items);
+        }
+    }
+
+    private void clearItems() {
+        if (mItemsAdapter != null) {
+            mItemsAdapter.clearItems();
+        }
+    }
+
+    private void clearStatus() {
+        mLabelStatus.setVisibility(View.INVISIBLE);
+        mLabelStatus.setText("");
     }
 }

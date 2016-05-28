@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -57,6 +56,7 @@ import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.utilities.MapUtilities;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 
 public class InsertFragment extends Fragment {
     private static final int ACTION_CAMERA = 1;
@@ -111,11 +111,14 @@ public class InsertFragment extends Fragment {
 
         // Binds controls
         ButterKnife.bind(this, view);
+
+        // Gets map reference
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
 
         // Sets adapter
         mSpinnerCategory.setAdapter(mAdapter);
 
+        // Sets change picture button event handler to select picture
         mButtonChoosePicture.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -123,6 +126,7 @@ public class InsertFragment extends Fragment {
             }
         });
 
+        // Sets location change listener to display position on map
         mSwitchLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -189,13 +193,12 @@ public class InsertFragment extends Fragment {
                     dispatchGalleryIntent();
                 }
                 else {
-                    Snackbar.make(getView(), "Can't read pictures from gallery", Snackbar.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), getString(R.string.could_not_read_pictures),
+                            Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
-
-
 
     private void actionCameraResult(Intent data) {
         mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 400);
@@ -218,7 +221,8 @@ public class InsertFragment extends Fragment {
     private void actionGalleryResult(Intent data) {
         if (data != null) {
             try {
-                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), data.getData()), 400);
+                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(
+                        getContext().getContentResolver(), data.getData()), 400);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -230,15 +234,21 @@ public class InsertFragment extends Fragment {
     }
 
     private void selectPicture() {
-        final CharSequence[] items = { "Take Photo", "Choose from Library", "Cancel" };
+        final CharSequence[] items = {
+                getString(R.string.take_picture),
+                getString(R.string.choose_from_library),
+                getString(R.string.cancel)
+        };
+
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
-        builder.setTitle("Add Photo!");
+        builder.setTitle(getString(R.string.add_picture));
+
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int item) {
-                if (items[item].equals("Take Photo")) {
+                if (items[item].equals(R.string.take_picture)) {
                     dispatchCameraIntent();
-                } else if (items[item].equals("Choose from Library")) {
+                } else if (items[item].equals(R.string.choose_from_library)) {
                     if (ContextCompat.checkSelfPermission(getActivity(),
                             Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         ActivityCompat.requestPermissions(getActivity(),
@@ -248,7 +258,7 @@ public class InsertFragment extends Fragment {
                     else {
                         dispatchGalleryIntent();
                     }
-                } else if (items[item].equals("Cancel")) {
+                } else if (items[item].equals(R.string.cancel)) {
                     dialog.dismiss();
                 }
             }
@@ -268,6 +278,11 @@ public class InsertFragment extends Fragment {
     }
 
     private void sendItem() {
+        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            return;
+        }
+
         String text = mTextTitle.getText().toString();
         String description = mTextDescription.getText().toString();
         Double latitude = null;
@@ -390,7 +405,11 @@ public class InsertFragment extends Fragment {
 
         @Override
         protected void onPostExecute(Boolean result) {
-            Toast.makeText(InsertFragment.this.getContext(), "Done!", Toast.LENGTH_LONG).show();
+            Toast.makeText(InsertFragment.this.getContext(),
+                    getString(R.string.item_saved), Toast.LENGTH_LONG).show();
+
+            Intent intent = new Intent(getActivity(), MainActivity.class);
+            startActivity(intent);
         }
     }
 }

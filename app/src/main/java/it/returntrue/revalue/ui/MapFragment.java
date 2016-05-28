@@ -160,6 +160,11 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
     }
 
     @Override
+    public void setStatus(String text) {
+        // No status label on this view
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState) {
         GoogleMap map = mMapFragment.getMap();
 

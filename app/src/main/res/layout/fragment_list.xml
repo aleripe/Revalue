@@ -19,12 +19,10 @@
             android:scrollbars="vertical"/>
     </android.support.v4.widget.SwipeRefreshLayout>
     <TextView
-        android:id="@+id/text_empty"
+        android:id="@+id/label_status"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="center"
-        android:fontFamily="sans-serif-thin"
-        android:textSize="24sp"
-        android:textColor="#000"
+        android:textStyle="bold"
         android:visibility="invisible"/>
 </FrameLayout>

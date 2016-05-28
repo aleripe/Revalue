@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -52,6 +51,7 @@ import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.utilities.MapUtilities;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -64,7 +64,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private OnSetFabVisibilityListener mSetFabVisibilityListener;
     private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
-    private DetailAsyncTaskLoader mDetailAsyncTaskLoader;
+    private DetailAsyncTaskLoader mDetailLoader;
     private Menu mMenu;
     private SupportMapFragment mMapFragment;
     private ImageView mImageCover;
@@ -110,17 +110,24 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
         // Binds controls
         mImageCover = (ImageView)getActivity().findViewById(R.id.image_cover);
 
         // Binds controls
         ButterKnife.bind(this, getView());
+
+        // Gets map fragment reference
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
 
-        // Initializes loader
-        getLoaderManager().initLoader(LOADER_ITEM, null, this).forceLoad();
-
-        super.onActivityCreated(savedInstanceState);
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            // Initializes loader and forces it to start
+            getLoaderManager().initLoader(LOADER_ITEM, null, this).forceLoad();
+        }
+        else {
+            clearDetails();
+        }
     }
 
     @Override
@@ -162,8 +169,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     @Override
     public Loader<ItemModel> onCreateLoader(int id, Bundle args) {
-        mDetailAsyncTaskLoader = new DetailAsyncTaskLoader(mApplication, mId);
-        return mDetailAsyncTaskLoader;
+        mDetailLoader = new DetailAsyncTaskLoader(mApplication, mId);
+        return mDetailLoader;
     }
 
     @Override
@@ -185,7 +192,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     share();
                 }
                 else {
-                    Snackbar.make(getView(), "Could not share item", Snackbar.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), getString(R.string.could_not_share_item),
+                            Toast.LENGTH_LONG).show();
                 }
             }
         }
@@ -206,10 +214,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             // Shows only appropriate favorite button
             updateMenuItems();
 
+            // Sets main data
             mTextTitle.setText(itemModel.Title);
             mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
             mTextDescription.setText(itemModel.Description);
 
+            // Shows position on map if available
             if (itemModel.ShowOnMap) {
                 GoogleMap map = mMapFragment.getMap();
                 if (map != null) {
@@ -228,6 +238,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 mMapFragment.getView().setVisibility(View.GONE);
             }
 
+            // Shows appropriate FABs
             mSetFabVisibilityListener.onSetChatFab(mItemModel.IsOwned);
             mSetFabVisibilityListener.onSetRevalueFab(mItemModel.IsOwned);
             mSetFabVisibilityListener.onSetRemoveFab(mItemModel.IsOwned);
@@ -235,10 +246,16 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     private void clearDetails() {
-
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
     }
 
     public void addFavorite() {
+        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (mItemModel != null) {
             RevalueService service = RevalueServiceGenerator.createService(
                     mSessionPreferences.getToken());
@@ -246,22 +263,37 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-                    Toast.makeText(DetailFragment.this.getContext(), "Favorite item added.", Toast.LENGTH_LONG).show();
+                    // Response is OK, reload data
+                    if (response.isSuccessful()) {
+                        Toast.makeText(DetailFragment.this.getContext(),
+                                getString(R.string.favorite_item_added), Toast.LENGTH_LONG).show();
 
-                    if (mDetailAsyncTaskLoader != null) {
-                        mDetailAsyncTaskLoader.onContentChanged();
+                        if (mDetailLoader != null) {
+                            mDetailLoader.onContentChanged();
+                        }
+                    }
+                    else {
+                        // Parse and display error
+                        String error = NetworkUtilities.parseError(DetailFragment.this.getContext(), response);
+                        Toast.makeText(DetailFragment.this.getContext(), error, Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(DetailFragment.this.getContext(), "Could not add favorite item.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DetailFragment.this.getContext(),
+                            getString(R.string.could_not_add_favorite_item), Toast.LENGTH_LONG).show();
                 }
             });
         }
     }
 
     public void removeFavorite() {
+        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (mItemModel != null) {
             RevalueService service = RevalueServiceGenerator.createService(
                     mSessionPreferences.getToken());
@@ -269,16 +301,26 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             call.enqueue(new Callback<Void>() {
                 @Override
                 public void onResponse(Call<Void> call, Response<Void> response) {
-                    Toast.makeText(DetailFragment.this.getContext(), "Favorite item removed.", Toast.LENGTH_LONG).show();
+                    // Response is OK, reload data
+                    if (response.isSuccessful()) {
+                        Toast.makeText(DetailFragment.this.getContext(),
+                                getString(R.string.favorite_item_removed), Toast.LENGTH_LONG).show();
 
-                    if (mDetailAsyncTaskLoader != null) {
-                        mDetailAsyncTaskLoader.onContentChanged();
+                        if (mDetailLoader != null) {
+                            mDetailLoader.onContentChanged();
+                        }
+                    }
+                    else {
+                        // Parse and display error
+                        String error = NetworkUtilities.parseError(DetailFragment.this.getContext(), response);
+                        Toast.makeText(DetailFragment.this.getContext(), error, Toast.LENGTH_LONG).show();
                     }
                 }
 
                 @Override
                 public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(DetailFragment.this.getContext(), "Could not remove favorite item.", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DetailFragment.this.getContext(),
+                            getString(R.string.could_not_remove_favorite_item), Toast.LENGTH_LONG).show();
                 }
             });
         }
@@ -295,10 +337,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void setItemAsRevalued() {
+        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            return;
+        }
+
         if (mItemModel != null) {
             new AlertDialog.Builder(getContext())
-                    .setTitle("Revalue item")
-                    .setMessage("Do you really revalued this item?")
+                    .setTitle(getString(R.string.revalue_item))
+                    .setMessage(getString(R.string.confirm_revalue_item))
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
@@ -312,7 +359,43 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
                                 @Override
                                 public void onFailure(Call<Void> call, Throwable t) {
-                                    Toast.makeText(getContext(), "Error", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(DetailFragment.this.getContext(),
+                                            getString(R.string.could_not_revalue_item),
+                                            Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }})
+                    .setNegativeButton(android.R.string.no, null)
+                    .show();
+        }
+    }
+
+    public void setItemAsRemoved() {
+        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (mItemModel != null) {
+            new AlertDialog.Builder(getContext())
+                    .setTitle(getString(R.string.remove_item))
+                    .setMessage(getString(R.string.confirm_remove_item))
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
+                            Call<Void> call = service.SetItemAsRemoved(mId);
+                            call.enqueue(new Callback<Void>() {
+                                @Override
+                                public void onResponse(Call<Void> call, Response<Void> response) {
+                                    Intent intent = new Intent(getActivity(), MainActivity.class);
+                                    startActivity(intent);
+                                }
+
+                                @Override
+                                public void onFailure(Call<Void> call, Throwable t) {
+                                    Toast.makeText(DetailFragment.this.getContext(),
+                                            getString(R.string.could_not_remove_item),
+                                            Toast.LENGTH_LONG).show();
                                 }
                             });
                         }})

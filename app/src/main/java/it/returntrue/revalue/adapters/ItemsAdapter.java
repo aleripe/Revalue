@@ -63,9 +63,9 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                 .load(itemModel.PictureUrl)
                 .into(holder.imageCover);
 
-        holder.imageAddFavorite.setVisibility(itemModel.IsOwned || itemModel.IsFavorite ?
-                View.GONE : View.VISIBLE);
-        holder.imageRemoveFavorite.setVisibility(itemModel.IsFavorite && !itemModel.IsFavorite ?
+        holder.imageAddFavorite.setVisibility(!itemModel.IsOwned && !itemModel.IsFavorite ?
+                View.VISIBLE : View.GONE);
+        holder.imageRemoveFavorite.setVisibility(!itemModel.IsOwned && itemModel.IsFavorite ?
                 View.VISIBLE : View.GONE);
         holder.textTitle.setText(itemModel.Title);
         holder.textLocation.setText(itemModel.City + " / " +
@@ -87,6 +87,11 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             mItems = items;
             notifyDataSetChanged();
         }
+    }
+
+    public void clearItems() {
+        mItems.clear();
+        notifyDataSetChanged();
     }
 
     /** Represents a ViewHolder for a RecyclerView item */

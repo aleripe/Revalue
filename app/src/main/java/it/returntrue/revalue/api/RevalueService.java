@@ -48,6 +48,9 @@ public interface RevalueService {
     @GET("Items/SetItemAsRevalued/{id}")
     Call<Void> SetItemAsRevalued(@Path("id") int id);
 
+    @GET("Items/SetItemAsRemoved/{id}")
+    Call<Void> SetItemAsRemoved(@Path("id") int id);
+
     @POST("Messages/SendMessage")
     Call<Void> SendMessage(@Body MessageModel messageModel);
 

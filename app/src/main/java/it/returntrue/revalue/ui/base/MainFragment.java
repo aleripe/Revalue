@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
@@ -24,15 +23,16 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.ButterKnife;
+import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 import retrofit2.Call;
 
 public abstract class MainFragment extends Fragment implements GoogleApiClient.ConnectionCallbacks,
@@ -183,7 +183,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
                     startLocationUpdates();
                 }
                 else {
-                    Snackbar.make(getView(), "Can't get last location", Snackbar.LENGTH_LONG).show();
+                    setStatus(getString(R.string.no_access_location_permission));
                 }
             }
         }
@@ -223,14 +223,21 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
         }
     }
 
-    public void updateItems(@ItemMode Integer itemMode) {
-        if (itemMode != null) {
-            ItemMode = itemMode;
-            mListLoader.setItemMode(itemMode);
-        }
+    public abstract void setStatus(String text);
 
+    public void updateItems(@ItemMode Integer itemMode) {
         if (mListLoader != null) {
-            mListLoader.onContentChanged();
+            if (itemMode != null) {
+                ItemMode = itemMode;
+                mListLoader.setItemMode(itemMode);
+            }
+
+            if (NetworkUtilities.checkInternetConnection(getContext())) {
+                mListLoader.onContentChanged();
+            }
+            else {
+                setStatus(getString(R.string.check_connection));
+            }
         }
     }
 
@@ -288,7 +295,7 @@ public abstract class MainFragment extends Fragment implements GoogleApiClient.C
                 return call.execute().body();
             }
             catch (IOException e) {
-                return new ArrayList<>();
+                return null;
             }
         }
     }

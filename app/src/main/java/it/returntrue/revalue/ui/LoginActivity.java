@@ -31,6 +31,7 @@ import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.api.TokenModel;
 import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -118,7 +119,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            mProgressDialog = ProgressDialog.show(this, "Loading", "Authenticating user...");
+            mProgressDialog = ProgressDialog.show(this,
+                    getString(R.string.loading), getString(R.string.authenticating_user));
             GoogleSignInAccount account = result.getSignInAccount();
             login(getString(R.string.provider_google), account.getIdToken());
         } else {
@@ -135,27 +137,27 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Calls API to log user
         RevalueService service = RevalueServiceGenerator.createService();
         Call<TokenModel> call = service.ExternalLogin(externalTokenModel);
-        call.clone().enqueue(new Callback<TokenModel>() {
+        call.enqueue(new Callback<TokenModel>() {
             @Override
             public void onResponse(Call<TokenModel> call, Response<TokenModel> response) {
                 // Response is OK, let's authenticate the user
-                if (response != null) {
+                if (response.isSuccessful()) {
                     TokenModel tokenModel = response.body();
 
                     if (tokenModel != null) {
-                        mSessionPreferences.login(tokenModel.getUserName(),
-                                tokenModel.getAccessToken(), tokenModel.getAlias(),
+                        mSessionPreferences.login(
+                                tokenModel.getUserName(),
+                                tokenModel.getAccessToken(),
+                                tokenModel.getAlias(),
                                 tokenModel.getAvatar());
 
                         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
                     }
-                    else {
-                        mLabelSignInStatus.setText(getString(R.string.token_unavailable));
-                    }
                 }
                 else {
-                    mLabelSignInStatus.setText(getString(R.string.response_null));
+                    // Parse and display error
+                    mLabelSignInStatus.setText(NetworkUtilities.parseError(LoginActivity.this, response));
                 }
 
                 if (mProgressDialog != null) mProgressDialog.dismiss();
@@ -172,7 +174,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private class FacebookCallbacks implements FacebookCallback<LoginResult> {
         @Override
         public void onSuccess(LoginResult loginResult) {
-            mProgressDialog = ProgressDialog.show(LoginActivity.this, "Loading", "Authenticating user...");
+            mProgressDialog = ProgressDialog.show(LoginActivity.this,
+                    getString(R.string.loading), getString(R.string.authenticating_user));
             login(getString(R.string.provider_facebook), loginResult.getAccessToken().getToken());
         }
 
