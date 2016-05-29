@@ -47,9 +47,9 @@
     <string name="facebook_app_id">1556315897995518</string>
     <string name="google_client_id">559968920325-fgf6frk206vt01a4m4n0e3c0kvi8hcui.apps.googleusercontent.com</string>
     <string name="google_api_key">AIzaSyAh70ETfM-SwaWrsmk-o_uVkm909Vs4Q4w</string>
-    <string name="call_failed">Call to server failed, please check connection</string>
+    <string name="call_failed">Call to server failed</string>
     <string name="login_canceled">Login process canceled</string>
-    <string name="login_failed">Login process failed, please check connection</string>
+    <string name="login_failed">Login process failed</string>
     <string name="provider_facebook">Facebook</string>
     <string name="provider_google">Google</string>
     <string name="text_filter_title_empty">No filter</string>

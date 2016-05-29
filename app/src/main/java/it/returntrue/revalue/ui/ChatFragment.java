@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.AsyncTaskLoader;
@@ -14,7 +15,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import java.io.IOException;
@@ -46,7 +46,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     @Bind(R.id.list_messages) RecyclerView mRecyclerView;
     @Bind(R.id.text_message) EditText mTextMessage;
-    @Bind(R.id.button_send) Button mButtonSend;
+    @Bind(R.id.button_send) FloatingActionButton mButtonSend;
 
     public ChatFragment() { }
 

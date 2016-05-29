@@ -55,9 +55,9 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<List<CategoryModel>> {
     protected static final int LOADER_CATEGORIES = 1;
 
-    private BroadcastReceiver mBroadcastReceiver;
     private RevalueApplication mApplication;
     private SessionPreferences mSessionPreferences;
+    private BroadcastReceiver mBroadcastReceiver;
     private MainFragment mMainFragment;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
@@ -80,14 +80,14 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Creates GCM broadcast receiver
-        mBroadcastReceiver = createBroadcastReceiver();
-
         // Sets application context
         mApplication = (RevalueApplication)getApplicationContext();
 
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(this);
+
+        // Creates GCM broadcast receiver
+        mBroadcastReceiver = createBroadcastReceiver();
 
         // Sets default item mode
         mItemMode = MainFragment.NEAREST_ITEMS_MODE;

@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -63,6 +64,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private int mId;
     private OnSetFabVisibilityListener mSetFabVisibilityListener;
     private RevalueApplication mApplication;
+    private Tracker mTracker;
     private SessionPreferences mSessionPreferences;
     private DetailAsyncTaskLoader mDetailLoader;
     private Menu mMenu;
@@ -92,6 +94,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
         // Sets application context
         mApplication = (RevalueApplication)getActivity().getApplicationContext();
+
+        // Gets analytics tracker
+        mTracker = mApplication.getTracker();
 
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(getContext());

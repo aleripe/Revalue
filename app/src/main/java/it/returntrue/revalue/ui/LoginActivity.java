@@ -39,14 +39,14 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int RC_SIGN_IN = 9001;
 
-    private SessionPreferences mSessionPreferences;
+    protected SessionPreferences mSessionPreferences;
     private CallbackManager mCallbackManager;
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
 
     @Bind(R.id.button_google_sign_in) Button mButtonGoogleSignIn;
     @Bind(R.id.button_facebook_sign_in) Button mButtonFacebookSignIn;
-    @Bind(R.id.label_sign_in_status) TextView mLabelSignInStatus;
+    @Bind(R.id.label_status) TextView mLabelStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,19 +55,9 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         // Creates session preferences manager
         mSessionPreferences = new SessionPreferences(this);
 
-        // Creates and registers Facebook callback manager
-        mCallbackManager = CallbackManager.Factory.create();
-        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallbacks());
-
-        // Creates Google API Client
-        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.google_client_id))
-                .requestEmail()
-                .build();
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
-                .enableAutoManage(this, new GoogleCallbacks())
-                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
-                .build();
+        // Setup available providers
+        setupFacebook();
+        setupGoogle();
 
         // Sets layout
         setContentView(R.layout.activity_login);
@@ -105,16 +95,38 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private void setupFacebook() {
+        // Creates and registers Facebook callback manager
+        mCallbackManager = CallbackManager.Factory.create();
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallbacks());
+    }
+
+    private void setupGoogle() {
+        // Creates Google API Client
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.google_client_id))
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .enableAutoManage(this, new GoogleCallbacks())
+                .addApi(Auth.GOOGLE_SIGN_IN_API, googleSignInOptions)
+                .build();
+    }
+
     private void googleLogin() {
-        // Starts Google login process
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+        if (checkInternetConnection()) {
+            // Starts Google login process
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+            startActivityForResult(signInIntent, RC_SIGN_IN);
+        }
     }
 
     private void facebookLogin() {
-        // Starts Facebook login process
-        LoginManager.getInstance().logInWithReadPermissions(this,
-                Arrays.asList("public_profile", "email"));
+        if (checkInternetConnection()) {
+            // Starts Facebook login process
+            LoginManager.getInstance().logInWithReadPermissions(this,
+                    Arrays.asList("public_profile", "email"));
+        }
     }
 
     private void handleSignInResult(GoogleSignInResult result) {
@@ -124,51 +136,61 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             GoogleSignInAccount account = result.getSignInAccount();
             login(getString(R.string.provider_google), account.getIdToken());
         } else {
-            mLabelSignInStatus.setText(getString(R.string.login_failed));
+            mLabelStatus.setText(R.string.login_failed);
         }
     }
 
     private void login(String provider, String token) {
-        // Creates external token
-        ExternalTokenModel externalTokenModel = new ExternalTokenModel();
-        externalTokenModel.Provider = provider;
-        externalTokenModel.Token = token;
+        if (checkInternetConnection()) {
+            // Creates external token
+            ExternalTokenModel externalTokenModel = new ExternalTokenModel();
+            externalTokenModel.Provider = provider;
+            externalTokenModel.Token = token;
 
-        // Calls API to log user
-        RevalueService service = RevalueServiceGenerator.createService();
-        Call<TokenModel> call = service.ExternalLogin(externalTokenModel);
-        call.enqueue(new Callback<TokenModel>() {
-            @Override
-            public void onResponse(Call<TokenModel> call, Response<TokenModel> response) {
-                // Response is OK, let's authenticate the user
-                if (response.isSuccessful()) {
-                    TokenModel tokenModel = response.body();
+            // Calls API to log user
+            RevalueService service = RevalueServiceGenerator.createService();
+            Call<TokenModel> call = service.ExternalLogin(externalTokenModel);
+            call.enqueue(new Callback<TokenModel>() {
+                @Override
+                public void onResponse(Call<TokenModel> call, Response<TokenModel> response) {
+                    // Response is OK, let's authenticate the user
+                    if (response.isSuccessful()) {
+                        TokenModel tokenModel = response.body();
 
-                    if (tokenModel != null) {
-                        mSessionPreferences.login(
-                                tokenModel.getUserName(),
-                                tokenModel.getAccessToken(),
-                                tokenModel.getAlias(),
-                                tokenModel.getAvatar());
+                        if (tokenModel != null) {
+                            mSessionPreferences.login(
+                                    tokenModel.getUserName(),
+                                    tokenModel.getAccessToken(),
+                                    tokenModel.getAlias(),
+                                    tokenModel.getAvatar());
 
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                        startActivity(intent);
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                        }
+                    } else {
+                        // Parse and display error
+                        mLabelStatus.setText(NetworkUtilities.parseError(LoginActivity.this, response));
                     }
-                }
-                else {
-                    // Parse and display error
-                    mLabelSignInStatus.setText(NetworkUtilities.parseError(LoginActivity.this, response));
+
+                    if (mProgressDialog != null) mProgressDialog.dismiss();
                 }
 
-                if (mProgressDialog != null) mProgressDialog.dismiss();
-            }
+                @Override
+                public void onFailure(Call<TokenModel> call, Throwable t) {
+                    mLabelStatus.setText(R.string.call_failed);
+                    if (mProgressDialog != null) mProgressDialog.dismiss();
+                }
+            });
+        }
+    }
 
-            @Override
-            public void onFailure(Call<TokenModel> call, Throwable t) {
-                mLabelSignInStatus.setText(getString(R.string.call_failed));
-                if (mProgressDialog != null) mProgressDialog.dismiss();
-            }
-        });
+    private boolean checkInternetConnection() {
+        if (!NetworkUtilities.checkInternetConnection(this)) {
+            mLabelStatus.setText(R.string.check_connection);
+            return false;
+        }
+
+        return true;
     }
 
     private class FacebookCallbacks implements FacebookCallback<LoginResult> {
@@ -181,19 +203,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
         @Override
         public void onCancel() {
-            mLabelSignInStatus.setText(getString(R.string.login_canceled));
+            mLabelStatus.setText(R.string.login_canceled);
         }
 
         @Override
         public void onError(FacebookException error) {
-            mLabelSignInStatus.setText(getString(R.string.login_failed));
+            mLabelStatus.setText(R.string.login_failed);
         }
     }
 
     private class GoogleCallbacks implements GoogleApiClient.OnConnectionFailedListener {
         @Override
         public void onConnectionFailed(ConnectionResult connectionResult) {
-            mLabelSignInStatus.setText(getString(R.string.login_failed));
+            mLabelStatus.setText(R.string.login_failed);
         }
     }
 }

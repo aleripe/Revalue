@@ -7,6 +7,8 @@ import android.text.TextUtils;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
+import com.google.android.gms.analytics.GoogleAnalytics;
+import com.google.android.gms.analytics.Tracker;
 
 import java.util.List;
 
@@ -28,6 +30,7 @@ public class RevalueApplication extends Application {
     private Double mLocationLatitude = null;
     private Double mLocationLongitude = null;
     private List<CategoryModel> mCategories = null;
+    private Tracker mTracker;
 
     @Override
     public void onCreate() {
@@ -142,6 +145,14 @@ public class RevalueApplication extends Application {
         }
 
         return null;
+    }
+
+    synchronized public Tracker getTracker() {
+        if (mTracker == null) {
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
+            mTracker = analytics.newTracker(R.xml.global_tracker);
+        }
+        return mTracker;
     }
 
     private void initizalize() {

@@ -2,6 +2,7 @@ package it.returntrue.revalue.api;
 
 import java.io.IOException;
 
+import it.returntrue.revalue.BuildConfig;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -10,7 +11,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RevalueServiceGenerator {
-    private static final String BASE_URL = "http://10.0.2.2/Revalue.Api/api/";
+    private static final String BASE_URL = BuildConfig.API_SERVICE_BASE_URL;
     private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
     private static Retrofit.Builder builder = new Retrofit.Builder()

@@ -24,18 +24,24 @@
         android:layout_centerHorizontal="true">
         <Button
             android:id="@+id/button_google_sign_in"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
+            android:layout_width="250dp"
+            android:layout_height="50dp"
             android:text="@string/sign_in_with_google"
+            android:background="@drawable/common_google_signin_btn_text_light_normal"
             android:layout_gravity="center_horizontal"/>
         <Button
             android:id="@+id/button_facebook_sign_in"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="244dp"
+            android:layout_height="45dp"
             android:text="@string/sign_in_with_facebook"
-            android:layout_gravity="center_horizontal"/>
+            android:layout_gravity="center_horizontal"
+            android:textColor="#FFF"
+            android:background="@color/com_facebook_blue"
+            android:paddingLeft="12dp"
+            android:drawableLeft="@drawable/com_facebook_button_icon_white"
+            android:layout_marginTop="8dp"/>
         <TextView
-            android:id="@+id/label_sign_in_status"
+            android:id="@+id/label_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
