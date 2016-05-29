@@ -95,6 +95,12 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        // Prevents from going back to MainActivity
+        moveTaskToBack(true);
+    }
+
     private void setupFacebook() {
         // Creates and registers Facebook callback manager
         mCallbackManager = CallbackManager.Factory.create();
@@ -166,6 +172,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
+                            finish();
                         }
                     } else {
                         // Parse and display error
