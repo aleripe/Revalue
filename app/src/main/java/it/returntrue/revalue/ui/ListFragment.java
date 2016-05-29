@@ -110,6 +110,12 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     }
 
     @Override
+    public void updateItems(@MainFragment.ItemMode Integer itemMode) {
+        mSwipeRefreshLayout.setRefreshing(true);
+        super.updateItems(itemMode);
+    }
+
+    @Override
     public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
         if (data != null) {
             loadItems(data);

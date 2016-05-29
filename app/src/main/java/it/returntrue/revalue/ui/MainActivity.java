@@ -378,11 +378,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_map);
 
         if (listFragment != null) {
-            ((MainFragment)listFragment).updateItems(mItemMode);
+            ((ListFragment)listFragment).updateItems(mItemMode);
         }
 
         if (mapFragment != null) {
-            ((MainFragment)mapFragment).updateItems(mItemMode);
+            ((MapFragment)mapFragment).updateItems(mItemMode);
         }
     }
 
