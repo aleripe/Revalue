@@ -9,19 +9,27 @@ import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.utilities.CursorUtilities;
 
 public final class MessageData {
-	public static Boolean getIsSent(Cursor cursor) {
-		return CursorUtilities.getBoolean(cursor, MessageEntry.COLUMN_ISSENT);
+	public static Integer getItemId(Cursor cursor) {
+		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_ITEM_ID);
 	}
 
-	public static Boolean getIsReceived(Cursor cursor) {
-		return CursorUtilities.getBoolean(cursor, MessageEntry.COLUMN_ISRECEIVED);
+	public static Integer getUserId(Cursor cursor) {
+		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_USER_ID);
 	}
 
 	public static String getText(Cursor cursor) {
 		return CursorUtilities.getString(cursor, MessageEntry.COLUMN_TEXT);
 	}
 
-	public static String getDate(Cursor cursor) {
-		return CursorUtilities.getString(cursor, MessageEntry.COLUMN_DATE);
+	public static Boolean getIsSent(Cursor cursor) {
+		return CursorUtilities.getBoolean(cursor, MessageEntry.COLUMN_IS_SENT);
+	}
+
+	public static Boolean getIsReceived(Cursor cursor) {
+		return CursorUtilities.getBoolean(cursor, MessageEntry.COLUMN_IS_RECEIVED);
+	}
+
+	public static String getDispatchDate(Cursor cursor) {
+		return CursorUtilities.getString(cursor, MessageEntry.COLUMN_DISPATCH_DATE);
 	}
 }

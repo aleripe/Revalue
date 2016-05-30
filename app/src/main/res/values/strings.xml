@@ -84,4 +84,5 @@
     <string name="choose_from_library">Choose from library</string>
     <string name="add_picture">Add picture</string>
     <string name="item_saved">Item saved</string>
+    <string name="enter_message">Enter your message</string>
 </resources>

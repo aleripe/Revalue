@@ -93,19 +93,21 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
                 //Creates message
                 MessageModel messageModel = new MessageModel();
-                messageModel.UserId = mUserId;
+                messageModel.UserId = mSessionPreferences.getUserId();
                 messageModel.ItemId = mId;
                 messageModel.Text = mTextMessage.getText().toString();
                 messageModel.Date = calendar.getTimeInMillis();
 
                 ContentValues values = new ContentValues(2);
-                values.put(MessageEntry.COLUMN_ITEM_ID, mId);
-                values.put(MessageEntry.COLUMN_ISSENT, 1);
-                values.put(MessageEntry.COLUMN_ISRECEIVED, 0);
+                values.put(MessageEntry.COLUMN_ITEM_ID, messageModel.ItemId);
+                values.put(MessageEntry.COLUMN_USER_ID, messageModel.UserId);
                 values.put(MessageEntry.COLUMN_TEXT, messageModel.Text);
-                values.put(MessageEntry.COLUMN_DATE, messageModel.Date);
+                values.put(MessageEntry.COLUMN_IS_SENT, 1);
+                values.put(MessageEntry.COLUMN_IS_RECEIVED, 0);
+                values.put(MessageEntry.COLUMN_DISPATCH_DATE, messageModel.Date);
                 getActivity().getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
+                mTextMessage.setText("");
                 mButtonSend.setEnabled(false);
 
                 // Calls API to send message
@@ -114,13 +116,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 call.enqueue(new Callback<Void>() {
                     @Override
                     public void onResponse(Call<Void> call, Response<Void> response) {
-                        mTextMessage.setText(null);
                         mButtonSend.setEnabled(true);
                     }
 
                     @Override
                     public void onFailure(Call<Void> call, Throwable t) {
-                        mTextMessage.setText(null);
                         mButtonSend.setEnabled(true);
                     }
                 });
@@ -138,7 +138,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 null,
                 MessageEntry.COLUMN_ITEM_ID + " = ?",
                 new String[] { String.valueOf(mId) },
-                MessageEntry.COLUMN_DATE + " ASC");
+                MessageEntry.COLUMN_DISPATCH_DATE + " ASC");
     }
 
     @Override

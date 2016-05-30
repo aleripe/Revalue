@@ -165,7 +165,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
                         if (tokenModel != null) {
                             mSessionPreferences.login(
-                                    tokenModel.getUserName(),
+                                    tokenModel.getUserId(),
+                                    tokenModel.getUsername(),
                                     tokenModel.getAccessToken(),
                                     tokenModel.getAlias(),
                                     tokenModel.getAvatar());

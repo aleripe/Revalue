@@ -4,9 +4,12 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class TokenModel {
-    @SerializedName("userName")
+    @SerializedName("userId")
     @Expose
-    private String userName;
+    private Integer userId;
+    @SerializedName("username")
+    @Expose
+    private String username;
     @SerializedName("access_token")
     @Expose
     private String accessToken;
@@ -17,12 +20,20 @@ public class TokenModel {
     @Expose
     private String avatar;
 
-    public String getUserName() {
-        return userName;
+    public Integer getUserId() {
+        return userId;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserId(Integer userId) {
+        this.userId = userId;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getAccessToken() {

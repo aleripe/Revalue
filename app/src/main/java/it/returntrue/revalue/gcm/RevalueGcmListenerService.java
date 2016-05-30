@@ -23,15 +23,17 @@ public class RevalueGcmListenerService extends GcmListenerService {
     @Override
     public void onMessageReceived(String from, Bundle data) {
         int id = Integer.parseInt(data.getString("id"));
+        int userId = Integer.parseInt(data.getString("userId"));
         String text = data.getString("text");
         long date = Long.parseLong(data.getString("date"));
 
         ContentValues values = new ContentValues(2);
         values.put(MessageEntry.COLUMN_ITEM_ID, id);
-        values.put(MessageEntry.COLUMN_ISSENT, 0);
-        values.put(MessageEntry.COLUMN_ISRECEIVED, 1);
+        values.put(MessageEntry.COLUMN_USER_ID, userId);
         values.put(MessageEntry.COLUMN_TEXT, text);
-        values.put(MessageEntry.COLUMN_DATE, date);
+        values.put(MessageEntry.COLUMN_IS_SENT, 0);
+        values.put(MessageEntry.COLUMN_IS_RECEIVED, 1);
+        values.put(MessageEntry.COLUMN_DISPATCH_DATE, date);
         getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
         sendNotification("New message received", text, date);

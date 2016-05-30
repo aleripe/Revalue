@@ -17,10 +17,11 @@ public class MessageDbHelper extends SQLiteOpenHelper {
         "CREATE TABLE " + MessageEntry.TABLE + " (" +
             MessageEntry._ID + " INTEGER PRIMARY KEY ON CONFLICT REPLACE," +
             MessageEntry.COLUMN_ITEM_ID + " INTEGER NOT NULL," +
-            MessageEntry.COLUMN_ISSENT + " INTEGER NOT NULL," +
-            MessageEntry.COLUMN_ISRECEIVED + " INTEGER NOT NULL," +
+            MessageEntry.COLUMN_USER_ID + " INTEGER NOT NULL," +
             MessageEntry.COLUMN_TEXT + " TEXT NOT NULL," +
-            MessageEntry.COLUMN_DATE + " TEXT NOT NULL" +
+            MessageEntry.COLUMN_IS_SENT + " INTEGER NOT NULL," +
+            MessageEntry.COLUMN_IS_RECEIVED + " INTEGER NOT NULL," +
+            MessageEntry.COLUMN_DISPATCH_DATE + " TEXT NOT NULL" +
         ")";
 
     public MessageDbHelper(Context context) {

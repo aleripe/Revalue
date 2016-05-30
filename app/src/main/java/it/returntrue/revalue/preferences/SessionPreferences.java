@@ -9,6 +9,7 @@ import android.text.TextUtils;
  */
 public class SessionPreferences {
     private static final String PREFERENCES_SESSION = "it.returntrue.revalue.PREFERENCES_FILE_SESSION";
+    private static final String KEY_USER_ID = "user_id";
     private static final String KEY_USERNAME = "username";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_ALIAS = "alias";
@@ -18,6 +19,14 @@ public class SessionPreferences {
 
     public SessionPreferences(Context context) {
         mPreferences = context.getSharedPreferences(PREFERENCES_SESSION, Context.MODE_PRIVATE);
+    }
+
+    public void setUserId(int userId) {
+        mPreferences.edit().putInt(KEY_USER_ID, userId).apply();
+    }
+
+    public int getUserId() {
+        return mPreferences.getInt(KEY_USER_ID, 0);
     }
 
     public void setUsername(String username) {
@@ -56,7 +65,8 @@ public class SessionPreferences {
         return !TextUtils.isEmpty(getToken());
     }
 
-    public void login(String username, String token, String alias, String avatar) {
+    public void login(int userId, String username, String token, String alias, String avatar) {
+        setUserId(userId);
         setUsername(username);
         setToken(token);
         setAlias(alias);
