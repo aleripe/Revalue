@@ -20,6 +20,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -458,9 +459,9 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static class DetailAsyncTaskLoader extends AsyncTaskLoader<ItemModel> {
         private final RevalueApplication mApplication;
         private final SessionPreferences mSessionPreferences;
-        private final long mId;
+        private final int mId;
 
-        public DetailAsyncTaskLoader(RevalueApplication application, long id) {
+        public DetailAsyncTaskLoader(RevalueApplication application, int id) {
             super(application);
             mApplication = application;
             mSessionPreferences = new SessionPreferences(application);
@@ -470,13 +471,15 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         @Override
         public ItemModel loadInBackground() {
             RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-            Call<ItemModel> call = service.GetItem(mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude(), mId);
+            Call<ItemModel> call = service.GetItem(mId,
+                    mApplication.getLocationLatitude(),
+                    mApplication.getLocationLongitude());
 
             try {
                 return call.execute().body();
             }
             catch (IOException e) {
+                Log.e(DetailFragment.class.getSimpleName(), e.toString());
                 return null;
             }
         }

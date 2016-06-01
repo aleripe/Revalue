@@ -10,56 +10,56 @@ import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface RevalueService {
-    @POST("Account/ExternalLogin")
+    @POST("accounts/login/")
     Call<TokenModel> ExternalLogin(@Body ExternalTokenModel externalTokenModel);
 
-    @POST("Account/UpdateGcmRegistrationId")
-    Call<Void> UpdateGcmRegistrationId(@Body GcmTokenModel gcmTokenModel);
+    @POST("accounts/update/")
+    Call<Void> UpdateGcmToken(@Body GcmTokenModel gcmTokenModel);
 
-    @GET("Items/GetNearestItems/{latitude}/{longitude}/")
+    @GET("categories/list/")
+    Call<List<CategoryModel>> GetAllCategories();
+
+    @GET("items/list/nearest/{latitude}/{longitude}/")
     Call<List<ItemModel>> GetNearestItems(@Path("latitude") double latitude,
                                           @Path("longitude") double longitude,
                                           @Query("filterTitle") String filterTitle,
                                           @Query("filterCategory") Integer filterCategory,
                                           @Query("filterDistance") Integer filterDistance);
 
-    @GET("Items/GetFavoriteItems/{latitude}/{longitude}/")
+    @GET("items/list/favorite/{latitude}/{longitude}/")
     Call<List<ItemModel>> GetFavoriteItems(@Path("latitude") double latitude,
                                            @Path("longitude") double longitude,
                                            @Query("filterTitle") String filterTitle,
                                            @Query("filterCategory") Integer filterCategory,
                                            @Query("filterDistance") Integer filterDistance);
 
-    @GET("Items/GetPersonalItems/{latitude}/{longitude}/")
+    @GET("items/list/personal/{latitude}/{longitude}/")
     Call<List<ItemModel>> GetPersonalItems(@Path("latitude") double latitude,
                                            @Path("longitude") double longitude,
                                            @Query("filterTitle") String filterTitle,
                                            @Query("filterCategory") Integer filterCategory,
                                            @Query("filterDistance") Integer filterDistance);
 
-    @GET("Items/GetItem/{latitude}/{longitude}/{id}")
-    Call<ItemModel> GetItem(@Path("latitude") double latitude,
-                            @Path("longitude") double longitude,
-                            @Path("id") long id);
+    @GET("items/single/{id}/{latitude}/{longitude}/")
+    Call<ItemModel> GetItem(@Path("id") int id,
+                            @Path("latitude") double latitude,
+                            @Path("longitude") double longitude);
 
-    @POST("Items/InsertItem")
+    @POST("items/create")
     Call<Void> InsertItem(@Body ItemModel itemModel);
 
-    @GET("Items/SetItemAsRevalued/{id}")
+    @POST("items/single/{id}/revalue/")
     Call<Void> SetItemAsRevalued(@Path("id") int id);
 
-    @GET("Items/SetItemAsRemoved/{id}")
+    @POST("items/single/{id}/remove/")
     Call<Void> SetItemAsRemoved(@Path("id") int id);
 
-    @POST("Messages/SendMessage")
-    Call<Void> SendMessage(@Body MessageModel messageModel);
-
-    @GET("Items/AddFavorite/{id}")
+    @POST("items/single/{id}/star/")
     Call<Void> AddFavorite(@Path("id") int id);
 
-    @GET("Items/RemoveFavorite/{id}")
+    @POST("items/single/{id}/unstar/")
     Call<Void> RemoveFavorite(@Path("id") int id);
 
-    @GET("Items/GetAllCategories")
-    Call<List<CategoryModel>> GetAllCategories();
+    @POST("messages/send")
+    Call<Void> SendMessage(@Body MessageModel messageModel);
 }

@@ -154,9 +154,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     private static class DetailAsyncTaskLoader extends AsyncTaskLoader<ItemModel> {
         private final RevalueApplication mApplication;
         private final SessionPreferences mSessionPreferences;
-        private final long mId;
+        private final int mId;
 
-        public DetailAsyncTaskLoader(RevalueApplication application, long id) {
+        public DetailAsyncTaskLoader(RevalueApplication application, int id) {
             super(application);
             mApplication = application;
             mSessionPreferences = new SessionPreferences(application);
@@ -166,8 +166,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         @Override
         public ItemModel loadInBackground() {
             RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-            Call<ItemModel> call = service.GetItem(mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude(), mId);
+            Call<ItemModel> call = service.GetItem(mId,
+                    mApplication.getLocationLatitude(),
+                    mApplication.getLocationLongitude());
 
             try {
                 return call.execute().body();

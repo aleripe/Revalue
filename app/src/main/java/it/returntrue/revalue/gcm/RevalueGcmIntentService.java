@@ -41,7 +41,7 @@ public class RevalueGcmIntentService extends IntentService {
 
             // Calls API to update Gcm registration id (token)
             RevalueService service = RevalueServiceGenerator.createService();
-            Call<Void> call = service.UpdateGcmRegistrationId(gcmTokenModel);
+            Call<Void> call = service.UpdateGcmToken(gcmTokenModel);
             call.execute();
 
             //sharedPreferences.edit().putBoolean(Config.SENT_TOKEN_TO_SERVER, true).apply();
