@@ -7,25 +7,22 @@ import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import java.io.IOException;
 import java.util.GregorianCalendar;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.adapters.MessagesAdapter;
-import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.api.MessageModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
@@ -89,6 +86,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         mButtonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (TextUtils.isEmpty(mTextMessage.getText())) return;
+
                 GregorianCalendar calendar = new GregorianCalendar();
 
                 //Creates message
@@ -149,33 +148,5 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mMessagesAdapter.setCursor(null);
-    }
-
-    private static class DetailAsyncTaskLoader extends AsyncTaskLoader<ItemModel> {
-        private final RevalueApplication mApplication;
-        private final SessionPreferences mSessionPreferences;
-        private final int mId;
-
-        public DetailAsyncTaskLoader(RevalueApplication application, int id) {
-            super(application);
-            mApplication = application;
-            mSessionPreferences = new SessionPreferences(application);
-            mId = id;
-        }
-
-        @Override
-        public ItemModel loadInBackground() {
-            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-            Call<ItemModel> call = service.GetItem(mId,
-                    mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude());
-
-            try {
-                return call.execute().body();
-            }
-            catch (IOException e) {
-                return null;
-            }
-        }
     }
 }

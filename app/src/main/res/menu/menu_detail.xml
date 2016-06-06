@@ -4,22 +4,36 @@
     tools:context=".ui.DetailActivity">
     <item
         android:id="@+id/action_add_favorite"
-        android:orderInCategory="99"
+        android:orderInCategory="96"
         android:title="@string/action_add_favorite"
         android:icon="@drawable/ic_favorite_border_white_24dp"
         android:visible="false"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_remove_favorite"
-        android:orderInCategory="99"
+        android:orderInCategory="97"
         android:title="@string/action_remove_favorite"
         android:icon="@drawable/ic_favorite_white_24dp"
         android:visible="false"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_share"
-        android:orderInCategory="100"
+        android:orderInCategory="98"
         android:title="@string/action_share"
         android:icon="@drawable/ic_share_white_24dp"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_set_removed"
+        android:orderInCategory="99"
+        android:title="@string/action_set_removed"
+        android:icon="@drawable/ic_close_white_24dp"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/action_set_revalued"
+        android:orderInCategory="100"
+        android:title="@string/action_set_revalued"
+        android:icon="@drawable/ic_check_white_24dp"
+        android:visible="false"
+        app:showAsAction="ifRoom" />
 </menu>

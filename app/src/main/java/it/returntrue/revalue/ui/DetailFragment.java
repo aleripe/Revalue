@@ -1,7 +1,6 @@
 package it.returntrue.revalue.ui;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -63,7 +62,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private int mId;
-    private OnSetFabVisibilityListener mSetFabVisibilityListener;
     private RevalueApplication mApplication;
     private Tracker mTracker;
     private SessionPreferences mSessionPreferences;
@@ -81,12 +79,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
 
     public static Fragment newInstance() {
         return new DetailFragment();
-    }
-
-    public interface OnSetFabVisibilityListener {
-        public void onSetChatFab(boolean isOwner);
-        public void onSetRevalueFab(boolean isOwner);
-        public void onSetRemoveFab(boolean isOwner);
     }
 
     @Override
@@ -137,18 +129,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            mSetFabVisibilityListener = (OnSetFabVisibilityListener)context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() +
-                    " must implement OnSetFabVisibilityListener");
-        }
-    }
-
-    @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.menu_detail, menu);
@@ -164,6 +144,12 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                 return true;
             case R.id.action_remove_favorite:
                 removeFavorite();
+                return true;
+            case R.id.action_set_revalued:
+                setItemAsRevalued();
+                return true;
+            case R.id.action_set_removed:
+                setItemAsRemoved();
                 return true;
             case R.id.action_share:
                 requestShare();
@@ -243,11 +229,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             } else {
                 mMapFragment.getView().setVisibility(View.GONE);
             }
-
-            // Shows appropriate FABs
-            mSetFabVisibilityListener.onSetChatFab(mItemModel.IsOwned);
-            mSetFabVisibilityListener.onSetRevalueFab(mItemModel.IsOwned);
-            mSetFabVisibilityListener.onSetRemoveFab(mItemModel.IsOwned);
         }
     }
 
@@ -338,6 +319,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
             intent.putExtra(ChatActivity.EXTRA_ID, mItemModel.Id);
             intent.putExtra(ChatActivity.EXTRA_USER_ID, mItemModel.UserId);
             intent.putExtra(ChatActivity.EXTRA_USER_ALIAS, mItemModel.UserAlias);
+            intent.putExtra(ChatActivity.EXTRA_IS_OWNED, mItemModel.IsOwned);
             startActivity(intent);
         }
     }
@@ -414,6 +396,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         if (mMenu != null && mItemModel != null) {
             mMenu.findItem(R.id.action_add_favorite).setVisible(!mItemModel.IsOwned && !mItemModel.IsFavorite);
             mMenu.findItem(R.id.action_remove_favorite).setVisible(!mItemModel.IsOwned && mItemModel.IsFavorite);
+            mMenu.findItem(R.id.action_set_revalued).setVisible(mItemModel.IsOwned);
+            mMenu.findItem(R.id.action_set_removed).setVisible(mItemModel.IsOwned);
         }
     }
 

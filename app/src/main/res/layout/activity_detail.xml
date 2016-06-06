@@ -44,28 +44,5 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
-        android:visibility="invisible"
         android:src="@drawable/ic_mail_white_24dp" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_revalue"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        android:visibility="invisible"
-        android:src="@drawable/ic_check_white_24dp" />
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_remove"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_gravity="top|end"
-        android:layout_marginBottom="80dp"
-        android:src="@drawable/ic_close_white_24dp"
-        android:visibility="invisible"
-        app:backgroundTint="@color/colorDark"
-        app:layout_anchor="@id/fab_revalue"
-        app:layout_anchorGravity="top" />
 </android.support.design.widget.CoordinatorLayout>

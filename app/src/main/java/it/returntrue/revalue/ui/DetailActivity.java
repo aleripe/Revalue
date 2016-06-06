@@ -12,14 +12,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
-public class DetailActivity extends AppCompatActivity implements DetailFragment.OnSetFabVisibilityListener {
+public class DetailActivity extends AppCompatActivity {
     public static final String EXTRA_ID = "id";
 
     @Bind(R.id.toolbar) Toolbar mToolbar;
     @Bind(R.id.layout_multipane) @Nullable LinearLayout mLayoutMultipane;
     @Bind(R.id.fab_chat) FloatingActionButton mFabChat;
-    @Bind(R.id.fab_revalue) FloatingActionButton mFabRevalue;
-    @Bind(R.id.fab_remove) FloatingActionButton mFabRemove;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,39 +41,5 @@ public class DetailActivity extends AppCompatActivity implements DetailFragment.
                 detailFragment.goToChatActivity();
             }
         });
-
-        // Sets revalue floating action button
-        mFabRevalue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                detailFragment.setItemAsRevalued();
-            }
-        });
-
-        // Sets remove floating action button
-        mFabRemove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                detailFragment.setItemAsRemoved();
-            }
-        });
-    }
-
-    @Override
-    public void onSetChatFab(boolean isOwner) {
-        // Sets floating action buttons visibility
-        mFabChat.setVisibility((mLayoutMultipane != null || isOwner) ? View.INVISIBLE : View.VISIBLE);
-    }
-
-    @Override
-    public void onSetRevalueFab(boolean isOwner) {
-        // Sets floating action buttons visibility
-        mFabRevalue.setVisibility(isOwner ? View.VISIBLE : View.INVISIBLE);
-    }
-
-    @Override
-    public void onSetRemoveFab(boolean isOwner) {
-        // Sets floating action buttons visibility
-        mFabRemove.setVisibility(isOwner ? View.VISIBLE : View.INVISIBLE);
     }
 }

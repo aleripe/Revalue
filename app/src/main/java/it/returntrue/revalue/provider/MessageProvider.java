@@ -20,11 +20,15 @@ import it.returntrue.revalue.data.MessageDbHelper;
 public class MessageProvider extends ContentProvider {
     public static final String CONTENT_AUTHORITY = "it.returntrue.revalue.provider";
     public static final Uri CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    public static final String PATH_CHAT = "chat";
     public static final String PATH_MESSAGE = "message";
+    public static final String CHAT_DIR_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
+            "vnd." + CONTENT_AUTHORITY + "." + PATH_CHAT;
     public static final String MESSAGE_DIR_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "vnd." + CONTENT_AUTHORITY + "." + PATH_MESSAGE;
 
-    private static final int MESSAGE = 100;
+    private static final int CHAT = 100;
+    private static final int MESSAGE = 200;
     private static final UriMatcher mUriMatcher = buildUriMatcher();
 
     private MessageDbHelper mMessageDbHelper;
@@ -39,6 +43,8 @@ public class MessageProvider extends ContentProvider {
     @Override
     public String getType(Uri uri) {
         switch (mUriMatcher.match(uri)) {
+            case CHAT:
+                return CHAT_DIR_CONTENT_TYPE;
             case MESSAGE:
                 return MESSAGE_DIR_CONTENT_TYPE;
             default:
@@ -53,9 +59,18 @@ public class MessageProvider extends ContentProvider {
         Cursor cursor;
 
         switch (mUriMatcher.match(uri)) {
+            case CHAT:
+                cursor = mMessageDbHelper.getReadableDatabase().rawQuery(
+                        "SELECT * FROM " + MessageEntry.TABLE + " WHERE " + MessageEntry._ID +
+                        " IN (SELECT MAX(" + MessageEntry._ID + ") FROM " + MessageEntry.TABLE +
+                        " WHERE " + MessageEntry.COLUMN_ITEM_ID + " = ? GROUP BY " + MessageEntry.COLUMN_USER_ID +
+                        ") ORDER BY " + MessageEntry.COLUMN_DISPATCH_DATE + " DESC",
+                        selectionArgs
+                );
+                break;
             case MESSAGE:
                 cursor = mMessageDbHelper.getReadableDatabase().query(MessageEntry.TABLE,
-                        null, null, null, null, null, null);
+                        null, selection, selectionArgs, null, null, sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);
@@ -170,6 +185,12 @@ public class MessageProvider extends ContentProvider {
         return totalRowCount;
     }
 
+    public static Uri buildChatUri() {
+        return CONTENT_URI.buildUpon()
+                .appendPath(PATH_CHAT)
+                .build();
+    }
+
     public static Uri buildMessageUri() {
         return CONTENT_URI.buildUpon()
                 .appendPath(PATH_MESSAGE)
@@ -185,6 +206,7 @@ public class MessageProvider extends ContentProvider {
 
     private static UriMatcher buildUriMatcher() {
         final UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
+        uriMatcher.addURI(CONTENT_AUTHORITY, PATH_CHAT, CHAT);
         uriMatcher.addURI(CONTENT_AUTHORITY, PATH_MESSAGE, MESSAGE);
         return uriMatcher;
     }
