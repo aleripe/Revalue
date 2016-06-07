@@ -13,20 +13,16 @@ public final class MessageData {
 		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_ITEM_ID);
 	}
 
-	public static Integer getUserId(Cursor cursor) {
-		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_USER_ID);
+	public static Integer getSenderId(Cursor cursor) {
+		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_SENDER_ID);
+	}
+
+	public static Integer getReceiverId(Cursor cursor) {
+		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_RECEIVER_ID);
 	}
 
 	public static String getText(Cursor cursor) {
 		return CursorUtilities.getString(cursor, MessageEntry.COLUMN_TEXT);
-	}
-
-	public static Boolean getIsSent(Cursor cursor) {
-		return CursorUtilities.getBoolean(cursor, MessageEntry.COLUMN_IS_SENT);
-	}
-
-	public static Boolean getIsReceived(Cursor cursor) {
-		return CursorUtilities.getBoolean(cursor, MessageEntry.COLUMN_IS_RECEIVED);
 	}
 
 	public static String getDispatchDate(Cursor cursor) {

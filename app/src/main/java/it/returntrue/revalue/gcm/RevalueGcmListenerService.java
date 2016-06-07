@@ -14,6 +14,7 @@ import com.google.android.gms.gcm.GcmListenerService;
 
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
+import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.MainActivity;
 
@@ -22,6 +23,9 @@ public class RevalueGcmListenerService extends GcmListenerService {
 
     @Override
     public void onMessageReceived(String from, Bundle data) {
+        // Creates preferences managers
+        SessionPreferences sessionPreferences = new SessionPreferences(this);
+
         int id = Integer.parseInt(data.getString("id"));
         int userId = Integer.parseInt(data.getString("userId"));
         String text = data.getString("text");
@@ -29,10 +33,9 @@ public class RevalueGcmListenerService extends GcmListenerService {
 
         ContentValues values = new ContentValues(2);
         values.put(MessageEntry.COLUMN_ITEM_ID, id);
-        values.put(MessageEntry.COLUMN_USER_ID, userId);
+        values.put(MessageEntry.COLUMN_SENDER_ID, userId);
+        values.put(MessageEntry.COLUMN_RECEIVER_ID, sessionPreferences.getUserId());
         values.put(MessageEntry.COLUMN_TEXT, text);
-        values.put(MessageEntry.COLUMN_IS_SENT, 0);
-        values.put(MessageEntry.COLUMN_IS_RECEIVED, 1);
         values.put(MessageEntry.COLUMN_DISPATCH_DATE, date);
         getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 

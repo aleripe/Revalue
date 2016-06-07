@@ -79,7 +79,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                 public void onClick(View view) {
                     if (mOnItemClickListener != null) {
                         mCursor.moveToPosition(getAdapterPosition());
-                        mOnItemClickListener.onItemClick(view, MessageData.getUserId(mCursor));
+                        mOnItemClickListener.onItemClick(view, MessageData.getSenderId(mCursor));
                     }
                 }
             });

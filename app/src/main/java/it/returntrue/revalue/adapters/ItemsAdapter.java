@@ -68,8 +68,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
         holder.imageRemoveFavorite.setVisibility(!itemModel.IsOwned && itemModel.IsFavorite ?
                 View.VISIBLE : View.GONE);
         holder.textTitle.setText(itemModel.Title);
-        holder.textLocation.setText(itemModel.City + " / " +
-                (int)(itemModel.Distance / 1000) + " km");
+        holder.textLocation.setText(itemModel.City + " / " + (int)(itemModel.Distance / 1000) + " km");
     }
 
     @Override

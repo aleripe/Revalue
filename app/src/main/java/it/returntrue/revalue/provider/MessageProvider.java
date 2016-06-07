@@ -60,13 +60,20 @@ public class MessageProvider extends ContentProvider {
 
         switch (mUriMatcher.match(uri)) {
             case CHAT:
-                cursor = mMessageDbHelper.getReadableDatabase().rawQuery(
-                        "SELECT * FROM " + MessageEntry.TABLE + " WHERE " + MessageEntry._ID +
-                        " IN (SELECT MAX(" + MessageEntry._ID + ") FROM " + MessageEntry.TABLE +
-                        " WHERE " + MessageEntry.COLUMN_ITEM_ID + " = ? GROUP BY " + MessageEntry.COLUMN_USER_ID +
-                        ") ORDER BY " + MessageEntry.COLUMN_DISPATCH_DATE + " DESC",
-                        selectionArgs
-                );
+                String query = String.format(
+                        "SELECT * FROM %s WHERE %s IN (SELECT MAX(%s) FROM %s WHERE %s = ? " +
+                                "GROUP BY CASE WHEN %s < %s THEN %s ELSE %s END, " +
+                                "CASE WHEN %s < %s THEN %s ELSE %s END) " +
+                                "ORDER BY %s DESC",
+                        MessageEntry.TABLE, MessageEntry.COLUMN_DISPATCH_DATE,
+                        MessageEntry.COLUMN_DISPATCH_DATE, MessageEntry.TABLE,
+                        MessageEntry.COLUMN_ITEM_ID, MessageEntry.COLUMN_SENDER_ID,
+                        MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_SENDER_ID,
+                        MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_SENDER_ID,
+                        MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_SENDER_ID,
+                        MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_DISPATCH_DATE);
+
+                cursor = mMessageDbHelper.getReadableDatabase().rawQuery(query, selectionArgs);
                 break;
             case MESSAGE:
                 cursor = mMessageDbHelper.getReadableDatabase().query(MessageEntry.TABLE,

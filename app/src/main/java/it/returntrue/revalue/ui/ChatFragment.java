@@ -71,7 +71,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         ButterKnife.bind(this, getView());
 
         // Creates adapter for messages
-        mMessagesAdapter = new MessagesAdapter(getContext());
+        mMessagesAdapter = new MessagesAdapter(getContext(), mSessionPreferences);
 
         // Creates layout manager
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
@@ -92,17 +92,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
                 //Creates message
                 MessageModel messageModel = new MessageModel();
-                messageModel.UserId = mSessionPreferences.getUserId();
+                messageModel.UserId = mUserId;
                 messageModel.ItemId = mId;
                 messageModel.Text = mTextMessage.getText().toString();
                 messageModel.Date = calendar.getTimeInMillis();
 
                 ContentValues values = new ContentValues(2);
                 values.put(MessageEntry.COLUMN_ITEM_ID, messageModel.ItemId);
-                values.put(MessageEntry.COLUMN_USER_ID, messageModel.UserId);
+                values.put(MessageEntry.COLUMN_SENDER_ID, mSessionPreferences.getUserId());
+                values.put(MessageEntry.COLUMN_RECEIVER_ID, messageModel.UserId);
                 values.put(MessageEntry.COLUMN_TEXT, messageModel.Text);
-                values.put(MessageEntry.COLUMN_IS_SENT, 1);
-                values.put(MessageEntry.COLUMN_IS_RECEIVED, 0);
                 values.put(MessageEntry.COLUMN_DISPATCH_DATE, messageModel.Date);
                 getActivity().getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
@@ -135,8 +134,18 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         return new CursorLoader(getContext(),
                 MessageProvider.buildMessageUri(),
                 null,
-                MessageEntry.COLUMN_ITEM_ID + " = ?",
-                new String[] { String.valueOf(mId) },
+                MessageEntry.COLUMN_ITEM_ID + " = ?" + "AND (" +
+                        MessageEntry.COLUMN_RECEIVER_ID + " = ? OR " +
+                        MessageEntry.COLUMN_SENDER_ID + " = ?) AND (" +
+                        MessageEntry.COLUMN_RECEIVER_ID + " = ? OR " +
+                        MessageEntry.COLUMN_RECEIVER_ID + " = ?)",
+                new String[] {
+                        String.valueOf(mId),
+                        String.valueOf(mUserId),
+                        String.valueOf(mSessionPreferences.getUserId()),
+                        String.valueOf(mUserId),
+                        String.valueOf(mSessionPreferences.getUserId())
+                },
                 MessageEntry.COLUMN_DISPATCH_DATE + " ASC");
     }
 

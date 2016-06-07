@@ -16,6 +16,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.data.MessageData;
+import it.returntrue.revalue.preferences.SessionPreferences;
 
 /**
  * Adapts data returned from cursor to show in a RecyclerView
@@ -26,10 +27,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
     private static final int ITEM_SENT = 2;
 
     private final Context mContext;
+    private final SessionPreferences mSessionPreferences;
     private Cursor mCursor;
 
-    public MessagesAdapter(Context context) {
+    public MessagesAdapter(Context context, SessionPreferences sessionPreferences) {
         mContext = context;
+        mSessionPreferences = sessionPreferences;
     }
 
     public void setCursor(Cursor cursor) {
@@ -46,11 +49,12 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
     public int getItemViewType(int position) {
         mCursor.moveToPosition(position);
 
-        boolean isSent = MessageData.getIsSent(mCursor);
-        boolean isReceived = MessageData.getIsReceived(mCursor);
+        int userId = mSessionPreferences.getUserId();
+        int senderId = MessageData.getSenderId(mCursor);
+        int receiverId = MessageData.getReceiverId(mCursor);
 
-        if (isReceived) return ITEM_RECEIVED;
-        if (isSent) return ITEM_SENT;
+        if (userId == senderId) return ITEM_SENT;
+        if (userId == receiverId) return ITEM_RECEIVED;
         return super.getItemViewType(position);
     }
 
