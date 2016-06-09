@@ -13,6 +13,6 @@ public final class MessageContract {
         public static final String COLUMN_SENDER_ID = "sender_id";
         public static final String COLUMN_RECEIVER_ID = "receiver_id";
         public static final String COLUMN_TEXT = "text";
-        public static final String COLUMN_DISPATCH_DATE = "date";
+        public static final String COLUMN_DATE = "date";
     }
 }

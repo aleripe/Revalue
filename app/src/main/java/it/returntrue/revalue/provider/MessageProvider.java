@@ -65,13 +65,13 @@ public class MessageProvider extends ContentProvider {
                                 "GROUP BY CASE WHEN %s < %s THEN %s ELSE %s END, " +
                                 "CASE WHEN %s < %s THEN %s ELSE %s END) " +
                                 "ORDER BY %s DESC",
-                        MessageEntry.TABLE, MessageEntry.COLUMN_DISPATCH_DATE,
-                        MessageEntry.COLUMN_DISPATCH_DATE, MessageEntry.TABLE,
+                        MessageEntry.TABLE, MessageEntry.COLUMN_DATE,
+                        MessageEntry.COLUMN_DATE, MessageEntry.TABLE,
                         MessageEntry.COLUMN_ITEM_ID, MessageEntry.COLUMN_SENDER_ID,
                         MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_SENDER_ID,
                         MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_SENDER_ID,
                         MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_SENDER_ID,
-                        MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_DISPATCH_DATE);
+                        MessageEntry.COLUMN_RECEIVER_ID, MessageEntry.COLUMN_DATE);
 
                 cursor = mMessageDbHelper.getReadableDatabase().rawQuery(query, selectionArgs);
                 break;

@@ -20,7 +20,7 @@ public class MessageDbHelper extends SQLiteOpenHelper {
             MessageEntry.COLUMN_SENDER_ID + " INTEGER NOT NULL," +
             MessageEntry.COLUMN_RECEIVER_ID + " INTEGER NOT NULL," +
             MessageEntry.COLUMN_TEXT + " TEXT NOT NULL," +
-            MessageEntry.COLUMN_DISPATCH_DATE + " TEXT NOT NULL" +
+            MessageEntry.COLUMN_DATE + " TEXT NOT NULL" +
         ")";
 
     public MessageDbHelper(Context context) {

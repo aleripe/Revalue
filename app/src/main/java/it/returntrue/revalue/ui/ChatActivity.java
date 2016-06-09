@@ -11,14 +11,15 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 
 public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnItemClickListener {
-    public static final String EXTRA_ID = "id";
+    public static final String EXTRA_ITEM_ID = "item_id";
     public static final String EXTRA_USER_ID = "user_id";
     public static final String EXTRA_USER_ALIAS = "user_alias";
     public static final String EXTRA_IS_OWNED = "is_owned";
 
     private static final String FRAGMENT_CHATS = "chats";
-    private static final String FRAGMENT_CHAT = "chat";
 
+    private int mItemId;
+    private int mUserId;
     private String mUserAlias;
     private Boolean mIsOwned;
 
@@ -35,6 +36,8 @@ public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnI
         ButterKnife.bind(this);
 
         // Gets extra data from intent
+        mItemId = getIntent().getIntExtra(ChatActivity.EXTRA_ITEM_ID, 0);
+        mUserId = getIntent().getIntExtra(ChatActivity.EXTRA_USER_ID, 0);
         mUserAlias = getIntent().getStringExtra(ChatActivity.EXTRA_USER_ALIAS);
         mIsOwned = getIntent().getBooleanExtra(ChatActivity.EXTRA_IS_OWNED, false);
 
@@ -46,13 +49,13 @@ public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnI
         if (mIsOwned) {
             getSupportActionBar().setTitle(R.string.messages);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new ChatsFragment())
+                    .add(R.id.fragment_container, ChatsFragment.newInstance(mItemId))
                     .commit();
         }
         else {
             getSupportActionBar().setTitle(mUserAlias);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, new ChatFragment())
+                    .add(R.id.fragment_container, ChatFragment.newInstance(mItemId, mUserId))
                     .commit();
         }
     }
@@ -69,10 +72,10 @@ public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnI
     }
 
     @Override
-    public void onItemClick(View view, int id) {
+    public void onItemClick(View view, int receiverId) {
         getSupportFragmentManager().beginTransaction()
-                .addToBackStack("ChatsFragment")
-                .replace(R.id.fragment_container, new ChatFragment())
+                .addToBackStack(FRAGMENT_CHATS)
+                .replace(R.id.fragment_container, ChatFragment.newInstance(mItemId, receiverId))
                 .commit();
     }
 }

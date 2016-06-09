@@ -316,7 +316,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void goToChatActivity() {
         if (mItemModel != null) {
             Intent intent = new Intent(getActivity(), ChatActivity.class);
-            intent.putExtra(ChatActivity.EXTRA_ID, mItemModel.Id);
+            intent.putExtra(ChatActivity.EXTRA_ITEM_ID, mItemModel.Id);
             intent.putExtra(ChatActivity.EXTRA_USER_ID, mItemModel.UserId);
             intent.putExtra(ChatActivity.EXTRA_USER_ALIAS, mItemModel.UserAlias);
             intent.putExtra(ChatActivity.EXTRA_IS_OWNED, mItemModel.IsOwned);

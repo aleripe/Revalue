@@ -37,8 +37,9 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     protected static final int LOADER_MESSAGES = 1;
 
     private SessionPreferences mSessionPreferences;
-    private int mId;
-    private int mUserId;
+    private int mItemId;
+    private int mReceiverId;
+    private int mSenderId;
     private MessagesAdapter mMessagesAdapter;
 
     @Bind(R.id.list_messages) RecyclerView mRecyclerView;
@@ -47,8 +48,11 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
     public ChatFragment() { }
 
-    public static Fragment newInstance() {
-        return new ChatFragment();
+    public static Fragment newInstance(int itemId, int receiverId) {
+        ChatFragment chatFragment = new ChatFragment();
+        chatFragment.setItemId(itemId);
+        chatFragment.setReceiverId(receiverId);
+        return chatFragment;
     }
 
     @Override
@@ -63,9 +67,8 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(getContext());
 
-        // Gets extra data from intent
-        mId = getActivity().getIntent().getIntExtra(ChatActivity.EXTRA_ID, 0);
-        mUserId = getActivity().getIntent().getIntExtra(ChatActivity.EXTRA_USER_ID, 0);
+        // Gets extra data from intent or preferences
+        mSenderId = mSessionPreferences.getUserId();
 
         // Binds controls
         ButterKnife.bind(this, getView());
@@ -92,17 +95,17 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
 
                 //Creates message
                 MessageModel messageModel = new MessageModel();
-                messageModel.UserId = mUserId;
-                messageModel.ItemId = mId;
+                messageModel.UserId = mReceiverId;
+                messageModel.ItemId = mItemId;
                 messageModel.Text = mTextMessage.getText().toString();
                 messageModel.Date = calendar.getTimeInMillis();
 
                 ContentValues values = new ContentValues(2);
                 values.put(MessageEntry.COLUMN_ITEM_ID, messageModel.ItemId);
-                values.put(MessageEntry.COLUMN_SENDER_ID, mSessionPreferences.getUserId());
+                values.put(MessageEntry.COLUMN_SENDER_ID, mSenderId);
                 values.put(MessageEntry.COLUMN_RECEIVER_ID, messageModel.UserId);
                 values.put(MessageEntry.COLUMN_TEXT, messageModel.Text);
-                values.put(MessageEntry.COLUMN_DISPATCH_DATE, messageModel.Date);
+                values.put(MessageEntry.COLUMN_DATE, messageModel.Date);
                 getActivity().getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
                 mTextMessage.setText("");
@@ -134,19 +137,19 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
         return new CursorLoader(getContext(),
                 MessageProvider.buildMessageUri(),
                 null,
-                MessageEntry.COLUMN_ITEM_ID + " = ?" + "AND (" +
+                MessageEntry.COLUMN_ITEM_ID + " = ? " + "AND (" +
                         MessageEntry.COLUMN_RECEIVER_ID + " = ? OR " +
                         MessageEntry.COLUMN_SENDER_ID + " = ?) AND (" +
                         MessageEntry.COLUMN_RECEIVER_ID + " = ? OR " +
-                        MessageEntry.COLUMN_RECEIVER_ID + " = ?)",
+                        MessageEntry.COLUMN_SENDER_ID + " = ?)",
                 new String[] {
-                        String.valueOf(mId),
-                        String.valueOf(mUserId),
-                        String.valueOf(mSessionPreferences.getUserId()),
-                        String.valueOf(mUserId),
-                        String.valueOf(mSessionPreferences.getUserId())
+                        String.valueOf(mItemId),
+                        String.valueOf(mReceiverId),
+                        String.valueOf(mReceiverId),
+                        String.valueOf(mSenderId),
+                        String.valueOf(mSenderId)
                 },
-                MessageEntry.COLUMN_DISPATCH_DATE + " ASC");
+                MessageEntry.COLUMN_DATE + " ASC");
     }
 
     @Override
@@ -157,5 +160,13 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mMessagesAdapter.setCursor(null);
+    }
+
+    public void setItemId(int itemId) {
+        mItemId = itemId;
+    }
+
+    public void setReceiverId(int receiverId) {
+        mReceiverId = receiverId;
     }
 }

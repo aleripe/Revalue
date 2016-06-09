@@ -1,5 +1,6 @@
 package it.returntrue.revalue.api;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
@@ -62,4 +63,7 @@ public interface RevalueService {
 
     @POST("messages/send")
     Call<Void> SendMessage(@Body MessageModel messageModel);
+
+    @POST("users/list/ids")
+    Call<List<UserModel>> GetUsersByIds(@Body ArrayList<Integer> ids);
 }

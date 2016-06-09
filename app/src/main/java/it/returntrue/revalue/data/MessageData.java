@@ -7,6 +7,7 @@ package it.returntrue.revalue.data;
 import android.database.Cursor;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.utilities.CursorUtilities;
+import it.returntrue.revalue.utilities.DateUtilities;
 
 public final class MessageData {
 	public static Integer getItemId(Cursor cursor) {
@@ -25,7 +26,7 @@ public final class MessageData {
 		return CursorUtilities.getString(cursor, MessageEntry.COLUMN_TEXT);
 	}
 
-	public static String getDispatchDate(Cursor cursor) {
-		return CursorUtilities.getString(cursor, MessageEntry.COLUMN_DISPATCH_DATE);
+	public static String getDate(Cursor cursor) {
+		return DateUtilities.format(CursorUtilities.getLong(cursor, MessageEntry.COLUMN_DATE));
 	}
 }

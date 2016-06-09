@@ -36,7 +36,7 @@ public class RevalueGcmListenerService extends GcmListenerService {
         values.put(MessageEntry.COLUMN_SENDER_ID, userId);
         values.put(MessageEntry.COLUMN_RECEIVER_ID, sessionPreferences.getUserId());
         values.put(MessageEntry.COLUMN_TEXT, text);
-        values.put(MessageEntry.COLUMN_DISPATCH_DATE, date);
+        values.put(MessageEntry.COLUMN_DATE, date);
         getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
         sendNotification("New message received", text, date);
