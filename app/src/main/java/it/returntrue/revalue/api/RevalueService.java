@@ -14,6 +14,7 @@ import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.GetItemEvent;
 import it.returntrue.revalue.events.GetItemsEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
+import it.returntrue.revalue.events.InsertItemEvent;
 import it.returntrue.revalue.events.SetItemAsRemovedEvent;
 import it.returntrue.revalue.events.SetItemAsRevaluedEvent;
 import it.returntrue.revalue.utilities.Constants;
@@ -130,6 +131,23 @@ public class RevalueService {
             @Override
             public void onFailure(Call<ItemModel> call, Throwable t) {
                 mBus.post(new GetItemEvent.OnFailure());
+            }
+        });
+    }
+
+    @Subscribe
+    public void onInsertItem(InsertItemEvent.OnStart onStart) {
+        Call<Void> call = mServiceContract.InsertItem(onStart.getItemModel());
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                mBus.post(new InsertItemEvent.OnSuccess());
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                mBus.post(new InsertItemEvent.OnFailure());
             }
         });
     }

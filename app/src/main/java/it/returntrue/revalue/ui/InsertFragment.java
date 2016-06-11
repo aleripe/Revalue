@@ -14,7 +14,6 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -29,6 +28,7 @@ import android.widget.ArrayAdapter;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -40,34 +40,35 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.otto.Subscribe;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.ItemModel;
-import it.returntrue.revalue.api.RevalueServiceContract;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.InsertItemEvent;
+import it.returntrue.revalue.ui.base.BaseFragment;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
-public class InsertFragment extends Fragment {
+public class InsertFragment extends BaseFragment {
     private static final int ACTION_CAMERA = 1;
     private static final int ACTION_GALLERY = 2;
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
+    private static final String EXTRA_PICTURE = "picture";
 
-    private RevalueApplication mApplication;
-    private SessionPreferences mSessionPreferences;
     private ArrayAdapter<CategoryModel> mAdapter;
     private SupportMapFragment mMapFragment;
     private Bitmap mPicture;
+    private String mPictureData;
 
     @Bind(R.id.label_title) TextView mLabelTitle;
     @Bind(R.id.text_title) EditText mTextTitle;
@@ -87,22 +88,8 @@ public class InsertFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sets option menu
-        setHasOptionsMenu(true);
-
-        // Sets application context
-        mApplication = (RevalueApplication)getActivity().getApplicationContext();
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(getContext());
-
-        // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<CategoryModel>(
-                getContext(), android.R.layout.simple_list_item_1);
-        mAdapter.clear();
-        mAdapter.addAll(mApplication.getCategories());
-        mAdapter.insert(createEmptyCategoryModel(), 0);
-        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        // Sets adapter
+        setupAdapter();
     }
 
     @Override
@@ -149,6 +136,12 @@ public class InsertFragment extends Fragment {
                 }
             }
         });
+
+        // Restores previously saved picture
+        if (savedInstanceState != null) {
+            mPicture = savedInstanceState.getParcelable(EXTRA_PICTURE);
+            previewPicture();
+        }
 
         return view;
     }
@@ -200,11 +193,43 @@ public class InsertFragment extends Fragment {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(EXTRA_PICTURE, mPicture);
+    }
+
+    @Subscribe
+    public void onInsertItemSuccess(InsertItemEvent.OnSuccess onSuccess) {
+        Toast.makeText(getContext(), R.string.item_saved, Toast.LENGTH_LONG).show();
+
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
+    }
+
+    @Subscribe
+    public void onInsertItemFailure(InsertItemEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_save_item, Toast.LENGTH_LONG).show();
+    }
+
+    private void setupAdapter() {
+        // Creates adapter and inserts empty default value
+        mAdapter = new ArrayAdapter<CategoryModel>(
+                getContext(), android.R.layout.simple_list_item_1);
+        mAdapter.clear();
+        mAdapter.addAll(mApplication.getCategories());
+        mAdapter.insert(createEmptyCategoryModel(), 0);
+        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+    }
+
     private void actionCameraResult(Intent data) {
         mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 400);
+        previewPicture();
+    }
 
+    private void previewPicture() {
         if (mPicture != null) {
-            mButtonChoosePicture.setImageBitmap(mPicture);
+            new BitmapWorkerTask(mButtonChoosePicture).execute(mPicture);
         }
     }
 
@@ -245,21 +270,25 @@ public class InsertFragment extends Fragment {
 
         builder.setItems(items, new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(DialogInterface dialog, int item) {
-                if (items[item].equals(R.string.take_picture)) {
-                    dispatchCameraIntent();
-                } else if (items[item].equals(R.string.choose_from_library)) {
-                    if (ContextCompat.checkSelfPermission(getActivity(),
-                            Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(getActivity(),
-                                new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
-                                PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
-                    }
-                    else {
-                        dispatchGalleryIntent();
-                    }
-                } else if (items[item].equals(R.string.cancel)) {
-                    dialog.dismiss();
+            public void onClick(DialogInterface dialog, int position) {
+                switch (position) {
+                    case 0:
+                        dispatchCameraIntent();
+                        break;
+                    case 1:
+                        if (ContextCompat.checkSelfPermission(getActivity(),
+                                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(getActivity(),
+                                    new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
+                                    PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+                        }
+                        else {
+                            dispatchGalleryIntent();
+                        }
+                        break;
+                    case 2:
+                        dialog.dismiss();
+                        break;
                 }
             }
         });
@@ -283,50 +312,52 @@ public class InsertFragment extends Fragment {
             return;
         }
 
-        String text = mTextTitle.getText().toString();
-        String description = mTextDescription.getText().toString();
-        Double latitude = null;
-        Double longitude = null;
-        String city = null;
-        Boolean showOnMap = mSwitchLocation.isChecked();
-        Integer categoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
-        String token = mSessionPreferences.getToken();
+        // Creates item model
+        ItemModel itemModel = new ItemModel();
+        itemModel.Title = mTextTitle.getText().toString();
+        itemModel.Description = mTextDescription.getText().toString();
+        itemModel.ShowOnMap = mSwitchLocation.isChecked();
+        itemModel.CategoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
+        itemModel.PictureData = mPictureData;
+        setLocationOnItem(itemModel);
 
-        if (!validateItem(text, description, categoryId, mPicture)) {
+        if (!validateItem(itemModel)) {
             Toast.makeText(getContext(), R.string.item_validation_failed, Toast.LENGTH_LONG).show();
             return;
         }
 
+        // Saves item
+        BusProvider.bus().post(new InsertItemEvent.OnStart(itemModel));
+    }
+
+    private void setLocationOnItem(ItemModel itemModel) {
         if (mSwitchLocation.isChecked() && mMapFragment.getMap() != null) {
             Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
 
-            latitude = mMapFragment.getMap().getCameraPosition().target.latitude;
-            longitude = mMapFragment.getMap().getCameraPosition().target.longitude;
+            itemModel.Latitude = mMapFragment.getMap().getCameraPosition().target.latitude;
+            itemModel.Longitude = mMapFragment.getMap().getCameraPosition().target.longitude;
 
             try {
-                List<Address> addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                List<Address> addresses = geocoder.getFromLocation(
+                        itemModel.Latitude, itemModel.Longitude, 1);
 
                 if (addresses != null || addresses.size() > 0) {
                     Address address = addresses.get(0);
-                    city = address.getLocality();
+                    itemModel.City = address.getLocality();
                 }
             }
             catch (IOException e) {
                 e.printStackTrace();
             }
         }
-
-        new SaveItemAsyncTask(text, description, latitude, longitude,
-                city, showOnMap,categoryId, mPicture, token).execute();
     }
 
-    private boolean validateItem(String title, String description,
-                                 Integer categoryId, Bitmap picture) {
+    private boolean validateItem(ItemModel itemModel) {
         boolean isValid = true;
-        isValid &= validate(mRequiredTitle, TextUtils.isEmpty(title));
-        isValid &= validate(mRequiredDescription, TextUtils.isEmpty(description));
-        isValid &= validate(mRequiredCategory, categoryId == null);
-        isValid &= validate(mRequiredPicture, mPicture == null);
+        isValid &= validate(mRequiredTitle, TextUtils.isEmpty(itemModel.Title));
+        isValid &= validate(mRequiredDescription, TextUtils.isEmpty(itemModel.Description));
+        isValid &= validate(mRequiredCategory, itemModel.CategoryId < 1);
+        isValid &= validate(mRequiredPicture, itemModel.PictureData == null);
         return isValid;
     }
 
@@ -348,68 +379,36 @@ public class InsertFragment extends Fragment {
         return category;
     }
 
-    class SaveItemAsyncTask extends AsyncTask<Void, Void, Boolean> {
-        private final String mText;
-        private final String mDescription;
-        private final Double mLatitude;
-        private final Double mLongitude;
-        private final String mCity;
-        private final Boolean mShowOnMap;
-        private final Integer mCategoryId;
-        private final Bitmap mPicture;
-        private final String mToken;
+    class BitmapWorkerTask extends AsyncTask<Bitmap, Void, Bitmap> {
+        private final WeakReference<ImageView> mImageViewReference;
 
-        public SaveItemAsyncTask(String text, String description, Double latitude,
-                                 Double longitude, String city, Boolean showOnMap,
-                                 Integer categoryId, Bitmap picture, String token) {
-            mText = text;
-            mDescription = description;
-            mLatitude = latitude;
-            mLongitude = longitude;
-            mCity = city;
-            mShowOnMap = showOnMap;
-            mCategoryId = categoryId;
-            mPicture = picture;
-            mToken = token;
+        public BitmapWorkerTask(ImageView imageView) {
+            mImageViewReference = new WeakReference<ImageView>(imageView);
         }
 
         @Override
-        protected Boolean doInBackground(Void... params) {
-            ItemModel item = new ItemModel();
-            item.Title = mText;
-            item.Description = mDescription;
-            item.Latitude = mLatitude;
-            item.Longitude = mLongitude;
-            item.City = mCity;
-            item.ShowOnMap = mShowOnMap;
-            item.CategoryId = mCategoryId;
+        protected Bitmap doInBackground(Bitmap... params) {
+            Bitmap bitmap = params[0];
 
-            if (mPicture != null) {
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                mPicture.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
-                byte[] byteArray = byteArrayOutputStream.toByteArray();
-                item.PictureData = Base64.encodeToString(byteArray, Base64.DEFAULT);
-            }
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            mPicture.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
+            byte[] byteArray = byteArrayOutputStream.toByteArray();
 
-            RevalueServiceContract service = RevalueServiceGenerator.createService(mToken);
+            // Stores resulting conversion data
+            InsertFragment.this.mPictureData = Base64.encodeToString(byteArray, Base64.DEFAULT);
 
-            try {
-                service.InsertItem(item).execute();
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            return true;
+            return bitmap;
         }
 
+        // Once complete, see if ImageView is still around and set bitmap.
         @Override
-        protected void onPostExecute(Boolean result) {
-            Toast.makeText(InsertFragment.this.getContext(),
-                    getString(R.string.item_saved), Toast.LENGTH_LONG).show();
-
-            Intent intent = new Intent(getActivity(), MainActivity.class);
-            startActivity(intent);
+        protected void onPostExecute(Bitmap bitmap) {
+            if (mImageViewReference != null && bitmap != null) {
+                final ImageView imageView = mImageViewReference.get();
+                if (imageView != null) {
+                    imageView.setImageBitmap(bitmap);
+                }
+            }
         }
     }
 }

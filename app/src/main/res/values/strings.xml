@@ -91,4 +91,5 @@
     <string name="could_not_get_categories">Could not get categories</string>
     <string name="could_not_get_items">Could not get items</string>
     <string name="could_not_get_item">Could not get item</string>
+    <string name="could_not_save_item">Could not save item</string>
 </resources>
