@@ -3,7 +3,6 @@ package it.returntrue.revalue.ui;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -20,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.squareup.otto.Subscribe;
 
 import java.util.Arrays;
 
@@ -27,19 +27,15 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ExternalTokenModel;
-import it.returntrue.revalue.api.RevalueService;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.api.TokenModel;
-import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.ExternalLoginEvent;
+import it.returntrue.revalue.services.RevalueGcmIntentService;
+import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.utilities.NetworkUtilities;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private static final int RC_SIGN_IN = 9001;
 
-    protected SessionPreferences mSessionPreferences;
     private CallbackManager mCallbackManager;
     private GoogleApiClient mGoogleApiClient;
     private ProgressDialog mProgressDialog;
@@ -51,9 +47,6 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Creates session preferences manager
-        mSessionPreferences = new SessionPreferences(this);
 
         // Setup available providers
         setupFacebook();
@@ -99,6 +92,36 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     public void onBackPressed() {
         // Prevents from going back to MainActivity
         moveTaskToBack(true);
+    }
+
+    @Subscribe
+    public void onExternalLoginSuccess(ExternalLoginEvent.OnSuccess onSuccess) {
+        // Authenticate the user
+        mSessionPreferences.login(
+                onSuccess.getTokenModel().getUserId(),
+                onSuccess.getTokenModel().getUsername(),
+                onSuccess.getTokenModel().getAccessToken(),
+                onSuccess.getTokenModel().getAlias(),
+                onSuccess.getTokenModel().getAvatar());
+
+        // Registers GCM to send or retrieve messages
+        startService(new Intent(LoginActivity.this, RevalueGcmIntentService.class));
+
+        // Starts main activity
+        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        finish();
+
+        // Closes progress dialog
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+    }
+
+    @Subscribe
+    public void onExternalLoginFailure(ExternalLoginEvent.OnFailure onFailure) {
+        // Displays error status
+        mLabelStatus.setText(onFailure.getMessage());
+
+        // Closes progress dialog
+        if (mProgressDialog != null) mProgressDialog.dismiss();
     }
 
     private void setupFacebook() {
@@ -153,42 +176,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
             externalTokenModel.Provider = provider;
             externalTokenModel.Token = token;
 
-            // Calls API to log user
-            RevalueService service = RevalueServiceGenerator.createService();
-            Call<TokenModel> call = service.ExternalLogin(externalTokenModel);
-            call.enqueue(new Callback<TokenModel>() {
-                @Override
-                public void onResponse(Call<TokenModel> call, Response<TokenModel> response) {
-                    // Response is OK, let's authenticate the user
-                    if (response.isSuccessful()) {
-                        TokenModel tokenModel = response.body();
-
-                        if (tokenModel != null) {
-                            mSessionPreferences.login(
-                                    tokenModel.getUserId(),
-                                    tokenModel.getUsername(),
-                                    tokenModel.getAccessToken(),
-                                    tokenModel.getAlias(),
-                                    tokenModel.getAvatar());
-
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    } else {
-                        // Parse and display error
-                        mLabelStatus.setText(NetworkUtilities.parseError(LoginActivity.this, response));
-                    }
-
-                    if (mProgressDialog != null) mProgressDialog.dismiss();
-                }
-
-                @Override
-                public void onFailure(Call<TokenModel> call, Throwable t) {
-                    mLabelStatus.setText(R.string.call_failed);
-                    if (mProgressDialog != null) mProgressDialog.dismiss();
-                }
-            });
+            // Login user
+            BusProvider.bus().post(new ExternalLoginEvent.OnStart(externalTokenModel));
         }
     }
 

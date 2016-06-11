@@ -13,13 +13,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,39 +29,32 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.google.android.gms.analytics.Tracker;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import java.io.IOException;
+import com.squareup.otto.Subscribe;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.ItemModel;
-import it.returntrue.revalue.api.RevalueService;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.events.AddFavoriteItemEvent;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.GetItemEvent;
+import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
+import it.returntrue.revalue.events.SetItemAsRemovedEvent;
+import it.returntrue.revalue.events.SetItemAsRevaluedEvent;
+import it.returntrue.revalue.ui.base.BaseFragment;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class DetailFragment extends Fragment implements LoaderManager.LoaderCallbacks<ItemModel> {
-    private static final int LOADER_ITEM = 1;
+public class DetailFragment extends BaseFragment {
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
     private int mId;
-    private RevalueApplication mApplication;
-    private Tracker mTracker;
-    private SessionPreferences mSessionPreferences;
-    private DetailAsyncTaskLoader mDetailLoader;
     private Menu mMenu;
     private SupportMapFragment mMapFragment;
     private ImageView mImageCover;
@@ -85,20 +74,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sets application context
-        mApplication = (RevalueApplication)getActivity().getApplicationContext();
-
-        // Gets analytics tracker
-        mTracker = mApplication.getTracker();
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(getContext());
-
         // Gets extra data from intent
         mId = getActivity().getIntent().getIntExtra(DetailActivity.EXTRA_ID, 0);
-
-        // Sets option menu
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -119,13 +96,8 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         // Gets map fragment reference
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
 
-        if (NetworkUtilities.checkInternetConnection(getContext())) {
-            // Initializes loader and forces it to start
-            getLoaderManager().initLoader(LOADER_ITEM, null, this).forceLoad();
-        }
-        else {
-            clearDetails();
-        }
+        // Gets item details
+        getDetails();
     }
 
     @Override
@@ -160,22 +132,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     @Override
-    public Loader<ItemModel> onCreateLoader(int id, Bundle args) {
-        mDetailLoader = new DetailAsyncTaskLoader(mApplication, mId);
-        return mDetailLoader;
-    }
-
-    @Override
-    public void onLoadFinished(Loader<ItemModel> loader, ItemModel data) {
-        setDetails(data);
-    }
-
-    @Override
-    public void onLoaderReset(Loader<ItemModel> loader) {
-        clearDetails();
-    }
-
-    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
         switch (requestCode) {
@@ -191,44 +147,108 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
         }
     }
 
+    @Subscribe
+    public void onGetItemSuccess(GetItemEvent.OnSuccess onSuccess) {
+        setDetails(onSuccess.getItem());
+    }
+
+    @Subscribe
+    public void onGetItemFailure(GetItemEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_get_item, Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
+    public void onAddFavoriteItemSuccess(AddFavoriteItemEvent.OnSuccess onSuccess) {
+        Toast.makeText(getContext(), R.string.favorite_item_added, Toast.LENGTH_LONG).show();
+        getDetails();
+    }
+
+    @Subscribe
+    public void onAddFavoriteItemFailure(AddFavoriteItemEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_add_favorite_item, Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
+    public void onRemoveFavoriteItemSuccess(RemoveFavoriteItemEvent.OnSuccess onSuccess) {
+        Toast.makeText(getContext(), R.string.favorite_item_removed, Toast.LENGTH_LONG).show();
+        getDetails();
+    }
+
+    @Subscribe
+    public void onRemoveFavoriteItemFailure(RemoveFavoriteItemEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_remove_favorite_item, Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
+    public void onSetItemAsRevaluedSuccess(SetItemAsRevaluedEvent.OnSuccess onSuccess) {
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
+    }
+
+    @Subscribe
+    public void onSetItemAsRevaluedFailure(SetItemAsRemovedEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_revalue_item, Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
+    public void onSetItemAsRemovedSuccess(SetItemAsRemovedEvent.OnSuccess onSuccess) {
+        Intent intent = new Intent(getActivity(), MainActivity.class);
+        startActivity(intent);
+    }
+
+    @Subscribe
+    public void onSetItemAsRemovedFailure(SetItemAsRemovedEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_remove_item, Toast.LENGTH_LONG).show();
+    }
+
+    private void getDetails() {
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            // Gets item details
+            BusProvider.bus().post(new GetItemEvent.OnStart(mId,
+                    mApplication.getLocationLatitude(),
+                    mApplication.getLocationLongitude()));
+        }
+        else {
+            clearDetails();
+        }
+    }
+
     private void setDetails(ItemModel itemModel) {
-        if (itemModel != null) {
-            mItemModel = itemModel;
+        mItemModel = itemModel;
 
-            Glide.with(getContext())
-                    .load(itemModel.PictureUrl)
-                    .into(mImageCover);
+        Glide.with(getContext())
+                .load(itemModel.PictureUrl)
+                .into(mImageCover);
 
-            // Sets toolbar title
-            AppCompatActivity activity = (AppCompatActivity) getActivity();
-            activity.getSupportActionBar().setTitle(itemModel.Title);
+        // Sets toolbar title
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setTitle(itemModel.Title);
 
-            // Shows only appropriate favorite button
-            updateMenuItems();
+        // Shows only appropriate favorite button
+        updateMenuItems();
 
-            // Sets main data
-            mTextTitle.setText(itemModel.Title);
-            mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
-            mTextDescription.setText(itemModel.Description);
+        // Sets main data
+        mTextTitle.setText(itemModel.Title);
+        mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
+        mTextDescription.setText(itemModel.Description);
 
-            // Shows position on map if available
-            if (itemModel.ShowOnMap) {
-                GoogleMap map = mMapFragment.getMap();
-                if (map != null) {
-                    LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
-                    map.addMarker(new MarkerOptions().position(coordinates));
+        // Shows position on map if available
+        if (itemModel.ShowOnMap) {
+            GoogleMap map = mMapFragment.getMap();
+            if (map != null) {
+                LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
+                map.addMarker(new MarkerOptions().position(coordinates));
 
-                    Circle circle = MapUtilities.getCenteredCircle(map, coordinates,
-                            mApplication.getFilterDistance());
-                    int zoom = MapUtilities.getCircleZoomLevel(circle);
+                Circle circle = MapUtilities.getCenteredCircle(map, coordinates,
+                        mApplication.getFilterDistance());
+                int zoom = MapUtilities.getCircleZoomLevel(circle);
 
-                    if (zoom > 0) {
-                        map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
-                    }
+                if (zoom > 0) {
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
                 }
-            } else {
-                mMapFragment.getView().setVisibility(View.GONE);
             }
+        } else {
+            mMapFragment.getView().setVisibility(View.GONE);
         }
     }
 
@@ -238,78 +258,20 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
     }
 
     public void addFavorite() {
-        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            // Adds favorite
+            BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(mId));
+        } else {
             Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if (mItemModel != null) {
-            RevalueService service = RevalueServiceGenerator.createService(
-                    mSessionPreferences.getToken());
-            Call<Void> call = service.AddFavorite(mItemModel.Id);
-            call.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    // Response is OK, reload data
-                    if (response.isSuccessful()) {
-                        Toast.makeText(DetailFragment.this.getContext(),
-                                getString(R.string.favorite_item_added), Toast.LENGTH_LONG).show();
-
-                        if (mDetailLoader != null) {
-                            mDetailLoader.onContentChanged();
-                        }
-                    }
-                    else {
-                        // Parse and display error
-                        String error = NetworkUtilities.parseError(DetailFragment.this.getContext(), response);
-                        Toast.makeText(DetailFragment.this.getContext(), error, Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(DetailFragment.this.getContext(),
-                            getString(R.string.could_not_add_favorite_item), Toast.LENGTH_LONG).show();
-                }
-            });
         }
     }
 
     public void removeFavorite() {
-        if (!NetworkUtilities.checkInternetConnection(getContext())) {
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            // Removes favorite
+            BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(mId));
+        } else {
             Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
-            return;
-        }
-
-        if (mItemModel != null) {
-            RevalueService service = RevalueServiceGenerator.createService(
-                    mSessionPreferences.getToken());
-            Call<Void> call = service.RemoveFavorite(mItemModel.Id);
-            call.enqueue(new Callback<Void>() {
-                @Override
-                public void onResponse(Call<Void> call, Response<Void> response) {
-                    // Response is OK, reload data
-                    if (response.isSuccessful()) {
-                        Toast.makeText(DetailFragment.this.getContext(),
-                                getString(R.string.favorite_item_removed), Toast.LENGTH_LONG).show();
-
-                        if (mDetailLoader != null) {
-                            mDetailLoader.onContentChanged();
-                        }
-                    }
-                    else {
-                        // Parse and display error
-                        String error = NetworkUtilities.parseError(DetailFragment.this.getContext(), response);
-                        Toast.makeText(DetailFragment.this.getContext(), error, Toast.LENGTH_LONG).show();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Void> call, Throwable t) {
-                    Toast.makeText(DetailFragment.this.getContext(),
-                            getString(R.string.could_not_remove_favorite_item), Toast.LENGTH_LONG).show();
-                }
-            });
         }
     }
 
@@ -336,22 +298,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     .setMessage(getString(R.string.confirm_revalue_item))
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-                            Call<Void> call = service.SetItemAsRevalued(mId);
-                            call.enqueue(new Callback<Void>() {
-                                @Override
-                                public void onResponse(Call<Void> call, Response<Void> response) {
-                                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                                    startActivity(intent);
-                                }
-
-                                @Override
-                                public void onFailure(Call<Void> call, Throwable t) {
-                                    Toast.makeText(DetailFragment.this.getContext(),
-                                            getString(R.string.could_not_revalue_item),
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            });
+                            BusProvider.bus().post(new SetItemAsRevaluedEvent.OnStart(mId));
                         }})
                     .setNegativeButton(android.R.string.no, null)
                     .show();
@@ -370,22 +317,7 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                     .setMessage(getString(R.string.confirm_remove_item))
                     .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
-                            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-                            Call<Void> call = service.SetItemAsRemoved(mId);
-                            call.enqueue(new Callback<Void>() {
-                                @Override
-                                public void onResponse(Call<Void> call, Response<Void> response) {
-                                    Intent intent = new Intent(getActivity(), MainActivity.class);
-                                    startActivity(intent);
-                                }
-
-                                @Override
-                                public void onFailure(Call<Void> call, Throwable t) {
-                                    Toast.makeText(DetailFragment.this.getContext(),
-                                            getString(R.string.could_not_remove_item),
-                                            Toast.LENGTH_LONG).show();
-                                }
-                            });
+                            BusProvider.bus().post(new SetItemAsRemovedEvent.OnStart(mId));
                         }})
                     .setNegativeButton(android.R.string.no, null)
                     .show();
@@ -437,35 +369,6 @@ public class DetailFragment extends Fragment implements LoaderManager.LoaderCall
                                     getResources().getText(R.string.share_with)));
                         }
                     });
-        }
-    }
-
-    private static class DetailAsyncTaskLoader extends AsyncTaskLoader<ItemModel> {
-        private final RevalueApplication mApplication;
-        private final SessionPreferences mSessionPreferences;
-        private final int mId;
-
-        public DetailAsyncTaskLoader(RevalueApplication application, int id) {
-            super(application);
-            mApplication = application;
-            mSessionPreferences = new SessionPreferences(application);
-            mId = id;
-        }
-
-        @Override
-        public ItemModel loadInBackground() {
-            RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-            Call<ItemModel> call = service.GetItem(mId,
-                    mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude());
-
-            try {
-                return call.execute().body();
-            }
-            catch (IOException e) {
-                Log.e(DetailFragment.class.getSimpleName(), e.toString());
-                return null;
-            }
         }
     }
 }

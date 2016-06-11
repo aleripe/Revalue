@@ -52,7 +52,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.ItemModel;
-import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceContract;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.utilities.MapUtilities;
@@ -391,7 +391,7 @@ public class InsertFragment extends Fragment {
                 item.PictureData = Base64.encodeToString(byteArray, Base64.DEFAULT);
             }
 
-            RevalueService service = RevalueServiceGenerator.createService(mToken);
+            RevalueServiceContract service = RevalueServiceGenerator.createService(mToken);
 
             try {
                 service.InsertItem(item).execute();

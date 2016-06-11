@@ -1,10 +1,7 @@
 package it.returntrue.revalue.ui;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -12,17 +9,10 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -32,33 +22,28 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.squareup.otto.Subscribe;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
-import it.returntrue.revalue.api.CategoryModel;
-import it.returntrue.revalue.api.RevalueService;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.gcm.RevalueGcmIntentService;
-import it.returntrue.revalue.preferences.SessionPreferences;
-import it.returntrue.revalue.ui.base.MainFragment;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import it.returntrue.revalue.events.AddFavoriteItemEvent;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.GetCategoriesEvent;
+import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
+import it.returntrue.revalue.ui.base.BaseActivity;
+import it.returntrue.revalue.ui.base.BaseItemsFragment;
+import it.returntrue.revalue.utilities.Constants;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 
-public class MainActivity extends AppCompatActivity implements MainFragment.OnItemClickListener,
-        NavigationView.OnNavigationItemSelectedListener, LoaderManager.LoaderCallbacks<List<CategoryModel>> {
-    protected static final int LOADER_CATEGORIES = 1;
+public class MainActivity extends BaseActivity implements BaseItemsFragment.OnItemClickListener,
+        NavigationView.OnNavigationItemSelectedListener {
+    private static final String FRAGMENT_FILTERS = "filters";
 
-    private RevalueApplication mApplication;
-    private SessionPreferences mSessionPreferences;
-    private BroadcastReceiver mBroadcastReceiver;
-    private MainFragment mMainFragment;
+    private BaseItemsFragment mMainFragment;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.nav_view) NavigationView mNavigationView;
@@ -71,7 +56,7 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab_chat) FloatingActionButton mFloatingActionButton;
 
-    private @MainFragment.ItemMode int mItemMode;
+    private @Constants.ItemMode int mItemMode;
     private String mFilterTitle;
     private ArrayList<Integer> mFilterCategories;
     private Integer mFilterDistance;
@@ -80,20 +65,11 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sets application context
-        mApplication = (RevalueApplication)getApplicationContext();
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(this);
-
-        // Creates GCM broadcast receiver
-        mBroadcastReceiver = createBroadcastReceiver();
-
-        // Sets default item mode
-        mItemMode = MainFragment.NEAREST_ITEMS_MODE;
-
         // Checks login
         checkLogin();
+
+        // Sets default item mode
+        mItemMode = Constants.NEAREST_ITEMS_MODE;
 
         // Sets layout
         setContentView(R.layout.activity_main);
@@ -105,67 +81,25 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         setSupportActionBar(mToolbar);
 
         // Setup the available loader
-        getSupportLoaderManager().initLoader(LOADER_CATEGORIES, null, this).forceLoad();
+        loadCategories();
 
-        // Sets informations on NavigationView header
+        // Sets information on NavigationView header
         setNavigationViewHeader();
 
-        // Reacts to FAB click
-        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // Opens insert activity
-                Intent intent = new Intent(MainActivity.this, InsertActivity.class);
-                startActivity(intent);
-            }
-        });
+        // Setups FAB to insert a new item
+        setupFloatingActionButton();
 
-        // Sets drawer layout
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout,
-                mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        mDrawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
+        // Setups ABD to respond to toggle button
+        setupActionBarDrawer();
 
         // Sets navigation view
         mNavigationView.setNavigationItemSelectedListener(this);
 
-        mBoxSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentManager fm = getSupportFragmentManager();
-                FiltersFragment filtersDialog = new FiltersFragment();
-                filtersDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        setFilters();
-                        updateListAndMap();
-                    }
-                });
-                filtersDialog.show(fm, "fragment_edit_name");
-            }
-        });
+        // Setups search box to update list or map
+        setupSearchBox();
 
+        // Sets default mode
         setMode(mApplication.getMainMode());
-
-        registerGCM();
-    }
-
-    @Override
-    protected void onPause() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
-
-        super.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("registrationComplete"));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("pushNotification"));
-
-        super.onResume();
     }
 
     @Override
@@ -225,40 +159,12 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
 
     @Override
     public void onAddFavoriteClick(View view, int id) {
-        RevalueService service = RevalueServiceGenerator.createService(
-                mSessionPreferences.getToken());
-        Call<Void> call = service.AddFavorite(id);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Toast.makeText(MainActivity.this, "Favorite item added.", Toast.LENGTH_LONG).show();
-                updateListAndMap();
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Could not add favorite item.", Toast.LENGTH_LONG).show();
-            }
-        });
+        BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(id));
     }
 
     @Override
     public void onRemoveFavoriteClick(View view, int id) {
-        RevalueService service = RevalueServiceGenerator.createService(
-            mSessionPreferences.getToken());
-        Call<Void> call = service.RemoveFavorite(id);
-        call.enqueue(new Callback<Void>() {
-            @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                Toast.makeText(MainActivity.this, "Favorite item removed.", Toast.LENGTH_LONG).show();
-                updateListAndMap();
-            }
-
-            @Override
-            public void onFailure(Call<Void> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Could not remove favorite item.", Toast.LENGTH_LONG).show();
-            }
-        });
+        BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(id));
     }
 
     @Override
@@ -266,34 +172,60 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public Loader<List<CategoryModel>> onCreateLoader(int id, Bundle args) {
-        return new CategoryAsyncTaskLoader(this, mSessionPreferences);
-    }
-
-    @Override
-    public void onLoadFinished(Loader<List<CategoryModel>> loader, List<CategoryModel> categories) {
-        mApplication.setCategories(categories);
+    @Subscribe
+    public void onGetCategoriesSuccess(GetCategoriesEvent.OnSuccess onSuccess) {
+        mApplication.setCategories(onSuccess.getCategories());
         setFilters();
     }
 
-    @Override
-    public void onLoaderReset(Loader<List<CategoryModel>> loader) {
+    @Subscribe
+    public void onGetCategoriesFailure(GetCategoriesEvent.OnFailure onFailure) {
+        setStatus(getString(R.string.could_not_get_categories));
+    }
 
+    @Subscribe
+    public void onAddFavoriteItemSuccess(AddFavoriteItemEvent.OnSuccess onSuccess) {
+        Toast.makeText(this, R.string.favorite_item_added, Toast.LENGTH_LONG).show();
+        updateListAndMap();
+    }
+
+    @Subscribe
+    public void onAddFavoriteItemFailure(AddFavoriteItemEvent.OnFailure onFailure) {
+        Toast.makeText(this, R.string.could_not_add_favorite_item, Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
+    public void onRemoveFavoriteItemSuccess(RemoveFavoriteItemEvent.OnSuccess onSuccess) {
+        Toast.makeText(this, R.string.favorite_item_removed, Toast.LENGTH_LONG).show();
+        updateListAndMap();
+    }
+
+    @Subscribe
+    public void onRemoveFavoriteItemFailure(RemoveFavoriteItemEvent.OnFailure onFailure) {
+        Toast.makeText(this, R.string.could_not_remove_favorite_item, Toast.LENGTH_LONG).show();
+    }
+
+    private void loadCategories() {
+        if (NetworkUtilities.checkInternetConnection(this)) {
+            BusProvider.bus().post(new GetCategoriesEvent.OnStart());
+        }
+        else {
+            setStatus(getString(R.string.check_connection));
+        }
     }
 
     private void showNearestItems() {
-        mItemMode = MainFragment.NEAREST_ITEMS_MODE;
+        mItemMode = Constants.NEAREST_ITEMS_MODE;
         updateListAndMap();
     }
 
     private void showFavoriteItems() {
-        mItemMode = MainFragment.FAVORITE_ITEMS_MODE;
+        mItemMode = Constants.FAVORITE_ITEMS_MODE;
         updateListAndMap();
     }
 
     private void showPersonalItems() {
-        mItemMode = MainFragment.PERSONAL_MOVIES_MODE;
+        mItemMode = Constants.PERSONAL_MOVIES_MODE;
         updateListAndMap();
     }
 
@@ -302,20 +234,8 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         checkLogin();
     }
 
-    private void checkLogin() {
-        if (!mSessionPreferences.getIsLoggedIn()) {
-            Intent i = new Intent(this, LoginActivity.class);
-            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(i);
-            finish();
-        }
-
-        String token = mSessionPreferences.getToken();
-        if (!TextUtils.isEmpty(token)) Log.v(MainActivity.class.getSimpleName(), token);
-    }
-
     private void setFilters() {
+        mBoxSearch.setVisibility(View.VISIBLE);
         mTextFilterTitle.setText(mApplication.getFilterTitleDescription());
         mTextFilterCategory.setText(mApplication.getFilterCategoryDescription());
         mTextFilterDistance.setText(mApplication.getFilterDistanceDescription());
@@ -331,6 +251,48 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         mLabelUsername.setText(mSessionPreferences.getAlias());
         mLabelEmail.setText(mSessionPreferences.getUsername());
         Glide.with(this).load(mSessionPreferences.getAvatar()).into(mImagePicture);
+    }
+
+    private void setupFloatingActionButton() {
+        // Reacts to FAB click
+        mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Opens insert activity
+                Intent intent = new Intent(MainActivity.this, InsertActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
+    private void setupActionBarDrawer() {
+        // Sets drawer layout
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this,
+                mDrawerLayout,
+                mToolbar,
+                R.string.navigation_drawer_open,
+                R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+    }
+
+    private void setupSearchBox() {
+        mBoxSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fragmentManager = getSupportFragmentManager();
+                FiltersFragment filtersDialog = new FiltersFragment();
+                filtersDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        setFilters();
+                        updateListAndMap();
+                    }
+                });
+                filtersDialog.show(fragmentManager, FRAGMENT_FILTERS);
+            }
+        });
     }
 
     private void setMode(@RevalueApplication.Modes int mode) {
@@ -373,53 +335,23 @@ public class MainActivity extends AppCompatActivity implements MainFragment.OnIt
         if (mMainFragment != null) {
             mMainFragment.updateItems(mItemMode);
         }
+        else {
+            Fragment listFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_list);
+            Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_map);
 
-        Fragment listFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_list);
-        Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+            if (listFragment != null) {
+                ((ListFragment) listFragment).updateItems(mItemMode);
+            }
 
-        if (listFragment != null) {
-            ((ListFragment)listFragment).updateItems(mItemMode);
-        }
-
-        if (mapFragment != null) {
-            ((MapFragment)mapFragment).updateItems(mItemMode);
+            if (mapFragment != null) {
+                ((MapFragment) mapFragment).updateItems(mItemMode);
+            }
         }
     }
 
-    private BroadcastReceiver createBroadcastReceiver() {
-        return new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-
-            }
-        };
-    }
-
-    private void registerGCM() {
-        Intent intent = new Intent(this, RevalueGcmIntentService.class);
-        startService(intent);
-    }
-
-    private static class CategoryAsyncTaskLoader extends AsyncTaskLoader<List<CategoryModel>> {
-        private SessionPreferences mSessionPreferences;
-
-        public CategoryAsyncTaskLoader(Context context, SessionPreferences sessionPreferences) {
-            super(context);
-            mSessionPreferences = sessionPreferences;
-        }
-
-        @Override
-        public List<CategoryModel> loadInBackground() {
-            RevalueService service = RevalueServiceGenerator.createService(
-                    mSessionPreferences.getToken());
-            Call<List<CategoryModel>> call = service.GetAllCategories();
-
-            try {
-                return call.execute().body();
-            }
-            catch (IOException e) {
-                return new ArrayList<>();
-            }
+    private void setStatus(String status) {
+        if (mMainFragment != null) {
+            mMainFragment.setStatus(status);
         }
     }
 }

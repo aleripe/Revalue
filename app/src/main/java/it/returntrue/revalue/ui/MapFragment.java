@@ -8,7 +8,6 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,22 +31,22 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.squareup.otto.Subscribe;
 
 import java.util.HashMap;
-import java.util.List;
 
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.ItemModel;
-import it.returntrue.revalue.ui.base.MainFragment;
+import it.returntrue.revalue.events.GetItemsEvent;
+import it.returntrue.revalue.ui.base.BaseItemsFragment;
+import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.MapUtilities;
 
-public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowClickListener {
+public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWindowClickListener {
     private static final String KEY_LATITUDE = "latitude";
     private static final String KEY_LONGITUDE = "longitude";
     private static final String KEY_ZOOM = "zoom";
 
-    private RevalueApplication mApplication;
     private SupportMapFragment mMapFragment;
     private HashMap<Marker, Integer> mMarkerIDs = new HashMap<>();
     private double mLatitude;
@@ -56,21 +55,10 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
 
     public MapFragment() { }
 
-    public static MapFragment newInstance(@MainFragment.ItemMode int itemMode) {
+    public static MapFragment newInstance(@Constants.ItemMode int itemMode) {
         MapFragment fragment = new MapFragment();
-        fragment.ItemMode = itemMode;
+        fragment.mItemMode = itemMode;
         return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Sets application context
-        mApplication = (RevalueApplication)getActivity().getApplicationContext();
-
-        // Sets option menu
-        setHasOptionsMenu(true);
     }
 
     @Override
@@ -99,35 +87,35 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
     }
 
-    @Override
-    public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
+    @Subscribe
+    public void onGetItemsSuccess(GetItemsEvent.OnSuccess onSuccess) {
         final GoogleMap map = mMapFragment.getMap();
 
         if (map != null) {
             map.clear();
             map.setOnInfoWindowClickListener(this);
 
-            for (final ItemModel itemModel : data) {
-                    if (!itemModel.ShowOnMap) continue;
+            for (final ItemModel itemModel : onSuccess.getItems()) {
+                if (!itemModel.ShowOnMap) continue;
 
-                    Glide.with(getContext())
-                            .load(itemModel.MarkerUrl)
-                            .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .transform(new CropCircleTransformation(getContext()))
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                                    final Marker marker = map.addMarker(new MarkerOptions()
-                                            .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
-                                            .title(itemModel.Title)
-                                            .snippet(itemModel.City + " / " +
-                                                    (int)(itemModel.Distance / 1000) + " km")
-                                            .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
-                                    mMarkerIDs.put(marker, itemModel.Id);
-                                }
-                            });
+                Glide.with(getContext())
+                        .load(itemModel.MarkerUrl)
+                        .asBitmap()
+                        .diskCacheStrategy(DiskCacheStrategy.NONE)
+                        .skipMemoryCache(true)
+                        .transform(new CropCircleTransformation(getContext()))
+                        .into(new SimpleTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
+                                final Marker marker = map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
+                                        .title(itemModel.Title)
+                                        .snippet(itemModel.City + " / " +
+                                                (int)(itemModel.Distance / 1000) + " km")
+                                        .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+                                mMarkerIDs.put(marker, itemModel.Id);
+                            }
+                        });
             }
 
             LatLng position = new LatLng(
@@ -150,13 +138,9 @@ public class MapFragment extends MainFragment implements GoogleMap.OnInfoWindowC
         }
     }
 
-    @Override
-    public void onLoaderReset(Loader<List<ItemModel>> loader) {
-        GoogleMap map = mMapFragment.getMap();
-
-        if (map != null) {
-            map.clear();
-        }
+    @Subscribe
+    public void onGetItemsFailure(GetItemsEvent.OnFailure onFailure) {
+        setStatus(getString(R.string.could_not_get_items));
     }
 
     @Override

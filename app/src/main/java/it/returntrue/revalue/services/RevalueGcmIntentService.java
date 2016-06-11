@@ -1,4 +1,4 @@
-package it.returntrue.revalue.gcm;
+package it.returntrue.revalue.services;
 
 import android.app.IntentService;
 import android.content.Intent;
@@ -9,7 +9,7 @@ import com.google.android.gms.iid.InstanceID;
 
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.GcmTokenModel;
-import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceContract;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import retrofit2.Call;
 
@@ -40,7 +40,7 @@ public class RevalueGcmIntentService extends IntentService {
             gcmTokenModel.Token = gcmRegistrationId;
 
             // Calls API to update Gcm registration id (token)
-            RevalueService service = RevalueServiceGenerator.createService();
+            RevalueServiceContract service = RevalueServiceGenerator.createService();
             Call<Void> call = service.UpdateGcmToken(gcmTokenModel);
             call.execute();
 

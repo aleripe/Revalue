@@ -26,7 +26,8 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginBottom="16dp"
-                android:layout_marginTop="?attr/actionBarSize">
+                android:layout_marginTop="?attr/actionBarSize"
+                android:visibility="gone">
                 <ImageView
                     android:id="@+id/image_search_filter"
                     android:layout_width="wrap_content"

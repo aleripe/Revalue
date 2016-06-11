@@ -9,10 +9,13 @@ import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Tracker;
+import com.squareup.otto.Bus;
 
 import java.util.List;
 
 import it.returntrue.revalue.api.CategoryModel;
+import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.events.BusProvider;
 
 public class RevalueApplication extends Application {
     // Defines allowed modes as a fake enumeration
@@ -31,6 +34,8 @@ public class RevalueApplication extends Application {
     private Double mLocationLongitude = null;
     private List<CategoryModel> mCategories = null;
     private Tracker mTracker;
+    private RevalueService mRevalueService;
+    private Bus mBus;
 
     @Override
     public void onCreate() {
@@ -147,12 +152,20 @@ public class RevalueApplication extends Application {
         return null;
     }
 
-    synchronized public Tracker getTracker() {
+    public Tracker getTracker() {
         if (mTracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
             mTracker = analytics.newTracker(R.xml.global_tracker);
         }
         return mTracker;
+    }
+
+    public RevalueService setupRevalueService(String token) {
+        if (mRevalueService == null) {
+            mRevalueService = new RevalueService(this, BusProvider.bus(), token);
+            BusProvider.bus().register(mRevalueService);
+        }
+        return mRevalueService;
     }
 
     private void initizalize() {

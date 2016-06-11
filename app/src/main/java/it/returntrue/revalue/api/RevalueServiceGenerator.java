@@ -18,11 +18,11 @@ public class RevalueServiceGenerator {
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create());
 
-    public static RevalueService createService() {
+    public static RevalueServiceContract createService() {
         return createService(null);
     }
 
-    public static RevalueService createService(final String token) {
+    public static RevalueServiceContract createService(final String token) {
         if (token != null) {
             httpClient.addInterceptor(new Interceptor() {
                 @Override
@@ -41,6 +41,6 @@ public class RevalueServiceGenerator {
 
         OkHttpClient client = httpClient.build();
         Retrofit retrofit = builder.client(client).build();
-        return retrofit.create(RevalueService.class);
+        return retrofit.create(RevalueServiceContract.class);
     }
 }

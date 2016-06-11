@@ -21,7 +21,7 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.adapters.ChatsAdapter;
-import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceContract;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.api.UserModel;
 import it.returntrue.revalue.data.MessageData;
@@ -122,7 +122,7 @@ public class ChatsFragment extends Fragment implements LoaderManager.LoaderCallb
             userIds.add((senderId != currentUserId) ? senderId : receiverId);
         }
 
-        RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
+        RevalueServiceContract service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
         Call<List<UserModel>> call = service.GetUsersByIds(userIds);
 
         call.enqueue(new Callback<List<UserModel>>() {

@@ -108,7 +108,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".gcm.RevalueGcmIntentService"
+            android:name=".services.RevalueGcmIntentService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.google.android.gms.iid.InstanceID" />

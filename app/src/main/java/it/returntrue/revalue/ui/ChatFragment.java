@@ -24,7 +24,7 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.adapters.MessagesAdapter;
 import it.returntrue.revalue.api.MessageModel;
-import it.returntrue.revalue.api.RevalueService;
+import it.returntrue.revalue.api.RevalueServiceContract;
 import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.preferences.SessionPreferences;
@@ -112,7 +112,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 mButtonSend.setEnabled(false);
 
                 // Calls API to send message
-                RevalueService service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
+                RevalueServiceContract service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
                 Call<Void> call = service.SendMessage(messageModel);
                 call.enqueue(new Callback<Void>() {
                     @Override

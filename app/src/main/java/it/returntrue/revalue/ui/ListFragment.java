@@ -1,8 +1,6 @@
 package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v4.content.Loader;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -13,24 +11,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import com.squareup.otto.Subscribe;
+
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.adapters.ItemsAdapter;
 import it.returntrue.revalue.api.ItemModel;
-import it.returntrue.revalue.ui.base.MainFragment;
+import it.returntrue.revalue.events.GetItemsEvent;
+import it.returntrue.revalue.ui.base.BaseItemsFragment;
+import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
 /**
  * Shows the list of items
  */
-public class ListFragment extends MainFragment implements ItemsAdapter.OnItemClickListener,
+public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnItemClickListener,
         SwipeRefreshLayout.OnRefreshListener {
-    private RevalueApplication mApplication;
     private ItemsAdapter mItemsAdapter;
 
     @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
@@ -39,26 +38,15 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
 
     public ListFragment() { }
 
-    public static ListFragment newInstance(@MainFragment.ItemMode int itemMode) {
+    public static ListFragment newInstance(@Constants.ItemMode int itemMode) {
         ListFragment fragment = new ListFragment();
-        fragment.ItemMode = itemMode;
+        fragment.mItemMode = itemMode;
         return fragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        // Sets option menu
-        setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,  Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_list, container, false);
-
-        // Sets application context
-        mApplication = (RevalueApplication)getActivity().getApplicationContext();
 
         // Binds controls
         ButterKnife.bind(this, view);
@@ -110,15 +98,15 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
     }
 
     @Override
-    public void updateItems(@MainFragment.ItemMode Integer itemMode) {
+    public void updateItems(@Constants.ItemMode Integer itemMode) {
         mSwipeRefreshLayout.setRefreshing(true);
         super.updateItems(itemMode);
     }
 
-    @Override
-    public void onLoadFinished(Loader<List<ItemModel>> loader, List<ItemModel> data) {
-        if (data != null) {
-            loadItems(data);
+    @Subscribe
+    public void onGetItemsSuccess(GetItemsEvent.OnSuccess onSuccess) {
+        if (onSuccess.getItems() != null) {
+            loadItems(onSuccess.getItems());
         }
         else {
             clearItems();
@@ -127,11 +115,10 @@ public class ListFragment extends MainFragment implements ItemsAdapter.OnItemCli
         mSwipeRefreshLayout.setRefreshing(false);
     }
 
-    @Override
-    public void onLoaderReset(Loader<List<ItemModel>> loader) {
-        if (mItemsAdapter != null) {
-            mItemsAdapter.setItems(new ArrayList<ItemModel>());
-        }
+    @Subscribe
+    public void onGetItemsFailure(GetItemsEvent.OnFailure onFailure) {
+        setStatus(getString(R.string.could_not_get_items));
+        mSwipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

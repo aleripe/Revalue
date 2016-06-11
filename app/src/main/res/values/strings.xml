@@ -88,4 +88,7 @@
     <string name="action_set_revalued">Set item as revalued</string>
     <string name="action_set_removed">Set item as removed</string>
     <string name="messages">Messages</string>
+    <string name="could_not_get_categories">Could not get categories</string>
+    <string name="could_not_get_items">Could not get items</string>
+    <string name="could_not_get_item">Could not get item</string>
 </resources>
