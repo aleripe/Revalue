@@ -16,6 +16,7 @@ import it.returntrue.revalue.events.GetItemsEvent;
 import it.returntrue.revalue.events.GetUsersByIdsEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.InsertItemEvent;
+import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.events.SetItemAsRemovedEvent;
 import it.returntrue.revalue.events.SetItemAsRevaluedEvent;
 import it.returntrue.revalue.events.UpdateGcmTokenEvent;
@@ -241,13 +242,26 @@ public class RevalueService {
 
         call.enqueue(new Callback<Void>() {
             @Override
+            public void onResponse(Call<Void> call, Response<Void> response) { }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) { }
+        });
+    }
+
+    @Subscribe
+    public void onSendMessage(final SendMessageEvent.OnStart onStart) {
+        Call<Void> call = mServiceContract.SendMessage(onStart.getMessageModel());
+
+        call.enqueue(new Callback<Void>() {
+            @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                int i = 0;
+                mBus.post(new SendMessageEvent.OnSuccess());
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                int i = 0;
+                mBus.post(new SendMessageEvent.OnFailure());
             }
         });
     }

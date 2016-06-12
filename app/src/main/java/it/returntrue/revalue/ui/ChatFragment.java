@@ -17,6 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
+import com.squareup.otto.Subscribe;
+
 import java.util.GregorianCalendar;
 
 import butterknife.Bind;
@@ -24,19 +26,15 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.adapters.MessagesAdapter;
 import it.returntrue.revalue.api.MessageModel;
-import it.returntrue.revalue.api.RevalueServiceContract;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
-import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.provider.MessageProvider;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import it.returntrue.revalue.ui.base.BaseFragment;
 
-public class ChatFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     protected static final int LOADER_MESSAGES = 1;
 
-    private SessionPreferences mSessionPreferences;
     private int mItemId;
     private int mReceiverId;
     private int mSenderId;
@@ -63,9 +61,6 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(getContext());
 
         // Gets extra data from intent or preferences
         mSenderId = mSessionPreferences.getUserId();
@@ -112,19 +107,7 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
                 mButtonSend.setEnabled(false);
 
                 // Calls API to send message
-                RevalueServiceContract service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-                Call<Void> call = service.SendMessage(messageModel);
-                call.enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> response) {
-                        mButtonSend.setEnabled(true);
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        mButtonSend.setEnabled(true);
-                    }
-                });
+                BusProvider.bus().post(new SendMessageEvent.OnStart(messageModel));
             }
         });
 
@@ -160,6 +143,16 @@ public class ChatFragment extends Fragment implements LoaderManager.LoaderCallba
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mMessagesAdapter.setCursor(null);
+    }
+
+    @Subscribe
+    public void onSendMessageSuccess(SendMessageEvent.OnSuccess onSuccess) {
+        mButtonSend.setEnabled(true);
+    }
+
+    @Subscribe
+    public void onSendMessageFailure(SendMessageEvent.OnFailure onFailure) {
+        mButtonSend.setEnabled(true);
     }
 
     public void setItemId(int itemId) {
