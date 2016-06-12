@@ -24,8 +24,6 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.squareup.otto.Subscribe;
 
-import java.util.ArrayList;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
@@ -34,6 +32,7 @@ import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
+import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
@@ -57,9 +56,6 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
     @Bind(R.id.fab_chat) FloatingActionButton mFloatingActionButton;
 
     private @Constants.ItemMode int mItemMode;
-    private String mFilterTitle;
-    private ArrayList<Integer> mFilterCategories;
-    private Integer mFilterDistance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,6 +96,9 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
 
         // Sets default mode
         setMode(mApplication.getMainMode());
+
+        // Registers GCM
+        registerGCM();
     }
 
     @Override
@@ -352,6 +351,13 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
     private void setStatus(String status) {
         if (mMainFragment != null) {
             mMainFragment.setStatus(status);
+        }
+    }
+
+    private void registerGCM() {
+        if (checkPlayServices()) {
+            Intent intent = new Intent(this, RevalueGcmIntentService.class);
+            startService(intent);
         }
     }
 }

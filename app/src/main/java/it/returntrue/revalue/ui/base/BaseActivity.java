@@ -1,15 +1,14 @@
 package it.returntrue.revalue.ui.base;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.events.BusProvider;
@@ -18,10 +17,10 @@ import it.returntrue.revalue.ui.LoginActivity;
 
 public class BaseActivity extends AppCompatActivity {
     private static final String TAG = BaseActivity.class.getSimpleName();
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     protected RevalueApplication mApplication;
     protected SessionPreferences mSessionPreferences;
-    protected BroadcastReceiver mBroadcastReceiver;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -35,14 +34,6 @@ public class BaseActivity extends AppCompatActivity {
 
         // Setup API service
         mApplication.setupRevalueService(mSessionPreferences.getToken());
-
-        // Creates GCM broadcast receiver
-        mBroadcastReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                // TODO: decidere cosa fare alla ricezione dei messaggi
-            }
-        };
     }
 
     @Override
@@ -51,9 +42,6 @@ public class BaseActivity extends AppCompatActivity {
 
         // Stops listening to bus events
         BusProvider.bus().unregister(this);
-
-        // Stops listening to broadcast messages
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(mBroadcastReceiver);
     }
 
     @Override
@@ -62,13 +50,6 @@ public class BaseActivity extends AppCompatActivity {
 
         // Listens to bus events
         BusProvider.bus().register(this);
-
-        // TODO: verificare
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("registrationComplete"));
-
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiver,
-                new IntentFilter("pushNotification"));
     }
 
     protected void checkLogin() {
@@ -82,5 +63,20 @@ public class BaseActivity extends AppCompatActivity {
 
         String token = mSessionPreferences.getToken();
         if (!TextUtils.isEmpty(token)) Log.v(TAG, "Token: " + token);
+    }
+
+    protected boolean checkPlayServices() {
+        GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
+        int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            if (apiAvailability.isUserResolvableError(resultCode)) {
+                apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
+            } else {
+                Log.e(TAG, "This device is not supported.");
+                finish();
+            }
+            return false;
+        }
+        return true;
     }
 }

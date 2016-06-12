@@ -223,8 +223,23 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void actionCameraResult(Intent data) {
-        mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 400);
+        mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 1000);
         previewPicture();
+    }
+
+    private void actionGalleryResult(Intent data) {
+        if (data != null) {
+            try {
+                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(
+                        getContext().getContentResolver(), data.getData()), 1000);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if (mPicture != null) {
+            mButtonChoosePicture.setImageBitmap(mPicture);
+        }
     }
 
     private void previewPicture() {
@@ -241,21 +256,6 @@ public class InsertFragment extends BaseFragment {
         int newHeight = (int)(height * scale);
 
         return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
-    }
-
-    private void actionGalleryResult(Intent data) {
-        if (data != null) {
-            try {
-                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(
-                        getContext().getContentResolver(), data.getData()), 400);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        if (mPicture != null) {
-            mButtonChoosePicture.setImageBitmap(mPicture);
-        }
     }
 
     private void selectPicture() {

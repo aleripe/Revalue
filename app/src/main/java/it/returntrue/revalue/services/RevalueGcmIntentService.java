@@ -9,9 +9,8 @@ import com.google.android.gms.iid.InstanceID;
 
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.GcmTokenModel;
-import it.returntrue.revalue.api.RevalueServiceContract;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
-import retrofit2.Call;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.UpdateGcmTokenEvent;
 
 public class RevalueGcmIntentService extends IntentService {
     private static final String TAG = RevalueGcmIntentService.class.getSimpleName();
@@ -26,11 +25,9 @@ public class RevalueGcmIntentService extends IntentService {
     }
 
     private void registerGCM() {
-        String gcmRegistrationId = null;
-
         try {
             InstanceID instanceID = InstanceID.getInstance(this);
-            gcmRegistrationId = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
+            String gcmRegistrationId = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
                     GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
 
             Log.i(TAG, "GCM token: " + gcmRegistrationId);
@@ -40,13 +37,8 @@ public class RevalueGcmIntentService extends IntentService {
             gcmTokenModel.Token = gcmRegistrationId;
 
             // Calls API to update Gcm registration id (token)
-            RevalueServiceContract service = RevalueServiceGenerator.createService();
-            Call<Void> call = service.UpdateGcmToken(gcmTokenModel);
-            call.execute();
-
-            //sharedPreferences.edit().putBoolean(Config.SENT_TOKEN_TO_SERVER, true).apply();
-        } catch (Exception e) {
-            //sharedPreferences.edit().putBoolean(Config.SENT_TOKEN_TO_SERVER, false).apply();
+            BusProvider.bus().post(new UpdateGcmTokenEvent.OnStart(gcmTokenModel));
         }
+        catch (Exception e) { }
     }
 }

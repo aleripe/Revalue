@@ -13,10 +13,12 @@ import it.returntrue.revalue.events.ExternalLoginEvent;
 import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.GetItemEvent;
 import it.returntrue.revalue.events.GetItemsEvent;
+import it.returntrue.revalue.events.GetUsersByIdsEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.InsertItemEvent;
 import it.returntrue.revalue.events.SetItemAsRemovedEvent;
 import it.returntrue.revalue.events.SetItemAsRevaluedEvent;
+import it.returntrue.revalue.events.UpdateGcmTokenEvent;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 import retrofit2.Call;
@@ -212,6 +214,40 @@ public class RevalueService {
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
                 mBus.post(new SetItemAsRemovedEvent.OnFailure());
+            }
+        });
+    }
+
+    @Subscribe
+    public void onGetUsersByIds(final GetUsersByIdsEvent.OnStart onStart) {
+        Call<List<UserModel>> call = mServiceContract.GetUsersByIds(onStart.getUsersIds());
+
+        call.enqueue(new Callback<List<UserModel>>() {
+            @Override
+            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
+                mBus.post(new GetUsersByIdsEvent.OnSuccess(response.body(), onStart.getCursor()));
+            }
+
+            @Override
+            public void onFailure(Call<List<UserModel>> call, Throwable t) {
+                mBus.post(new GetUsersByIdsEvent.OnFailure());
+            }
+        });
+    }
+
+    @Subscribe
+    public void onUpdateGcmToken(final UpdateGcmTokenEvent.OnStart onStart) {
+        Call<Void> call = mServiceContract.UpdateGcmToken(onStart.getTokenModel());
+
+        call.enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                int i = 0;
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                int i = 0;
             }
         });
     }

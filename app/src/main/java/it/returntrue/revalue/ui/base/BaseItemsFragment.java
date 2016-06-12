@@ -57,7 +57,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(INTERVAL);
         mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         // Create an bus of GoogleAPIClient.
         mGoogleApiClient = new GoogleApiClient.Builder(getContext())

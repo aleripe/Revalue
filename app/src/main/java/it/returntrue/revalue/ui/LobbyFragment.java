@@ -13,30 +13,27 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
+
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.adapters.ChatsAdapter;
-import it.returntrue.revalue.api.RevalueServiceContract;
-import it.returntrue.revalue.api.RevalueServiceGenerator;
-import it.returntrue.revalue.api.UserModel;
 import it.returntrue.revalue.data.MessageData;
-import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.GetUsersByIdsEvent;
 import it.returntrue.revalue.provider.MessageProvider;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import it.returntrue.revalue.ui.base.BaseFragment;
 
-public class ChatsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>,
     ChatsAdapter.OnItemClickListener {
     protected static final int LOADER_CHATS = 1;
 
     private OnItemClickListener mOnItemClickListener;
-    private SessionPreferences mSessionPreferences;
     private int mItemId;
     private int mSenderId;
     private ChatsAdapter mChatsAdapter;
@@ -48,10 +45,10 @@ public class ChatsFragment extends Fragment implements LoaderManager.LoaderCallb
         void onItemClick(View view, int id);
     }
 
-    public ChatsFragment() { }
+    public LobbyFragment() { }
 
     public static Fragment newInstance(int itemId) {
-        return new ChatsFragment();
+        return new LobbyFragment();
     }
 
     @Override
@@ -67,15 +64,12 @@ public class ChatsFragment extends Fragment implements LoaderManager.LoaderCallb
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_chats, container, false);
+        return inflater.inflate(R.layout.fragment_lobby, container, false);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(getContext());
 
         // Gets extra data from intent and preferences
         mItemId = getActivity().getIntent().getIntExtra(ChatActivity.EXTRA_ITEM_ID, 0);
@@ -122,21 +116,8 @@ public class ChatsFragment extends Fragment implements LoaderManager.LoaderCallb
             userIds.add((senderId != currentUserId) ? senderId : receiverId);
         }
 
-        RevalueServiceContract service = RevalueServiceGenerator.createService(mSessionPreferences.getToken());
-        Call<List<UserModel>> call = service.GetUsersByIds(userIds);
-
-        call.enqueue(new Callback<List<UserModel>>() {
-            @Override
-            public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                mChatsAdapter.setUsers(response.body());
-                mChatsAdapter.setCursor(data);
-            }
-
-            @Override
-            public void onFailure(Call<List<UserModel>> call, Throwable t) {
-
-            }
-        });
+        // Gets users
+        BusProvider.bus().post(new GetUsersByIdsEvent.OnStart(userIds, data));
     }
 
     @Override
@@ -149,5 +130,16 @@ public class ChatsFragment extends Fragment implements LoaderManager.LoaderCallb
         if (mOnItemClickListener != null) {
             mOnItemClickListener.onItemClick(view, id);
         }
+    }
+
+    @Subscribe
+    public void onGetUsersByIdsSuccess(GetUsersByIdsEvent.OnSuccess onSuccess) {
+        mChatsAdapter.setUsers(onSuccess.getUsers());
+        mChatsAdapter.setCursor(onSuccess.getCursor());
+    }
+
+    @Subscribe
+    public void onGetUsersByIdsFailure(GetUsersByIdsEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_save_item, Toast.LENGTH_LONG).show();
     }
 }

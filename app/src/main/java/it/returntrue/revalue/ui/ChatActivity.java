@@ -1,7 +1,6 @@
 package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
@@ -9,14 +8,15 @@ import android.view.View;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.ui.base.BaseActivity;
 
-public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnItemClickListener {
+public class ChatActivity extends BaseActivity implements LobbyFragment.OnItemClickListener {
     public static final String EXTRA_ITEM_ID = "item_id";
     public static final String EXTRA_USER_ID = "user_id";
     public static final String EXTRA_USER_ALIAS = "user_alias";
     public static final String EXTRA_IS_OWNED = "is_owned";
 
-    private static final String FRAGMENT_CHATS = "chats";
+    private static final String FRAGMENT_LOBBY = "lobby";
 
     private int mItemId;
     private int mUserId;
@@ -49,7 +49,7 @@ public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnI
         if (mIsOwned) {
             getSupportActionBar().setTitle(R.string.messages);
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.fragment_container, ChatsFragment.newInstance(mItemId))
+                    .add(R.id.fragment_container, LobbyFragment.newInstance(mItemId))
                     .commit();
         }
         else {
@@ -74,7 +74,7 @@ public class ChatActivity extends AppCompatActivity implements ChatsFragment.OnI
     @Override
     public void onItemClick(View view, int receiverId) {
         getSupportFragmentManager().beginTransaction()
-                .addToBackStack(FRAGMENT_CHATS)
+                .addToBackStack(FRAGMENT_LOBBY)
                 .replace(R.id.fragment_container, ChatFragment.newInstance(mItemId, receiverId))
                 .commit();
     }
