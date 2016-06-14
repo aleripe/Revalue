@@ -16,7 +16,15 @@ public class SendMessageEvent {
     }
 
     public static class OnSuccess {
-        public OnSuccess() { }
+        private MessageModel mMessageModel;
+
+        public OnSuccess(MessageModel messageModel) {
+            mMessageModel = messageModel;
+        }
+
+        public MessageModel getMessageModel() {
+            return mMessageModel;
+        }
     }
 
     public static class OnFailure {

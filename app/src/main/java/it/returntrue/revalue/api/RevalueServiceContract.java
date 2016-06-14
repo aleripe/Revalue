@@ -62,7 +62,7 @@ public interface RevalueServiceContract {
     Call<Void> RemoveFavoriteItem(@Path("id") int id);
 
     @POST("messages/send")
-    Call<Void> SendMessage(@Body MessageModel messageModel);
+    Call<MessageModel> SendMessage(@Body MessageModel messageModel);
 
     @POST("users/list/ids")
     Call<List<UserModel>> GetUsersByIds(@Body ArrayList<Integer> ids);

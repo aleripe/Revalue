@@ -14,8 +14,8 @@ import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.GetItemEvent;
 import it.returntrue.revalue.events.GetItemsEvent;
 import it.returntrue.revalue.events.GetUsersByIdsEvent;
-import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.InsertItemEvent;
+import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.events.SetItemAsRemovedEvent;
 import it.returntrue.revalue.events.SetItemAsRevaluedEvent;
@@ -251,16 +251,16 @@ public class RevalueService {
 
     @Subscribe
     public void onSendMessage(final SendMessageEvent.OnStart onStart) {
-        Call<Void> call = mServiceContract.SendMessage(onStart.getMessageModel());
+        Call<MessageModel> call = mServiceContract.SendMessage(onStart.getMessageModel());
 
-        call.enqueue(new Callback<Void>() {
+        call.enqueue(new Callback<MessageModel>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) {
-                mBus.post(new SendMessageEvent.OnSuccess());
+            public void onResponse(Call<MessageModel> call, Response<MessageModel> response) {
+                mBus.post(new SendMessageEvent.OnSuccess(response.body()));
             }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) {
+            public void onFailure(Call<MessageModel> call, Throwable t) {
                 mBus.post(new SendMessageEvent.OnFailure());
             }
         });

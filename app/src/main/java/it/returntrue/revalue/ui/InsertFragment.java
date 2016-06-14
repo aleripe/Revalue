@@ -64,6 +64,7 @@ public class InsertFragment extends BaseFragment {
     private static final int ACTION_GALLERY = 2;
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private static final String EXTRA_PICTURE = "picture";
+    private static final int PICTURE_SIZE = 2000;
 
     private ArrayAdapter<CategoryModel> mAdapter;
     private SupportMapFragment mMapFragment;
@@ -223,7 +224,7 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void actionCameraResult(Intent data) {
-        mPicture = resizeImage((Bitmap)data.getExtras().get("data"), 1000);
+        mPicture = resizeImage((Bitmap)data.getExtras().get("data"), PICTURE_SIZE);
         previewPicture();
     }
 
@@ -231,7 +232,7 @@ public class InsertFragment extends BaseFragment {
         if (data != null) {
             try {
                 mPicture = resizeImage(MediaStore.Images.Media.getBitmap(
-                        getContext().getContentResolver(), data.getData()), 1000);
+                        getContext().getContentResolver(), data.getData()), PICTURE_SIZE);
             } catch (IOException e) {
                 e.printStackTrace();
             }

@@ -19,8 +19,6 @@ import android.widget.EditText;
 
 import com.squareup.otto.Subscribe;
 
-import java.util.GregorianCalendar;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
@@ -86,24 +84,14 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
             public void onClick(View view) {
                 if (TextUtils.isEmpty(mTextMessage.getText())) return;
 
-                GregorianCalendar calendar = new GregorianCalendar();
-
                 //Creates message
                 MessageModel messageModel = new MessageModel();
                 messageModel.UserId = mReceiverId;
                 messageModel.ItemId = mItemId;
                 messageModel.Text = mTextMessage.getText().toString();
-                messageModel.Date = calendar.getTimeInMillis();
 
-                ContentValues values = new ContentValues(2);
-                values.put(MessageEntry.COLUMN_ITEM_ID, messageModel.ItemId);
-                values.put(MessageEntry.COLUMN_SENDER_ID, mSenderId);
-                values.put(MessageEntry.COLUMN_RECEIVER_ID, messageModel.UserId);
-                values.put(MessageEntry.COLUMN_TEXT, messageModel.Text);
-                values.put(MessageEntry.COLUMN_DATE, messageModel.Date);
-                getActivity().getContentResolver().insert(MessageProvider.buildMessageUri(), values);
-
-                mTextMessage.setText("");
+                // Resets interface
+                mTextMessage.setText(null);
                 mButtonSend.setEnabled(false);
 
                 // Calls API to send message
@@ -147,6 +135,15 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
 
     @Subscribe
     public void onSendMessageSuccess(SendMessageEvent.OnSuccess onSuccess) {
+        ContentValues values = new ContentValues(2);
+        values.put(MessageEntry.COLUMN_ITEM_ID, onSuccess.getMessageModel().ItemId);
+        values.put(MessageEntry.COLUMN_SENDER_ID, mSenderId);
+        values.put(MessageEntry.COLUMN_RECEIVER_ID, onSuccess.getMessageModel().UserId);
+        values.put(MessageEntry.COLUMN_TEXT, onSuccess.getMessageModel().Text);
+        values.put(MessageEntry.COLUMN_DATE, onSuccess.getMessageModel().Date);
+
+        getActivity().getContentResolver().insert(MessageProvider.buildMessageUri(), values);
+
         mButtonSend.setEnabled(true);
     }
 
