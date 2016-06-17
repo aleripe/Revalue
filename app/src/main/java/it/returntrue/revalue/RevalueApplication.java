@@ -168,6 +168,14 @@ public class RevalueApplication extends Application {
         return mRevalueService;
     }
 
+    public void updateRevalueService(String token) {
+        if (mRevalueService != null) {
+            BusProvider.bus().unregister(mRevalueService);
+            mRevalueService = new RevalueService(this, BusProvider.bus(), token);
+            BusProvider.bus().register(mRevalueService);
+        }
+    }
+
     private void initizalize() {
         // Initializes Facebook SDK
         FacebookSdk.sdkInitialize(getApplicationContext());

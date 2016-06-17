@@ -2,15 +2,13 @@ package it.returntrue.revalue.services;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.text.TextUtils;
 import android.util.Log;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.google.android.gms.iid.InstanceID;
-
-import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.GcmTokenModel;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.UpdateGcmTokenEvent;
+import it.returntrue.revalue.preferences.SessionPreferences;
 
 public class RevalueGcmIntentService extends IntentService {
     private static final String TAG = RevalueGcmIntentService.class.getSimpleName();
@@ -21,24 +19,21 @@ public class RevalueGcmIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        registerGCM();
-    }
+        // Creates preferences managers
+        SessionPreferences sessionPreferences = new SessionPreferences(this);
+        String token = sessionPreferences.getFirebirdToken();
+        boolean isLoggedIn = sessionPreferences.getIsLoggedIn();
 
-    private void registerGCM() {
-        try {
-            InstanceID instanceID = InstanceID.getInstance(this);
-            String gcmRegistrationId = instanceID.getToken(getString(R.string.gcm_defaultSenderId),
-                    GoogleCloudMessaging.INSTANCE_ID_SCOPE, null);
-
-            Log.i(TAG, "GCM token: " + gcmRegistrationId);
+        // If token exists and user is logged in
+        if (!TextUtils.isEmpty(token) && isLoggedIn) {
+            Log.i(TAG, "Firebird token: " + token);
 
             // Creates token model
             GcmTokenModel gcmTokenModel = new GcmTokenModel();
-            gcmTokenModel.Token = gcmRegistrationId;
+            gcmTokenModel.Token = token;
 
             // Calls API to update Gcm registration id (token)
             BusProvider.bus().post(new UpdateGcmTokenEvent.OnStart(gcmTokenModel));
         }
-        catch (Exception e) { }
     }
 }

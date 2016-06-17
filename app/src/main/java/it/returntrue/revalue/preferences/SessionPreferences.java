@@ -14,11 +14,20 @@ public class SessionPreferences {
     private static final String KEY_TOKEN = "token";
     private static final String KEY_ALIAS = "alias";
     private static final String KEY_AVATAR = "avatar";
+    private static final String KEY_FIREBIRD_TOKEN = "firebird_token";
 
     private SharedPreferences mPreferences;
 
     public SessionPreferences(Context context) {
         mPreferences = context.getSharedPreferences(PREFERENCES_SESSION, Context.MODE_PRIVATE);
+    }
+
+    public void setFirebirdToken(String token) {
+        mPreferences.edit().putString(KEY_FIREBIRD_TOKEN, token).apply();
+    }
+
+    public String getFirebirdToken() {
+        return mPreferences.getString(KEY_FIREBIRD_TOKEN, null);
     }
 
     public void setUserId(int userId) {

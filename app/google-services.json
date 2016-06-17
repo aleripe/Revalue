@@ -1,7 +1,9 @@
 {
   "project_info": {
     "project_number": "559968920325",
-    "project_id": "revalue-1276"
+    "firebase_url": "https://revalue-1276.firebaseio.com",
+    "project_id": "revalue-1276",
+    "storage_bucket": "revalue-1276.appspot.com"
   },
   "client": [
     {
@@ -21,6 +23,10 @@
           }
         },
         {
+          "client_id": "559968920325-efhek7lgqefg56g1k81m3l3o97tnlvkt.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
           "client_id": "559968920325-fgf6frk206vt01a4m4n0e3c0kvi8hcui.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -38,11 +44,16 @@
           }
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "559968920325-efhek7lgqefg56g1k81m3l3o97tnlvkt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
-          "status": 1
+          "status": 2
         }
       }
     }

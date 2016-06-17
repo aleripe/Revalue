@@ -242,10 +242,19 @@ public class RevalueService {
 
         call.enqueue(new Callback<Void>() {
             @Override
-            public void onResponse(Call<Void> call, Response<Void> response) { }
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                if (response.isSuccessful()) {
+                    mBus.post(new UpdateGcmTokenEvent.OnSuccess());
+                }
+                else {
+                    mBus.post(new UpdateGcmTokenEvent.OnFailure());
+                }
+            }
 
             @Override
-            public void onFailure(Call<Void> call, Throwable t) { }
+            public void onFailure(Call<Void> call, Throwable t) {
+                mBus.post(new UpdateGcmTokenEvent.OnFailure());
+            }
         });
     }
 

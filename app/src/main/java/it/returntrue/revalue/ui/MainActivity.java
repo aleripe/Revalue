@@ -32,7 +32,7 @@ import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
-import it.returntrue.revalue.services.RevalueGcmIntentService;
+//import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
@@ -96,9 +96,6 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
 
         // Sets default mode
         setMode(mApplication.getMainMode());
-
-        // Registers GCM
-        registerGCM();
     }
 
     @Override
@@ -351,13 +348,6 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
     private void setStatus(String status) {
         if (mMainFragment != null) {
             mMainFragment.setStatus(status);
-        }
-    }
-
-    private void registerGCM() {
-        if (checkPlayServices()) {
-            Intent intent = new Intent(this, RevalueGcmIntentService.class);
-            startService(intent);
         }
     }
 }

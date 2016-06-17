@@ -29,6 +29,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ExternalTokenModel;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.ExternalLoginEvent;
+import it.returntrue.revalue.events.UpdateGcmTokenEvent;
 import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.utilities.NetworkUtilities;
@@ -104,9 +105,24 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 onSuccess.getTokenModel().getAlias(),
                 onSuccess.getTokenModel().getAvatar());
 
-        // Registers GCM to send or retrieve messages
-        startService(new Intent(LoginActivity.this, RevalueGcmIntentService.class));
+        // Updates service with authentication token
+        mApplication.updateRevalueService(mSessionPreferences.getToken());
 
+        // Registers to send or retrieve messages
+        startService(new Intent(LoginActivity.this, RevalueGcmIntentService.class));
+    }
+
+    @Subscribe
+    public void onExternalLoginFailure(ExternalLoginEvent.OnFailure onFailure) {
+        // Displays error status
+        mLabelStatus.setText(onFailure.getMessage());
+
+        // Closes progress dialog
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+    }
+
+    @Subscribe
+    public void onUpdateGcmTokenSuccess(UpdateGcmTokenEvent.OnSuccess onSuccess) {
         // Starts main activity
         startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
@@ -116,9 +132,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     @Subscribe
-    public void onExternalLoginFailure(ExternalLoginEvent.OnFailure onFailure) {
+    public void onUpdateGcmTokenFailure(UpdateGcmTokenEvent.OnFailure onFailure) {
         // Displays error status
-        mLabelStatus.setText(onFailure.getMessage());
+        mLabelStatus.setText(R.string.could_not_register_messaging_token);
 
         // Closes progress dialog
         if (mProgressDialog != null) mProgressDialog.dismiss();

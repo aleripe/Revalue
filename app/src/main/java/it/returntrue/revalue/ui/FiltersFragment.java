@@ -81,7 +81,7 @@ public class FiltersFragment extends DialogFragment {
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.search_filters)
                 .setView(view)
-                .setPositiveButton(R.string.ok,
+                .setPositiveButton(android.R.string.ok,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 mApplication.setFilterTitle(mTextTitle.getText().toString());

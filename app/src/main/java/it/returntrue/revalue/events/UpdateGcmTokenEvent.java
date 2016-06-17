@@ -14,4 +14,8 @@ public class UpdateGcmTokenEvent {
             return mTokenModel;
         }
     }
+
+    public static class OnSuccess { }
+
+    public static class OnFailure { }
 }

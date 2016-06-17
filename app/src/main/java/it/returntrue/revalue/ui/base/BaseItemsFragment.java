@@ -31,7 +31,9 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     private static final int FASTEST_INTERVAL = 1000;
     private static final int INTERVAL = FASTEST_INTERVAL * 2;
 
-    protected @Constants.ItemMode int mItemMode;
+    protected
+    @Constants.ItemMode
+    int mItemMode;
     protected OnItemClickListener OnItemClickListener;
     protected Location mLastLocation;
 
@@ -41,13 +43,16 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     /** Provides listeners for click events */
     public interface OnItemClickListener {
         void onAddFavoriteClick(View view, int id);
+
         void onRemoveFavoriteClick(View view, int id);
+
         void onItemClick(View view, int id);
     }
 
     public abstract void setStatus(String text);
 
-    public BaseItemsFragment() { }
+    public BaseItemsFragment() {
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -72,7 +77,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
         super.onAttach(context);
 
         try {
-            OnItemClickListener = (OnItemClickListener)context;
+            OnItemClickListener = (OnItemClickListener) context;
         } catch (ClassCastException e) {
             throw new ClassCastException(context.toString() + " must implement OnItemClickListener");
         }
@@ -123,10 +128,9 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
         if (ContextCompat.checkSelfPermission(getActivity(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{ Manifest.permission.ACCESS_FINE_LOCATION },
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-        else {
+        } else {
             startLocationUpdates();
         }
     }
@@ -154,8 +158,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
             case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startLocationUpdates();
-                }
-                else {
+                } else {
                     setStatus(getString(R.string.no_access_location_permission));
                 }
             }
@@ -173,11 +176,9 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     private void loadItems() {
         if (mLastLocation == null) {
             setStatus(getString(R.string.waiting_gps_fix));
-        }
-        else if (!NetworkUtilities.checkInternetConnection(getContext())) {
+        } else if (!NetworkUtilities.checkInternetConnection(getContext())) {
             setStatus(getString(R.string.check_connection));
-        }
-        else {
+        } else {
             BusProvider.bus().post(new GetItemsEvent.OnStart(mItemMode,
                     mApplication.getLocationLatitude(),
                     mApplication.getLocationLongitude(),
@@ -188,7 +189,6 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     }
 
     private void startLocationUpdates() {
-        // Stores last location and starts location updates
         setLastLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
     }

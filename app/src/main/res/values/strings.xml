@@ -32,7 +32,6 @@
     <string name="submit_item">Submit item</string>
     <string name="action_send">Send</string>
     <string name="search_filters">Search filters</string>
-    <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
     <string name="distance">Distance</string>
     <string-array name="array_categories">
@@ -46,7 +45,7 @@
     </string-array>
     <string name="facebook_app_id">1556315897995518</string>
     <string name="google_client_id">559968920325-fgf6frk206vt01a4m4n0e3c0kvi8hcui.apps.googleusercontent.com</string>
-    <string name="google_api_key">AIzaSyAh70ETfM-SwaWrsmk-o_uVkm909Vs4Q4w</string>
+    <string name="google_key">AIzaSyAh70ETfM-SwaWrsmk-o_uVkm909Vs4Q4w</string>
     <string name="call_failed">Call to server failed</string>
     <string name="login_canceled">Login process canceled</string>
     <string name="login_failed">Login process failed</string>
@@ -62,9 +61,9 @@
     <string name="nav_personal">My items</string>
     <string name="content_provider_authority">it.returntrue.revalue.provider</string>
     <string name="loading">Loading</string>
-    <string name="waiting_gps_fix">Waiting for a GPS fix...</string>
+    <string name="waiting_gps_fix">Waiting for a GPS fix…</string>
     <string name="generic_error">An error occurred</string>
-    <string name="authenticating_user">Authenticating user...</string>
+    <string name="authenticating_user">Authenticating user…</string>
     <string name="no_access_location_permission">No access location permission</string>
     <string name="no_results_found">No results found</string>
     <string name="check_connection">Please check internet connection</string>
@@ -92,4 +91,5 @@
     <string name="could_not_get_items">Could not get items</string>
     <string name="could_not_get_item">Could not get item</string>
     <string name="could_not_save_item">Could not save item</string>
+    <string name="could_not_register_messaging_token">Could not connect to messaging system</string>
 </resources>

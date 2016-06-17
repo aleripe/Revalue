@@ -7,10 +7,12 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
-import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
-import com.google.android.gms.gcm.GcmListenerService;
+import com.google.firebase.messaging.FirebaseMessagingService;
+import com.google.firebase.messaging.RemoteMessage;
+
+import java.util.Map;
 
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
@@ -18,18 +20,20 @@ import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.MainActivity;
 
-public class RevalueGcmListenerService extends GcmListenerService {
+public class RevalueGcmListenerService extends FirebaseMessagingService {
     private static final String TAG = RevalueGcmListenerService.class.getSimpleName();
 
     @Override
-    public void onMessageReceived(String from, Bundle data) {
+    public void onMessageReceived(RemoteMessage message) {
+        Map data = message.getData();
+
         // Creates preferences managers
         SessionPreferences sessionPreferences = new SessionPreferences(this);
 
-        int id = Integer.parseInt(data.getString("id"));
-        int userId = Integer.parseInt(data.getString("userId"));
-        String text = data.getString("text");
-        long date = Long.parseLong(data.getString("date"));
+        int id = Integer.parseInt(String.valueOf(data.get("id")));
+        int userId = Integer.parseInt(String.valueOf(data.get("userId")));
+        String text = String.valueOf(data.get("text"));
+        long date = Long.parseLong(String.valueOf(data.get("date")));
 
         ContentValues values = new ContentValues(2);
         values.put(MessageEntry.COLUMN_ITEM_ID, id);

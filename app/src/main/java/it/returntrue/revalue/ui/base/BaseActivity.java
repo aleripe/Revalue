@@ -15,7 +15,7 @@ import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.ui.LoginActivity;
 
-public class BaseActivity extends AppCompatActivity {
+public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAG = BaseActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 

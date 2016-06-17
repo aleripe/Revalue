@@ -20,7 +20,11 @@ public class MessageDbHelper extends SQLiteOpenHelper {
             MessageEntry.COLUMN_SENDER_ID + " INTEGER NOT NULL," +
             MessageEntry.COLUMN_RECEIVER_ID + " INTEGER NOT NULL," +
             MessageEntry.COLUMN_TEXT + " TEXT NOT NULL," +
-            MessageEntry.COLUMN_DATE + " TEXT NOT NULL" +
+            MessageEntry.COLUMN_DATE + " TEXT NOT NULL," +
+                "UNIQUE (" + MessageEntry.COLUMN_ITEM_ID + "," +
+                MessageEntry.COLUMN_SENDER_ID + "," +
+                MessageEntry.COLUMN_RECEIVER_ID + "," +
+                MessageEntry.COLUMN_DATE + ") ON CONFLICT REPLACE" +
         ")";
 
     public MessageDbHelper(Context context) {
