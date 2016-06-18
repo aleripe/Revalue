@@ -1,11 +1,6 @@
 package it.returntrue.revalue.ui;
 
-import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapShader;
-import android.graphics.Canvas;
-import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -15,15 +10,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.Transformation;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.engine.Resource;
-import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
-import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
@@ -38,17 +30,19 @@ import java.util.HashMap;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.events.GetItemsEvent;
+import it.returntrue.revalue.imaging.CropCircleTransformation;
 import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.MapUtilities;
 
+@SuppressWarnings({"UnusedParameters", "unused"})
 public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWindowClickListener {
     private static final String KEY_LATITUDE = "latitude";
     private static final String KEY_LONGITUDE = "longitude";
     private static final String KEY_ZOOM = "zoom";
 
     private SupportMapFragment mMapFragment;
-    private HashMap<Marker, Integer> mMarkerIDs = new HashMap<>();
+    private final HashMap<Marker, Integer> mMarkerIDs = new HashMap<>();
     private double mLatitude;
     private double mLongitude;
     private float mZoom;
@@ -88,54 +82,55 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
     }
 
     @Subscribe
-    public void onGetItemsSuccess(GetItemsEvent.OnSuccess onSuccess) {
-        final GoogleMap map = mMapFragment.getMap();
+    public void onGetItemsSuccess(final GetItemsEvent.OnSuccess onSuccess) {
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(final GoogleMap googleMap) {
+                googleMap.clear();
+                googleMap.setOnInfoWindowClickListener(MapFragment.this);
 
-        if (map != null) {
-            map.clear();
-            map.setOnInfoWindowClickListener(this);
+                for (final ItemModel itemModel : onSuccess.getItems()) {
+                    if (!itemModel.ShowOnMap) continue;
 
-            for (final ItemModel itemModel : onSuccess.getItems()) {
-                if (!itemModel.ShowOnMap) continue;
+                    Glide.with(getContext())
+                            .load(itemModel.MarkerUrl)
+                            .asBitmap()
+                            .diskCacheStrategy(DiskCacheStrategy.NONE)
+                            .skipMemoryCache(true)
+                            .transform(new CropCircleTransformation(getContext()))
+                            .into(new SimpleTarget<Bitmap>() {
+                                @Override
+                                public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
+                                    final Marker marker = googleMap.addMarker(new MarkerOptions()
+                                            .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
+                                            .title(itemModel.Title)
+                                            .snippet(getString(R.string.item_location,
+                                                    itemModel.City, (int)(itemModel.Distance / 1000)))
+                                            .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+                                    mMarkerIDs.put(marker, itemModel.Id);
+                                }
+                            });
+                }
 
-                Glide.with(getContext())
-                        .load(itemModel.MarkerUrl)
-                        .asBitmap()
-                        .diskCacheStrategy(DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .transform(new CropCircleTransformation(getContext()))
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                                final Marker marker = map.addMarker(new MarkerOptions()
-                                        .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
-                                        .title(itemModel.Title)
-                                        .snippet(itemModel.City + " / " +
-                                                (int)(itemModel.Distance / 1000) + " km")
-                                        .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
-                                mMarkerIDs.put(marker, itemModel.Id);
-                            }
-                        });
+                LatLng position = new LatLng(
+                        mApplication.getLocationLatitude(), mApplication.getLocationLongitude());
+
+                if (mLatitude != 0 && mLongitude != 0) {
+                    position = new LatLng(mLatitude, mLongitude);
+                }
+
+                Circle circle = MapUtilities.getCenteredCircle(googleMap, position,
+                        mApplication.getFilterDistance());
+
+                if (mZoom == 0) {
+                    mZoom = MapUtilities.getCircleZoomLevel(circle);
+                }
+
+                if (mZoom > 0) {
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, mZoom));
+                }
             }
-
-            LatLng position = new LatLng(
-                    mApplication.getLocationLatitude(), mApplication.getLocationLongitude());
-
-            if (mLatitude != 0 && mLongitude != 0) {
-                position = new LatLng(mLatitude, mLongitude);
-            }
-
-            Circle circle = MapUtilities.getCenteredCircle(map, position,
-                    mApplication.getFilterDistance());
-
-            if (mZoom == 0) {
-                mZoom = MapUtilities.getCircleZoomLevel(circle);
-            }
-
-            if (mZoom > 0) {
-                map.moveCamera(CameraUpdateFactory.newLatLngZoom(position, mZoom));
-            }
-        }
+        });
     }
 
     @Subscribe
@@ -149,18 +144,19 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        GoogleMap map = mMapFragment.getMap();
+    public void onSaveInstanceState(final Bundle outState) {
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                CameraPosition camera = googleMap.getCameraPosition();
 
-        if (map != null) {
-            CameraPosition camera = map.getCameraPosition();
-
-            if (camera != null) {
-                outState.putDouble(KEY_LATITUDE, camera.target.latitude);
-                outState.putDouble(KEY_LONGITUDE, camera.target.longitude);
-                outState.putFloat(KEY_ZOOM, camera.zoom);
+                if (camera != null) {
+                    outState.putDouble(KEY_LATITUDE, camera.target.latitude);
+                    outState.putDouble(KEY_LONGITUDE, camera.target.longitude);
+                    outState.putFloat(KEY_ZOOM, camera.zoom);
+                }
             }
-        }
+        });
 
         super.onSaveInstanceState(outState);
     }
@@ -168,56 +164,7 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
     @Override
     public void onInfoWindowClick(Marker marker) {
         if (OnItemClickListener != null) {
-            OnItemClickListener.onItemClick(null, mMarkerIDs.get(marker));
-        }
-    }
-
-    public class CropCircleTransformation implements Transformation<Bitmap> {
-
-        private BitmapPool mBitmapPool;
-
-        public CropCircleTransformation(Context context) {
-            this(Glide.get(context).getBitmapPool());
-        }
-
-        public CropCircleTransformation(BitmapPool pool) {
-            this.mBitmapPool = pool;
-        }
-
-        @Override
-        public Resource<Bitmap> transform(Resource<Bitmap> resource, int outWidth, int outHeight) {
-            Bitmap source = resource.get();
-            int size = Math.min(source.getWidth(), source.getHeight());
-
-            int width = (source.getWidth() - size) / 2;
-            int height = (source.getHeight() - size) / 2;
-
-            Bitmap bitmap = mBitmapPool.get(size, size, Bitmap.Config.ARGB_8888);
-            if (bitmap == null) {
-                bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            }
-
-            Canvas canvas = new Canvas(bitmap);
-            Paint paint = new Paint();
-            BitmapShader shader = new BitmapShader(source,
-                    BitmapShader.TileMode.CLAMP, BitmapShader.TileMode.CLAMP);
-
-            if (width != 0 || height != 0) {
-                Matrix matrix = new Matrix();
-                matrix.setTranslate(-width, -height);
-                shader.setLocalMatrix(matrix);
-            }
-            paint.setShader(shader);
-            paint.setAntiAlias(true);
-
-            float r = size / 2f;
-            canvas.drawCircle(r, r, r, paint);
-
-            return BitmapResource.obtain(bitmap, mBitmapPool);
-        }
-
-        @Override public String getId() {
-            return "CropCircleTransformation()";
+            OnItemClickListener.onItemClick(mMarkerIDs.get(marker));
         }
     }
 }

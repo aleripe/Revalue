@@ -4,15 +4,12 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
-import com.google.android.gms.analytics.Tracker;
-
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
 public class BaseFragment extends Fragment {
     protected RevalueApplication mApplication;
-    protected Tracker mTracker;
     protected SessionPreferences mSessionPreferences;
 
     @Override
@@ -21,9 +18,6 @@ public class BaseFragment extends Fragment {
 
         // Sets application context
         mApplication = (RevalueApplication)getActivity().getApplicationContext();
-
-        // Gets analytics tracker
-        mTracker = mApplication.getTracker();
 
         // Creates preferences managers
         mSessionPreferences = new SessionPreferences(getContext());

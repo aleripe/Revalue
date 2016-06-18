@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+    <entry_points version="2.0">
+      <entry_point TYPE="method" FQNAME="it.returntrue.revalue.imaging.CropCircleTransformation CropCircleTransformation(android.content.Context context)" />
+      <entry_point TYPE="method" FQNAME="it.returntrue.revalue.imaging.CropCircleTransformation CropCircleTransformation(com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool pool)" />
+    </entry_points>
   </component>
   <component name="NullableNotNullManager">
     <option name="myDefaultNullable" value="android.support.annotation.Nullable" />

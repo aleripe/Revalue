@@ -2,9 +2,10 @@ package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.ItemModel;
 
+@SuppressWarnings("ALL")
 public class InsertItemEvent {
     public static class OnStart {
-        private ItemModel mItemModel;
+        private final ItemModel mItemModel;
 
         public OnStart(ItemModel itemModel) {
             mItemModel = itemModel;

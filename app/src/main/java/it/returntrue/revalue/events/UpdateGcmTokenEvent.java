@@ -2,9 +2,10 @@ package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.GcmTokenModel;
 
+@SuppressWarnings("ALL")
 public class UpdateGcmTokenEvent {
     public static class OnStart {
-        private GcmTokenModel mTokenModel;
+        private final GcmTokenModel mTokenModel;
 
         public OnStart(GcmTokenModel tokenModel) {
             mTokenModel = tokenModel;

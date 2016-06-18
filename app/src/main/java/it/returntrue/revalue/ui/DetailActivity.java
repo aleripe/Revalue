@@ -9,6 +9,7 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
+@SuppressWarnings({"ConstantConditions", "WeakerAccess", "unused"})
 public class DetailActivity extends BaseActivity {
     public static final String EXTRA_ID = "id";
 
@@ -42,7 +43,7 @@ public class DetailActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 DetailFragment detailFragment =
-                        (DetailFragment)getSupportFragmentManager().findFragmentById(R.id.fragment);
+                        (DetailFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_detail);
                 detailFragment.goToChatActivity();
             }
         });

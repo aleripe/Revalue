@@ -38,6 +38,7 @@ import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+@SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class MainActivity extends BaseActivity implements BaseItemsFragment.OnItemClickListener,
         NavigationView.OnNavigationItemSelectedListener {
     private static final String FRAGMENT_FILTERS = "filters";
@@ -146,7 +147,7 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
     }
 
     @Override
-    public void onItemClick(View view, int id) {
+    public void onItemClick(int id) {
         // Opens details activity
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_ID, id);
@@ -154,18 +155,13 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
     }
 
     @Override
-    public void onAddFavoriteClick(View view, int id) {
+    public void onAddFavoriteClick(int id) {
         BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(id));
     }
 
     @Override
-    public void onRemoveFavoriteClick(View view, int id) {
+    public void onRemoveFavoriteClick(int id) {
         BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(id));
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Subscribe

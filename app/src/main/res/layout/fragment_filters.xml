@@ -1,90 +1,106 @@
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context=".ui.FiltersFragment">
-    <LinearLayout
-        android:id="@+id/layout_title"
+    android:layout_height="match_parent">
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/label_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/title"
-            android:textSize="12sp"
-            android:layout_marginBottom="-8dp"/>
-        <EditText
-            android:id="@+id/text_title"
+        android:orientation="vertical"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        tools:context=".ui.FiltersFragment">
+        <LinearLayout
+            android:id="@+id/layout_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="-4dp"
-            android:textSize="16sp"
-            android:hint="@string/hint_title" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/layout_category"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/layout_title"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/category"
-            android:textSize="12sp"
-            android:layout_marginBottom="2dp" />
-        <Spinner
-            android:id="@+id/spinner_category"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/label_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title"
+                android:textSize="12sp"
+                android:layout_marginBottom="-8dp"/>
+            <EditText
+                android:id="@+id/text_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textDirection="locale"
+                android:layout_marginLeft="-4dp"
+                android:layout_marginStart="-4dp"
+                android:textSize="16sp"
+                android:hint="@string/hint_title"
+                tools:targetApi="jelly_bean_mr1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_category"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="-8dp"
-            android:hint="@string/hint_category" />
-    </LinearLayout>
-    <LinearLayout
-        android:id="@+id/layout_distance"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/layout_category"
-        android:layout_marginTop="16dp"
-        android:orientation="vertical">
-        <TextView
-            android:layout_width="wrap_content"
+            android:layout_below="@id/layout_title"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/category"
+                android:textSize="12sp"
+                android:layout_marginBottom="2dp" />
+            <Spinner
+                android:id="@+id/spinner_category"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="-8dp"
+                android:layout_marginStart="-8dp"
+                android:textDirection="locale"
+                android:hint="@string/hint_category"
+                tools:targetApi="jelly_bean_mr1" />
+        </LinearLayout>
+        <LinearLayout
+            android:id="@+id/layout_distance"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/distance"
-            android:textSize="12sp"
-            android:layout_marginBottom="2dp" />
-        <RadioGroup
-            android:id="@+id/radio_distance"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <RadioButton
-                android:id="@+id/radio_distance_50"
+            android:layout_below="@id/layout_category"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical">
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="50 km" />
-            <RadioButton
-                android:id="@+id/radio_distance_100"
-                android:layout_width="wrap_content"
+                android:text="@string/distance"
+                android:textSize="12sp"
+                android:layout_marginBottom="2dp" />
+            <RadioGroup
+                android:id="@+id/radio_distance"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="100 km" />
-            <RadioButton
-                android:id="@+id/radio_distance_200"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="200 km" />
-        </RadioGroup>
-    </LinearLayout>
-</RelativeLayout>
+                android:orientation="horizontal">
+                <RadioButton
+                    android:id="@+id/radio_distance_50"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/distance_50"
+                    android:textDirection="locale"
+                    tools:targetApi="jelly_bean_mr1" />
+                <RadioButton
+                    android:id="@+id/radio_distance_100"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/distance_100"
+                    android:textDirection="locale"
+                    tools:targetApi="jelly_bean_mr1" />
+                <RadioButton
+                    android:id="@+id/radio_distance_200"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/distance_200"
+                    android:textDirection="locale"
+                    tools:targetApi="jelly_bean_mr1" />
+            </RadioGroup>
+        </LinearLayout>
+    </RelativeLayout>
+</ScrollView>

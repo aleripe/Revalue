@@ -18,14 +18,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
-    buildTypes {
-        debug {
-            it.buildConfigField 'String', 'API_SERVICE_BASE_URL', API_SERVICE_DEBUG_BASE_URL
-        }
-        release {
-            it.buildConfigField 'String', 'API_SERVICE_BASE_URL', API_SERVICE_RELEASE_BASE_URL
-        }
-    }
     lintOptions {
         abortOnError false
     }

@@ -26,10 +26,11 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+@SuppressWarnings({"UnusedParameters", "unused"})
 public class RevalueService {
-    private Context mContext;
-    private RevalueServiceContract mServiceContract;
-    private Bus mBus;
+    private final Context mContext;
+    private final RevalueServiceContract mServiceContract;
+    private final Bus mBus;
 
     public RevalueService(Context context, Bus bus, String token) {
         mContext = context;

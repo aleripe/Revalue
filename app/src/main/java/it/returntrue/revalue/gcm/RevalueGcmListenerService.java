@@ -20,9 +20,8 @@ import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.MainActivity;
 
+@SuppressWarnings("SameParameterValue")
 public class RevalueGcmListenerService extends FirebaseMessagingService {
-    private static final String TAG = RevalueGcmListenerService.class.getSimpleName();
-
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Map data = message.getData();

@@ -7,10 +7,11 @@ import java.util.List;
 
 import it.returntrue.revalue.api.UserModel;
 
+@SuppressWarnings("ALL")
 public class GetUsersByIdsEvent {
     public static class OnStart {
-        private ArrayList<Integer> mUsersIds;
-        private Cursor mCursor;
+        private final ArrayList<Integer> mUsersIds;
+        private final Cursor mCursor;
 
         public OnStart(ArrayList<Integer> usersIds, Cursor cursor) {
             mUsersIds = usersIds;
@@ -27,8 +28,8 @@ public class GetUsersByIdsEvent {
     }
 
     public static class OnSuccess {
-        private List<UserModel> mUsers;
-        private Cursor mCursor;
+        private final List<UserModel> mUsers;
+        private final Cursor mCursor;
 
         public OnSuccess(List<UserModel> users, Cursor cursor) {
             mUsers = users;

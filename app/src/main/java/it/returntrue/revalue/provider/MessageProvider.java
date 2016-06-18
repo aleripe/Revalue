@@ -12,21 +12,22 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.data.MessageDbHelper;
 
+@SuppressWarnings("ConstantConditions")
 public class MessageProvider extends ContentProvider {
-    public static final String CONTENT_AUTHORITY = "it.returntrue.revalue.provider";
-    public static final Uri CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
-    public static final String PATH_CHAT = "chat";
-    public static final String PATH_MESSAGE = "message";
-    public static final String CHAT_DIR_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
+    private static final String CONTENT_AUTHORITY = "it.returntrue.revalue.provider";
+    private static final Uri CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final String PATH_CHAT = "chat";
+    private static final String PATH_MESSAGE = "message";
+    private static final String CHAT_DIR_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "vnd." + CONTENT_AUTHORITY + "." + PATH_CHAT;
-    public static final String MESSAGE_DIR_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
+    private static final String MESSAGE_DIR_CONTENT_TYPE = ContentResolver.CURSOR_DIR_BASE_TYPE +
             "vnd." + CONTENT_AUTHORITY + "." + PATH_MESSAGE;
-
     private static final int CHAT = 100;
     private static final int MESSAGE = 200;
     private static final UriMatcher mUriMatcher = buildUriMatcher();
@@ -41,7 +42,7 @@ public class MessageProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NonNull Uri uri) {
         switch (mUriMatcher.match(uri)) {
             case CHAT:
                 return CHAT_DIR_CONTENT_TYPE;
@@ -54,7 +55,7 @@ public class MessageProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Cursor query(Uri uri, String[] projection,
+    public Cursor query(@NonNull Uri uri, String[] projection,
                         String selection, String[] selectionArgs, String sortOrder) {
         Cursor cursor;
 
@@ -90,7 +91,7 @@ public class MessageProvider extends ContentProvider {
 
     @Nullable
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NonNull Uri uri, ContentValues values) {
         SQLiteDatabase db = mMessageDbHelper.getWritableDatabase();
         Uri returnUri;
 
@@ -114,7 +115,7 @@ public class MessageProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(@NonNull Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mMessageDbHelper.getWritableDatabase();
         int rowsUpdated;
 
@@ -134,7 +135,7 @@ public class MessageProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NonNull Uri uri, String selection, String[] selectionArgs) {
         SQLiteDatabase db = mMessageDbHelper.getWritableDatabase();
         int rowsDeleted;
 
@@ -154,7 +155,7 @@ public class MessageProvider extends ContentProvider {
     }
 
     @Override
-    public int bulkInsert(Uri uri, ContentValues[] valuesArray) {
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] valuesArray) {
         SQLiteDatabase db = mMessageDbHelper.getWritableDatabase();
         int totalRowCount = 0;
 
@@ -204,7 +205,7 @@ public class MessageProvider extends ContentProvider {
                 .build();
     }
 
-    public static Uri buildMessageUri(long id) {
+    private static Uri buildMessageUri(long id) {
         return CONTENT_URI.buildUpon()
                 .appendPath(PATH_MESSAGE)
                 .appendPath(String.valueOf(id))

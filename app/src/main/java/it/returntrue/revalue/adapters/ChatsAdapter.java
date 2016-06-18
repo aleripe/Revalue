@@ -29,8 +29,6 @@ import it.returntrue.revalue.preferences.SessionPreferences;
  * Adapts data returned from cursor to show in a RecyclerView
  * */
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
-    private static final String TAG = ChatsAdapter.class.getSimpleName();
-
     private final SessionPreferences mSessionPreferences;
     private final Context mContext;
     private Cursor mCursor;
@@ -39,7 +37,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
-        void onItemClick(View view, int id);
+        void onItemClick(int id);
     }
 
     public ChatsAdapter(Context context, SessionPreferences sessionPreferences) {
@@ -95,6 +93,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     }
 
     /** Represents a ViewHolder for a RecyclerView item */
+    @SuppressWarnings("unused")
     public final class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.image_avatar) public ImageView imageAvatar;
         @Bind(R.id.text_alias) public TextView textAlias;
@@ -117,8 +116,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
                         int senderId = MessageData.getSenderId(mCursor);
                         int receiverId = MessageData.getReceiverId(mCursor);
 
-                        mOnItemClickListener.onItemClick(view,
-                                (userId != senderId) ? senderId : receiverId);
+                        mOnItemClickListener.onItemClick((userId != senderId) ? senderId : receiverId);
                     }
                 }
             });

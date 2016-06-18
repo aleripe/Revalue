@@ -30,8 +30,9 @@ import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.base.BaseFragment;
 
+@SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
-    protected static final int LOADER_MESSAGES = 1;
+    private static final int LOADER_MESSAGES = 1;
 
     private int mItemId;
     private int mReceiverId;
@@ -152,11 +153,11 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
         mButtonSend.setEnabled(true);
     }
 
-    public void setItemId(int itemId) {
+    private void setItemId(int itemId) {
         mItemId = itemId;
     }
 
-    public void setReceiverId(int receiverId) {
+    private void setReceiverId(int receiverId) {
         mReceiverId = receiverId;
     }
 }

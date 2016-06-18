@@ -3,6 +3,7 @@ package it.returntrue.revalue.api;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+@SuppressWarnings("unused")
 public class TokenModel {
     @SerializedName("userId")
     @Expose

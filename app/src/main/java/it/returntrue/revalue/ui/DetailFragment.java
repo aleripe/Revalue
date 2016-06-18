@@ -31,6 +31,7 @@ import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
@@ -51,6 +52,7 @@ import it.returntrue.revalue.ui.base.BaseFragment;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+@SuppressWarnings({"ConstantConditions", "UnusedParameters", "WeakerAccess", "unused"})
 public class DetailFragment extends BaseFragment {
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
 
@@ -213,7 +215,7 @@ public class DetailFragment extends BaseFragment {
         }
     }
 
-    private void setDetails(ItemModel itemModel) {
+    private void setDetails(final ItemModel itemModel) {
         mItemModel = itemModel;
 
         Glide.with(getContext())
@@ -229,24 +231,27 @@ public class DetailFragment extends BaseFragment {
 
         // Sets main data
         mTextTitle.setText(itemModel.Title);
-        mTextLocation.setText(itemModel.City + " / " + (int) (itemModel.Distance / 1000) + " km");
+        mTextLocation.setText(getString(R.string.item_location,
+                itemModel.City, (int) (itemModel.Distance / 1000)));
         mTextDescription.setText(itemModel.Description);
 
         // Shows position on map if available
         if (itemModel.ShowOnMap) {
-            GoogleMap map = mMapFragment.getMap();
-            if (map != null) {
-                LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
-                map.addMarker(new MarkerOptions().position(coordinates));
+            mMapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    LatLng coordinates = new LatLng(itemModel.Latitude, itemModel.Longitude);
+                    googleMap.addMarker(new MarkerOptions().position(coordinates));
 
-                Circle circle = MapUtilities.getCenteredCircle(map, coordinates,
-                        mApplication.getFilterDistance());
-                int zoom = MapUtilities.getCircleZoomLevel(circle);
+                    Circle circle = MapUtilities.getCenteredCircle(googleMap, coordinates,
+                            mApplication.getFilterDistance());
+                    int zoom = MapUtilities.getCircleZoomLevel(circle);
 
-                if (zoom > 0) {
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                    if (zoom > 0) {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                    }
                 }
-            }
+            });
         } else {
             mMapFragment.getView().setVisibility(View.GONE);
         }
@@ -257,7 +262,7 @@ public class DetailFragment extends BaseFragment {
         startActivity(intent);
     }
 
-    public void addFavorite() {
+    private void addFavorite() {
         if (NetworkUtilities.checkInternetConnection(getContext())) {
             // Adds favorite
             BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(mId));
@@ -266,7 +271,7 @@ public class DetailFragment extends BaseFragment {
         }
     }
 
-    public void removeFavorite() {
+    private void removeFavorite() {
         if (NetworkUtilities.checkInternetConnection(getContext())) {
             // Removes favorite
             BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(mId));
@@ -286,7 +291,7 @@ public class DetailFragment extends BaseFragment {
         }
     }
 
-    public void setItemAsRevalued() {
+    private void setItemAsRevalued() {
         if (!NetworkUtilities.checkInternetConnection(getContext())) {
             Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
             return;
@@ -305,7 +310,7 @@ public class DetailFragment extends BaseFragment {
         }
     }
 
-    public void setItemAsRemoved() {
+    private void setItemAsRemoved() {
         if (!NetworkUtilities.checkInternetConnection(getContext())) {
             Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
             return;

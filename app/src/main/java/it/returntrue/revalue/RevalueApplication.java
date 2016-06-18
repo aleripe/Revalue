@@ -7,9 +7,6 @@ import android.text.TextUtils;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.stetho.Stetho;
-import com.google.android.gms.analytics.GoogleAnalytics;
-import com.google.android.gms.analytics.Tracker;
-import com.squareup.otto.Bus;
 
 import java.util.List;
 
@@ -24,7 +21,7 @@ public class RevalueApplication extends Application {
     public static final int LIST_MODE = 1;
     public static final int MAP_MODE = 2;
 
-    public static final int DEFAULT_DISTANCE = 50;
+    private static final int DEFAULT_DISTANCE = 50;
 
     @Modes private int mMainMode = LIST_MODE;
     private String mFilterTitle = null;
@@ -33,14 +30,13 @@ public class RevalueApplication extends Application {
     private Double mLocationLatitude = null;
     private Double mLocationLongitude = null;
     private List<CategoryModel> mCategories = null;
-    private Tracker mTracker;
+    //private Tracker mTracker;
     private RevalueService mRevalueService;
-    private Bus mBus;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        initizalize();
+        initialize();
     }
 
     public void setMainMode(@Modes int mode) {
@@ -121,7 +117,7 @@ public class RevalueApplication extends Application {
         return mCategories;
     }
 
-    public String getCategoryName(Integer id) {
+    private String getCategoryName(Integer id) {
         if (id != null) {
             for (CategoryModel categoryModel : mCategories) {
                 if (categoryModel.Id == getFilterCategory()) {
@@ -152,6 +148,7 @@ public class RevalueApplication extends Application {
         return null;
     }
 
+    /*
     public Tracker getTracker() {
         if (mTracker == null) {
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
@@ -159,13 +156,13 @@ public class RevalueApplication extends Application {
         }
         return mTracker;
     }
+    */
 
-    public RevalueService setupRevalueService(String token) {
+    public void setupRevalueService(String token) {
         if (mRevalueService == null) {
             mRevalueService = new RevalueService(this, BusProvider.bus(), token);
             BusProvider.bus().register(mRevalueService);
         }
-        return mRevalueService;
     }
 
     public void updateRevalueService(String token) {
@@ -176,7 +173,7 @@ public class RevalueApplication extends Application {
         }
     }
 
-    private void initizalize() {
+    private void initialize() {
         // Initializes Facebook SDK
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);

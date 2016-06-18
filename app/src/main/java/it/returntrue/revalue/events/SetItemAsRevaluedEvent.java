@@ -1,8 +1,9 @@
 package it.returntrue.revalue.events;
 
+@SuppressWarnings("ALL")
 public class SetItemAsRevaluedEvent {
     public static class OnStart {
-        private int mId;
+        private final int mId;
 
         public OnStart(int id) {
             mId = id;

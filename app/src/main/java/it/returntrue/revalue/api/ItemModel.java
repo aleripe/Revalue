@@ -1,5 +1,6 @@
 package it.returntrue.revalue.api;
 
+@SuppressWarnings("unused")
 public class ItemModel {
     public int Id;
     public String Title;

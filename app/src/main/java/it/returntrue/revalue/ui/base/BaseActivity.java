@@ -6,10 +6,12 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
+import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
@@ -34,6 +36,11 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // Setup API service
         mApplication.setupRevalueService(mSessionPreferences.getToken());
+
+        if (!checkPlayServices()) {
+            //TODO: what to do?
+            Toast.makeText(this, getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+        }
     }
 
     @Override
@@ -65,7 +72,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(token)) Log.v(TAG, "Token: " + token);
     }
 
-    protected boolean checkPlayServices() {
+    private boolean checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {

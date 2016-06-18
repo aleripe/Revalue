@@ -6,6 +6,7 @@ package it.returntrue.revalue.utilities;
 
 import android.database.Cursor;
 
+@SuppressWarnings({"SameParameterValue", "unused"})
 public final class CursorUtilities {
     /** Gets the string from the specified cursor's column */
     public static String getString(Cursor cursor, String columnName) {

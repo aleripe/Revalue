@@ -16,7 +16,7 @@ public class SessionPreferences {
     private static final String KEY_AVATAR = "avatar";
     private static final String KEY_FIREBIRD_TOKEN = "firebird_token";
 
-    private SharedPreferences mPreferences;
+    private final SharedPreferences mPreferences;
 
     public SessionPreferences(Context context) {
         mPreferences = context.getSharedPreferences(PREFERENCES_SESSION, Context.MODE_PRIVATE);
@@ -30,7 +30,7 @@ public class SessionPreferences {
         return mPreferences.getString(KEY_FIREBIRD_TOKEN, null);
     }
 
-    public void setUserId(int userId) {
+    private void setUserId(int userId) {
         mPreferences.edit().putInt(KEY_USER_ID, userId).apply();
     }
 
@@ -38,7 +38,7 @@ public class SessionPreferences {
         return mPreferences.getInt(KEY_USER_ID, 0);
     }
 
-    public void setUsername(String username) {
+    private void setUsername(String username) {
         mPreferences.edit().putString(KEY_USERNAME, username).apply();
     }
 
@@ -46,7 +46,7 @@ public class SessionPreferences {
         return mPreferences.getString(KEY_USERNAME, null);
     }
 
-    public void setToken(String token) {
+    private void setToken(String token) {
         mPreferences.edit().putString(KEY_TOKEN, token).apply();
     }
 
@@ -54,7 +54,7 @@ public class SessionPreferences {
         return mPreferences.getString(KEY_TOKEN, null);
     }
 
-    public void setAlias(String alias) {
+    private void setAlias(String alias) {
         mPreferences.edit().putString(KEY_ALIAS, alias).apply();
     }
 
@@ -62,7 +62,7 @@ public class SessionPreferences {
         return mPreferences.getString(KEY_ALIAS, null);
     }
 
-    public void setAvatar(String avatar) {
+    private void setAvatar(String avatar) {
         mPreferences.edit().putString(KEY_AVATAR, avatar).apply();
     }
 

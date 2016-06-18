@@ -2,11 +2,12 @@ package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.ItemModel;
 
+@SuppressWarnings("ALL")
 public class GetItemEvent {
     public static class OnStart {
-        private int mId;
-        private double mLatitude;
-        private double mLongitude;
+        private final int mId;
+        private final double mLatitude;
+        private final double mLongitude;
 
         public OnStart(int id, double latitude, double longitude) {
             mId = id;
@@ -28,7 +29,7 @@ public class GetItemEvent {
     }
 
     public static class OnSuccess {
-        private ItemModel mItem;
+        private final ItemModel mItem;
 
         public OnSuccess(ItemModel item) {
             mItem = item;

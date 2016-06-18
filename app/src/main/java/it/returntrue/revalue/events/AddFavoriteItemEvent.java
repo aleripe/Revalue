@@ -1,5 +1,6 @@
 package it.returntrue.revalue.events;
 
+@SuppressWarnings("ALL")
 public class AddFavoriteItemEvent {
     public static class OnStart {
         private int mId;

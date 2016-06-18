@@ -29,26 +29,28 @@ import it.returntrue.revalue.events.GetUsersByIdsEvent;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.base.BaseFragment;
 
+@SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>,
     ChatsAdapter.OnItemClickListener {
-    protected static final int LOADER_CHATS = 1;
+    private static final int LOADER_CHATS = 1;
 
     private OnItemClickListener mOnItemClickListener;
     private int mItemId;
-    private int mSenderId;
     private ChatsAdapter mChatsAdapter;
 
     @Bind(R.id.list_messages) RecyclerView mRecyclerView;
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
-        void onItemClick(View view, int id);
+        void onItemClick(int id);
     }
 
     public LobbyFragment() { }
 
     public static Fragment newInstance(int itemId) {
-        return new LobbyFragment();
+        LobbyFragment lobbyFragment = new LobbyFragment();
+        lobbyFragment.setItemId(itemId);
+        return lobbyFragment;
     }
 
     @Override
@@ -71,9 +73,9 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // TODO: id duplicated
         // Gets extra data from intent and preferences
         mItemId = getActivity().getIntent().getIntExtra(ChatActivity.EXTRA_ITEM_ID, 0);
-        mSenderId = mSessionPreferences.getUserId();
 
         // Binds controls
         ButterKnife.bind(this, getView());
@@ -126,9 +128,9 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
     }
 
     @Override
-    public void onItemClick(View view, int id) {
+    public void onItemClick(int id) {
         if (mOnItemClickListener != null) {
-            mOnItemClickListener.onItemClick(view, id);
+            mOnItemClickListener.onItemClick(id);
         }
     }
 
@@ -141,5 +143,9 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
     @Subscribe
     public void onGetUsersByIdsFailure(GetUsersByIdsEvent.OnFailure onFailure) {
         Toast.makeText(getContext(), R.string.could_not_save_item, Toast.LENGTH_LONG).show();
+    }
+
+    private void setItemId(int itemId) {
+        mItemId = itemId;
     }
 }

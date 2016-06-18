@@ -3,13 +3,14 @@ package it.returntrue.revalue.events;
 import java.util.List;
 import it.returntrue.revalue.api.CategoryModel;
 
+@SuppressWarnings("ALL")
 public class GetCategoriesEvent {
     public static class OnStart {
         public OnStart() { }
     }
 
     public static class OnSuccess {
-        private List<CategoryModel> mCategories;
+        private final List<CategoryModel> mCategories;
 
         public OnSuccess(List<CategoryModel> categories) {
             mCategories = categories;

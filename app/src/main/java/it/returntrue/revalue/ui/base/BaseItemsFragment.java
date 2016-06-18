@@ -9,7 +9,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.view.View;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,27 +25,25 @@ import it.returntrue.revalue.utilities.NetworkUtilities;
 
 public abstract class BaseItemsFragment extends BaseFragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
-    protected static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
 
     private static final int FASTEST_INTERVAL = 1000;
     private static final int INTERVAL = FASTEST_INTERVAL * 2;
 
-    protected
-    @Constants.ItemMode
-    int mItemMode;
+    protected @Constants.ItemMode int mItemMode;
     protected OnItemClickListener OnItemClickListener;
-    protected Location mLastLocation;
 
-    private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
+    private LocationRequest mLocationRequest;
+    private Location mLastLocation;
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
-        void onAddFavoriteClick(View view, int id);
+        void onAddFavoriteClick(int id);
 
-        void onRemoveFavoriteClick(View view, int id);
+        void onRemoveFavoriteClick(int id);
 
-        void onItemClick(View view, int id);
+        void onItemClick(int id);
     }
 
     public abstract void setStatus(String text);
@@ -125,14 +122,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
 
     @Override
     public void onConnected(Bundle bundle) {
-        if (ContextCompat.checkSelfPermission(getActivity(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        } else {
-            startLocationUpdates();
-        }
+        startLocationUpdates();
     }
 
     @Override
@@ -141,7 +131,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     }
 
     @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
 
@@ -174,23 +164,32 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     }
 
     private void loadItems() {
-        if (mLastLocation == null) {
-            setStatus(getString(R.string.waiting_gps_fix));
-        } else if (!NetworkUtilities.checkInternetConnection(getContext())) {
-            setStatus(getString(R.string.check_connection));
-        } else {
-            BusProvider.bus().post(new GetItemsEvent.OnStart(mItemMode,
-                    mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude(),
-                    mApplication.getFilterTitle(),
-                    mApplication.getFilterCategory(),
-                    mApplication.getFilterDistance()));
+        if (isAdded()) {
+            if (mLastLocation == null) {
+                setStatus(getString(R.string.waiting_gps_fix));
+            } else if (!NetworkUtilities.checkInternetConnection(getContext())) {
+                setStatus(getString(R.string.check_connection));
+            } else {
+                BusProvider.bus().post(new GetItemsEvent.OnStart(mItemMode,
+                        mApplication.getLocationLatitude(),
+                        mApplication.getLocationLongitude(),
+                        mApplication.getFilterTitle(),
+                        mApplication.getFilterCategory(),
+                        mApplication.getFilterDistance()));
+            }
         }
     }
 
     private void startLocationUpdates() {
-        setLastLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        if (ContextCompat.checkSelfPermission(getActivity(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        } else {
+            setLastLocation(LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient));
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        }
     }
 
     private void stopLocationUpdates() {

@@ -22,7 +22,6 @@ import it.returntrue.revalue.preferences.SessionPreferences;
  * Adapts data returned from cursor to show in a RecyclerView
  * */
 public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHolder> {
-    private static final String TAG = MessagesAdapter.class.getSimpleName();
     private static final int ITEM_RECEIVED = 1;
     private static final int ITEM_SENT = 2;
 
@@ -86,6 +85,7 @@ public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHo
     }
 
     /** Represents a ViewHolder for a RecyclerView item */
+    @SuppressWarnings("unused")
     public final class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.text_text) public TextView textText;
 

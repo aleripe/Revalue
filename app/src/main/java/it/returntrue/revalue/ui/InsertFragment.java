@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
@@ -59,6 +60,7 @@ import it.returntrue.revalue.ui.base.BaseFragment;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+@SuppressWarnings({"SameParameterValue", "UnusedParameters", "WeakerAccess", "unused"})
 public class InsertFragment extends BaseFragment {
     private static final int ACTION_CAMERA = 1;
     private static final int ACTION_GALLERY = 2;
@@ -117,24 +119,26 @@ public class InsertFragment extends BaseFragment {
         // Sets location change listener to display position on map
         mSwitchLocation.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                GoogleMap map = mMapFragment.getMap();
-                if (map != null) {
-                    map.clear();
+            public void onCheckedChanged(CompoundButton buttonView, final boolean isChecked) {
+                mMapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap googleMap) {
+                        googleMap.clear();
 
-                    if (isChecked) {
-                        LatLng coordinates = new LatLng(mApplication.getLocationLatitude(),
-                                mApplication.getLocationLongitude());
-                        map.addMarker(new MarkerOptions().position(coordinates));
+                        if (isChecked) {
+                            LatLng coordinates = new LatLng(mApplication.getLocationLatitude(),
+                                    mApplication.getLocationLongitude());
+                            googleMap.addMarker(new MarkerOptions().position(coordinates));
 
-                        Circle circle = MapUtilities.getCenteredCircle(map, coordinates, 5);
-                        int zoom = MapUtilities.getCircleZoomLevel(circle);
+                            Circle circle = MapUtilities.getCenteredCircle(googleMap, coordinates, 5);
+                            int zoom = MapUtilities.getCircleZoomLevel(circle);
 
-                        if (zoom > 0) {
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                            if (zoom > 0) {
+                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(coordinates, zoom));
+                            }
                         }
                     }
-                }
+                });
             }
         });
 
@@ -215,8 +219,7 @@ public class InsertFragment extends BaseFragment {
 
     private void setupAdapter() {
         // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<CategoryModel>(
-                getContext(), android.R.layout.simple_list_item_1);
+        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
         mAdapter.addAll(mApplication.getCategories());
         mAdapter.insert(createEmptyCategoryModel(), 0);
@@ -331,31 +334,35 @@ public class InsertFragment extends BaseFragment {
         BusProvider.bus().post(new InsertItemEvent.OnStart(itemModel));
     }
 
-    private void setLocationOnItem(ItemModel itemModel) {
-        if (mSwitchLocation.isChecked() && mMapFragment.getMap() != null) {
-            Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+    private void setLocationOnItem(final ItemModel itemModel) {
+        if (mSwitchLocation.isChecked()) {
+            mMapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
 
-            itemModel.Latitude = mMapFragment.getMap().getCameraPosition().target.latitude;
-            itemModel.Longitude = mMapFragment.getMap().getCameraPosition().target.longitude;
+                    itemModel.Latitude = googleMap.getCameraPosition().target.latitude;
+                    itemModel.Longitude = googleMap.getCameraPosition().target.longitude;
 
-            try {
-                List<Address> addresses = geocoder.getFromLocation(
-                        itemModel.Latitude, itemModel.Longitude, 1);
+                    try {
+                        List<Address> addresses = geocoder.getFromLocation(
+                                itemModel.Latitude, itemModel.Longitude, 1);
 
-                if (addresses != null || addresses.size() > 0) {
-                    Address address = addresses.get(0);
-                    itemModel.City = address.getLocality();
+                        if (addresses != null && addresses.size() > 0) {
+                            Address address = addresses.get(0);
+                            itemModel.City = address.getLocality();
+                        }
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
+            });
         }
     }
 
     private boolean validateItem(ItemModel itemModel) {
-        boolean isValid = true;
-        isValid &= validate(mRequiredTitle, TextUtils.isEmpty(itemModel.Title));
+        boolean isValid = validate(mRequiredTitle, TextUtils.isEmpty(itemModel.Title));
         isValid &= validate(mRequiredDescription, TextUtils.isEmpty(itemModel.Description));
         isValid &= validate(mRequiredCategory, itemModel.CategoryId < 1);
         isValid &= validate(mRequiredPicture, itemModel.PictureData == null);
@@ -384,7 +391,7 @@ public class InsertFragment extends BaseFragment {
         private final WeakReference<ImageView> mImageViewReference;
 
         public BitmapWorkerTask(ImageView imageView) {
-            mImageViewReference = new WeakReference<ImageView>(imageView);
+            mImageViewReference = new WeakReference<>(imageView);
         }
 
         @Override
@@ -404,7 +411,7 @@ public class InsertFragment extends BaseFragment {
         // Once complete, see if ImageView is still around and set bitmap.
         @Override
         protected void onPostExecute(Bitmap bitmap) {
-            if (mImageViewReference != null && bitmap != null) {
+            if (bitmap != null) {
                 final ImageView imageView = mImageViewReference.get();
                 if (imageView != null) {
                     imageView.setImageBitmap(bitmap);

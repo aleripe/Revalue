@@ -3,6 +3,7 @@ package it.returntrue.revalue.ui;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -34,6 +35,7 @@ import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+@SuppressWarnings({"ConstantConditions", "UnusedParameters", "WeakerAccess", "unused"})
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private static final int RC_SIGN_IN = 9001;
 
@@ -227,7 +229,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     private class GoogleCallbacks implements GoogleApiClient.OnConnectionFailedListener {
         @Override
-        public void onConnectionFailed(ConnectionResult connectionResult) {
+        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
             mLabelStatus.setText(R.string.login_failed);
         }
     }

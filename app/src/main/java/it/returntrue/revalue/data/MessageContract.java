@@ -6,6 +6,7 @@ package it.returntrue.revalue.data;
 
 import android.provider.BaseColumns;
 
+@SuppressWarnings("unused")
 public final class MessageContract {
     public static abstract class MessageEntry implements BaseColumns {
         public static final String TABLE = "message";

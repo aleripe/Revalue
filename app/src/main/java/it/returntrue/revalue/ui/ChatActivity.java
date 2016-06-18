@@ -3,13 +3,12 @@ package it.returntrue.revalue.ui;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
-import android.view.View;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
+@SuppressWarnings({"FieldCanBeLocal", "ConstantConditions", "WeakerAccess", "unused"})
 public class ChatActivity extends BaseActivity implements LobbyFragment.OnItemClickListener {
     public static final String EXTRA_ITEM_ID = "item_id";
     public static final String EXTRA_USER_ID = "user_id";
@@ -72,7 +71,7 @@ public class ChatActivity extends BaseActivity implements LobbyFragment.OnItemCl
     }
 
     @Override
-    public void onItemClick(View view, int receiverId) {
+    public void onItemClick(int receiverId) {
         getSupportFragmentManager().beginTransaction()
                 .addToBackStack(FRAGMENT_LOBBY)
                 .replace(R.id.fragment_container, ChatFragment.newInstance(mItemId, receiverId))

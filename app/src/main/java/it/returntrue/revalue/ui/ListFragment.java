@@ -28,6 +28,7 @@ import it.returntrue.revalue.utilities.NetworkUtilities;
 /**
  * Shows the list of items
  */
+@SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnItemClickListener,
         SwipeRefreshLayout.OnRefreshListener {
     private ItemsAdapter mItemsAdapter;
@@ -77,23 +78,23 @@ public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnIt
     }
 
     @Override
-    public void onAddFavoriteClick(View view, int itemId) {
+    public void onAddFavoriteClick(int itemId) {
         if (OnItemClickListener != null) {
-            OnItemClickListener.onAddFavoriteClick(view, itemId);
+            OnItemClickListener.onAddFavoriteClick(itemId);
         }
     }
 
     @Override
-    public void onRemoveFavoriteClick(View view, int id) {
+    public void onRemoveFavoriteClick(int id) {
         if (OnItemClickListener != null) {
-            OnItemClickListener.onRemoveFavoriteClick(view, id);
+            OnItemClickListener.onRemoveFavoriteClick(id);
         }
     }
 
     @Override
-    public void onItemClick(View view, int id) {
+    public void onItemClick(int id) {
         if (OnItemClickListener != null) {
-            OnItemClickListener.onItemClick(view, id);
+            OnItemClickListener.onItemClick(id);
         }
     }
 

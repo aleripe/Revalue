@@ -4,14 +4,15 @@ import java.util.List;
 
 import it.returntrue.revalue.api.ItemModel;
 
+@SuppressWarnings("ALL")
 public class GetItemsEvent {
     public static class OnStart {
-        private int mMode;
-        private double mLatitude;
-        private double mLongitude;
-        private String mTitle;
-        private Integer mCategory;
-        private Integer mDistance;
+        private final int mMode;
+        private final double mLatitude;
+        private final double mLongitude;
+        private final String mTitle;
+        private final Integer mCategory;
+        private final Integer mDistance;
 
         public OnStart(int mode, double latitude, double longitude,
                        String title, Integer category, Integer distance) {
@@ -49,7 +50,7 @@ public class GetItemsEvent {
     }
 
     public static class OnSuccess {
-        private List<ItemModel> mItems;
+        private final List<ItemModel> mItems;
 
         public OnSuccess(List<ItemModel> items) {
             mItems = items;

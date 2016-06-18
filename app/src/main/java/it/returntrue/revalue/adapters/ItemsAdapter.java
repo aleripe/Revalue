@@ -26,17 +26,15 @@ import it.returntrue.revalue.api.ItemModel;
  * Adapts data returned from cursor to show in a RecyclerView
  * */
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
-    public static final String TAG = ItemsAdapter.class.getSimpleName();
-
     private OnItemClickListener mOnItemClickListener;
     private final Context mContext;
     private List<ItemModel> mItems;
 
     /** Provides listeners for click events */
     public interface OnItemClickListener {
-        void onAddFavoriteClick(View view, int id);
-        void onRemoveFavoriteClick(View view, int id);
-        void onItemClick(View view, int id);
+        void onAddFavoriteClick(int id);
+        void onRemoveFavoriteClick(int id);
+        void onItemClick(int id);
     }
 
     public ItemsAdapter(Context context) {
@@ -68,7 +66,8 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
         holder.imageRemoveFavorite.setVisibility(!itemModel.IsOwned && itemModel.IsFavorite ?
                 View.VISIBLE : View.GONE);
         holder.textTitle.setText(itemModel.Title);
-        holder.textLocation.setText(itemModel.City + " / " + (int)(itemModel.Distance / 1000) + " km");
+        holder.textLocation.setText(mContext.getString(R.string.item_location,
+                itemModel.City, (int) (itemModel.Distance / 1000)));
     }
 
     @Override
@@ -94,6 +93,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
     }
 
     /** Represents a ViewHolder for a RecyclerView item */
+    @SuppressWarnings("unused")
     public final class ViewHolder extends RecyclerView.ViewHolder {
         @Bind(R.id.image_cover) public ImageView imageCover;
         @Bind(R.id.image_add_favorite) public ImageView imageAddFavorite;
@@ -111,8 +111,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                 @Override
                 public void onClick(View view) {
                     if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onAddFavoriteClick(view,
-                                mItems.get(getAdapterPosition()).Id);
+                        mOnItemClickListener.onAddFavoriteClick(mItems.get(getAdapterPosition()).Id);
                     }
                 }
             });
@@ -121,8 +120,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                 @Override
                 public void onClick(View view) {
                     if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onRemoveFavoriteClick(view,
-                                mItems.get(getAdapterPosition()).Id);
+                        mOnItemClickListener.onRemoveFavoriteClick(mItems.get(getAdapterPosition()).Id);
                     }
                 }
             });
@@ -131,8 +129,7 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
                 @Override
                 public void onClick(View view) {
                     if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onItemClick(view,
-                                mItems.get(getAdapterPosition()).Id);
+                        mOnItemClickListener.onItemClick(mItems.get(getAdapterPosition()).Id);
                     }
                 }
             });

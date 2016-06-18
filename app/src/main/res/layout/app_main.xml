@@ -33,12 +33,16 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
-                    android:src="@drawable/ic_search_white_18dp" />
+                    android:src="@drawable/ic_search_white_18dp"
+                    android:contentDescription="@string/search_filter" />
                 <TextView
                     android:id="@+id/text_filter_title"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="24dp"
+                    android:layout_toRightOf="@id/image_search_filter"
+                    android:layout_toEndOf="@id/image_search_filter"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
                     android:textColor="#FFF" />
                 <ImageView
                     android:id="@+id/image_search_category"
@@ -46,13 +50,17 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
                     android:layout_below="@id/image_search_filter"
-                    android:src="@drawable/ic_label_white_18dp" />
+                    android:src="@drawable/ic_label_white_18dp"
+                    android:contentDescription="@string/search_category" />
                 <TextView
                     android:id="@+id/text_filter_category"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/text_filter_title"
-                    android:layout_marginLeft="24dp"
+                    android:layout_toRightOf="@id/image_search_category"
+                    android:layout_toEndOf="@id/image_search_category"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginStart="8dp"
                     android:textColor="#FFF" />
                 <ImageView
                     android:id="@+id/image_search_location"
@@ -60,13 +68,15 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="1dp"
                     android:layout_below="@id/image_search_category"
-                    android:src="@drawable/ic_my_location_white_18dp" />
+                    android:src="@drawable/ic_my_location_white_18dp"
+                    android:contentDescription="@string/search_location" />
                 <TextView
                     android:id="@+id/text_filter_distance"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/text_filter_category"
                     android:layout_marginLeft="24dp"
+                    android:layout_marginStart="24dp"
                     android:textColor="#FFF" />
             </RelativeLayout>
             <android.support.v7.widget.Toolbar

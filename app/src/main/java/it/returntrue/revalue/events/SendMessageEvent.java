@@ -2,9 +2,10 @@ package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.MessageModel;
 
+@SuppressWarnings("ALL")
 public class SendMessageEvent {
     public static class OnStart {
-        private MessageModel mMessageModel;
+        private final MessageModel mMessageModel;
 
         public OnStart(MessageModel messageModel) {
             mMessageModel = messageModel;
@@ -16,7 +17,7 @@ public class SendMessageEvent {
     }
 
     public static class OnSuccess {
-        private MessageModel mMessageModel;
+        private final MessageModel mMessageModel;
 
         public OnSuccess(MessageModel messageModel) {
             mMessageModel = messageModel;

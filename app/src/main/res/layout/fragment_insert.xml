@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
@@ -30,8 +30,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="-4dp"
+                android:layout_marginStart="-4dp"
                 android:textSize="16sp"
-                android:hint="@string/hint_title" />
+                android:textDirection="locale"
+                android:hint="@string/hint_title"
+                tools:targetApi="jelly_bean_mr1" />
             <TextView
                 android:id="@+id/required_title"
                 android:layout_width="wrap_content"
@@ -60,8 +63,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="-4dp"
+                android:layout_marginStart="-4dp"
                 android:textSize="16sp"
-                android:hint="@string/hint_description" />
+                android:textDirection="locale"
+                android:hint="@string/hint_description"
+                tools:targetApi="jelly_bean_mr1" />
             <TextView
                 android:id="@+id/required_description"
                 android:layout_width="wrap_content"
@@ -84,13 +90,18 @@
                 android:layout_height="wrap_content"
                 android:text="@string/category"
                 android:textSize="12sp"
-                android:layout_marginBottom="2dp" />
+                android:textDirection="locale"
+                android:layout_marginBottom="2dp"
+                tools:targetApi="jelly_bean_mr1" />
             <Spinner
                 android:id="@+id/spinner_category"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="-8dp"
-                android:hint="@string/hint_category" />
+                android:layout_marginStart="-8dp"
+                android:textDirection="locale"
+                android:hint="@string/hint_category"
+                tools:targetApi="jelly_bean_mr1" />
             <TextView
                 android:id="@+id/required_category"
                 android:layout_width="wrap_content"
@@ -119,9 +130,11 @@
                 android:layout_width="200dp"
                 android:layout_height="200dp"
                 android:layout_marginLeft="-4dp"
+                android:layout_marginStart="-4dp"
                 android:scaleType="centerInside"
                 android:adjustViewBounds="true"
-                android:src="@drawable/ic_add_a_photo_white_36dp" />
+                android:src="@drawable/ic_add_a_photo_white_36dp"
+                android:contentDescription="@string/picture_preview" />
             <TextView
                 android:id="@+id/required_picture"
                 android:layout_width="wrap_content"
@@ -147,12 +160,17 @@
                     android:layout_height="wrap_content"
                     android:text="@string/display_location"
                     android:textSize="12sp"
-                    android:layout_centerVertical="true" />
+                    android:gravity="start"
+                    android:layout_centerVertical="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    tools:ignore="RelativeOverlap" />
                 <Switch
                     android:id="@+id/switch_location"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true" />
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentEnd="true" />
             </RelativeLayout>
             <fragment
                 android:id="@+id/map"
@@ -160,6 +178,7 @@
                 android:layout_height="200dp"
                 android:name="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_marginTop="2dp"
+                tools:ignore="MissingPrefix"
                 app:uiRotateGestures="true"
                 app:uiScrollGestures="true"
                 app:uiTiltGestures="true"

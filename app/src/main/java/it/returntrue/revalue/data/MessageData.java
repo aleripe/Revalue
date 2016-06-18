@@ -9,6 +9,7 @@ import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.utilities.CursorUtilities;
 import it.returntrue.revalue.utilities.DateUtilities;
 
+@SuppressWarnings({"ConstantConditions", "unused"})
 public final class MessageData {
 	public static Integer getItemId(Cursor cursor) {
 		return CursorUtilities.getInt(cursor, MessageEntry.COLUMN_ITEM_ID);

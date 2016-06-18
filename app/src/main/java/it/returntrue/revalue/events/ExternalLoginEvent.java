@@ -3,9 +3,10 @@ package it.returntrue.revalue.events;
 import it.returntrue.revalue.api.ExternalTokenModel;
 import it.returntrue.revalue.api.TokenModel;
 
+@SuppressWarnings("ALL")
 public class ExternalLoginEvent {
     public static class OnStart {
-        private ExternalTokenModel mExternalTokenModel;
+        private final ExternalTokenModel mExternalTokenModel;
 
         public OnStart(ExternalTokenModel externalTokenModel) {
             mExternalTokenModel = externalTokenModel;
@@ -17,7 +18,7 @@ public class ExternalLoginEvent {
     }
 
     public static class OnSuccess {
-        private TokenModel mTokenModel;
+        private final TokenModel mTokenModel;
 
         public OnSuccess(TokenModel tokenModel) {
             mTokenModel = tokenModel;
@@ -29,7 +30,7 @@ public class ExternalLoginEvent {
     }
 
     public static class OnFailure {
-        private String mMessage;
+        private final String mMessage;
 
         public OnFailure(String message) {
             mMessage = message;

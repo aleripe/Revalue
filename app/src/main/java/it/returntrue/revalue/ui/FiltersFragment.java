@@ -3,6 +3,7 @@ package it.returntrue.revalue.ui;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -21,6 +22,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
 
+@SuppressWarnings({"WeakerAccess", "unused"})
 public class FiltersFragment extends DialogFragment {
     private RevalueApplication mApplication;
     private DialogInterface.OnDismissListener mOnDismissListener;
@@ -46,8 +48,7 @@ public class FiltersFragment extends DialogFragment {
         mApplication = (RevalueApplication)getActivity().getApplicationContext();
 
         // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<CategoryModel>(
-                getContext(), android.R.layout.simple_list_item_1);
+        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
         mAdapter.addAll(mApplication.getCategories());
         mAdapter.insert(createEmptyCategoryModel(), 0);
@@ -63,9 +64,10 @@ public class FiltersFragment extends DialogFragment {
         mRadioButtons.put(R.id.radio_distance_200, 200);
     }
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        View view = getActivity().getLayoutInflater().inflate(R.layout.fragment_filters, null);
+        View view = View.inflate(getContext(), R.layout.fragment_filters, null);
 
         // Binds controls
         ButterKnife.bind(this, view);
