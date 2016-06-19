@@ -83,54 +83,56 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
 
     @Subscribe
     public void onGetItemsSuccess(final GetItemsEvent.OnSuccess onSuccess) {
-        mMapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(final GoogleMap googleMap) {
-                googleMap.clear();
-                googleMap.setOnInfoWindowClickListener(MapFragment.this);
+        if (isFragmentAvailable()) {
+            mMapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(final GoogleMap googleMap) {
+                    googleMap.clear();
+                    googleMap.setOnInfoWindowClickListener(MapFragment.this);
 
-                for (final ItemModel itemModel : onSuccess.getItems()) {
-                    if (!itemModel.ShowOnMap) continue;
+                    for (final ItemModel itemModel : onSuccess.getItems()) {
+                        if (!itemModel.ShowOnMap) continue;
 
-                    Glide.with(getContext())
-                            .load(itemModel.MarkerUrl)
-                            .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .transform(new CropCircleTransformation(getContext()))
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                                    final Marker marker = googleMap.addMarker(new MarkerOptions()
-                                            .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
-                                            .title(itemModel.Title)
-                                            .snippet(getString(R.string.item_location,
-                                                    itemModel.City, (int)(itemModel.Distance / 1000)))
-                                            .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
-                                    mMarkerIDs.put(marker, itemModel.Id);
-                                }
-                            });
+                        Glide.with(getContext())
+                                .load(itemModel.MarkerUrl)
+                                .asBitmap()
+                                .diskCacheStrategy(DiskCacheStrategy.NONE)
+                                .skipMemoryCache(true)
+                                .transform(new CropCircleTransformation(getContext()))
+                                .into(new SimpleTarget<Bitmap>() {
+                                    @Override
+                                    public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
+                                        final Marker marker = googleMap.addMarker(new MarkerOptions()
+                                                .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
+                                                .title(itemModel.Title)
+                                                .snippet(getString(R.string.item_location,
+                                                        itemModel.City, (int) (itemModel.Distance / 1000)))
+                                                .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+                                        mMarkerIDs.put(marker, itemModel.Id);
+                                    }
+                                });
+                    }
+
+                    LatLng position = new LatLng(
+                            mApplication.getLocationLatitude(), mApplication.getLocationLongitude());
+
+                    if (mLatitude != 0 && mLongitude != 0) {
+                        position = new LatLng(mLatitude, mLongitude);
+                    }
+
+                    Circle circle = MapUtilities.getCenteredCircle(googleMap, position,
+                            mApplication.getFilterDistance());
+
+                    if (mZoom == 0) {
+                        mZoom = MapUtilities.getCircleZoomLevel(circle);
+                    }
+
+                    if (mZoom > 0) {
+                        googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, mZoom));
+                    }
                 }
-
-                LatLng position = new LatLng(
-                        mApplication.getLocationLatitude(), mApplication.getLocationLongitude());
-
-                if (mLatitude != 0 && mLongitude != 0) {
-                    position = new LatLng(mLatitude, mLongitude);
-                }
-
-                Circle circle = MapUtilities.getCenteredCircle(googleMap, position,
-                        mApplication.getFilterDistance());
-
-                if (mZoom == 0) {
-                    mZoom = MapUtilities.getCircleZoomLevel(circle);
-                }
-
-                if (mZoom > 0) {
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, mZoom));
-                }
-            }
-        });
+            });
+        }
     }
 
     @Subscribe

@@ -66,7 +66,12 @@ public class RevalueService {
         call.enqueue(new Callback<List<CategoryModel>>() {
             @Override
             public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
-                mBus.post(new GetCategoriesEvent.OnSuccess(response.body()));
+                if (response.isSuccessful()) {
+                    mBus.post(new GetCategoriesEvent.OnSuccess(response.body()));
+                }
+                else {
+                    mBus.post(new GetCategoriesEvent.OnFailure());
+                }
             }
 
             @Override
@@ -109,7 +114,12 @@ public class RevalueService {
         call.enqueue(new Callback<List<ItemModel>>() {
             @Override
             public void onResponse(Call<List<ItemModel>> call, Response<List<ItemModel>> response) {
-                mBus.post(new GetItemsEvent.OnSuccess(response.body()));
+                if (response.isSuccessful()) {
+                    mBus.post(new GetItemsEvent.OnSuccess(response.body()));
+                }
+                else {
+                    mBus.post(new GetItemsEvent.OnFailure());
+                }
             }
 
             @Override
@@ -129,7 +139,12 @@ public class RevalueService {
         call.enqueue(new Callback<ItemModel>() {
             @Override
             public void onResponse(Call<ItemModel> call, Response<ItemModel> response) {
-                mBus.post(new GetItemEvent.OnSuccess(response.body()));
+                if (response.isSuccessful()) {
+                    mBus.post(new GetItemEvent.OnSuccess(response.body()));
+                }
+                else {
+                    mBus.post(new GetItemEvent.OnFailure());
+                }
             }
 
             @Override
@@ -146,7 +161,12 @@ public class RevalueService {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                mBus.post(new InsertItemEvent.OnSuccess());
+                if (response.isSuccessful()) {
+                    mBus.post(new InsertItemEvent.OnSuccess());
+                }
+                else {
+                    mBus.post(new InsertItemEvent.OnFailure());
+                }
             }
 
             @Override
@@ -162,7 +182,12 @@ public class RevalueService {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                mBus.post(new AddFavoriteItemEvent.OnSuccess());
+                if (response.isSuccessful()) {
+                    mBus.post(new AddFavoriteItemEvent.OnSuccess());
+                }
+                else {
+                    mBus.post(new AddFavoriteItemEvent.OnFailure());
+                }
             }
 
             @Override
@@ -178,7 +203,12 @@ public class RevalueService {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                mBus.post(new RemoveFavoriteItemEvent.OnSuccess());
+                if (response.isSuccessful()) {
+                    mBus.post(new RemoveFavoriteItemEvent.OnSuccess());
+                }
+                else {
+                    mBus.post(new RemoveFavoriteItemEvent.OnFailure());
+                }
             }
 
             @Override
@@ -194,7 +224,12 @@ public class RevalueService {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                mBus.post(new SetItemAsRevaluedEvent.OnSuccess());
+                if (response.isSuccessful()) {
+                    mBus.post(new SetItemAsRevaluedEvent.OnSuccess());
+                }
+                else {
+                    mBus.post(new SetItemAsRevaluedEvent.OnFailure());
+                }
             }
 
             @Override
@@ -210,7 +245,12 @@ public class RevalueService {
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
-                mBus.post(new SetItemAsRemovedEvent.OnSuccess());
+                if (response.isSuccessful()) {
+                    mBus.post(new SetItemAsRemovedEvent.OnSuccess());
+                }
+                else {
+                    mBus.post(new SetItemAsRemovedEvent.OnFailure());
+                }
             }
 
             @Override
@@ -227,7 +267,12 @@ public class RevalueService {
         call.enqueue(new Callback<List<UserModel>>() {
             @Override
             public void onResponse(Call<List<UserModel>> call, Response<List<UserModel>> response) {
-                mBus.post(new GetUsersByIdsEvent.OnSuccess(response.body(), onStart.getCursor()));
+                if (response.isSuccessful()) {
+                    mBus.post(new GetUsersByIdsEvent.OnSuccess(response.body(), onStart.getCursor()));
+                }
+                else {
+                    mBus.post(new GetUsersByIdsEvent.OnFailure());
+                }
             }
 
             @Override
@@ -266,7 +311,12 @@ public class RevalueService {
         call.enqueue(new Callback<MessageModel>() {
             @Override
             public void onResponse(Call<MessageModel> call, Response<MessageModel> response) {
-                mBus.post(new SendMessageEvent.OnSuccess(response.body()));
+                if (response.isSuccessful()) {
+                    mBus.post(new SendMessageEvent.OnSuccess(response.body()));
+                }
+                else {
+                    mBus.post(new SendMessageEvent.OnFailure());
+                }
             }
 
             @Override

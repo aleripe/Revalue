@@ -1,6 +1,7 @@
 package it.returntrue.revalue.api;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -10,8 +11,12 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RevalueServiceGenerator {
+    private static final int SECONDS_TIMEOUT = 60;
     private static final String BASE_URL = "http://37.187.240.199:8080/api/";
-    private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
+    private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder()
+        .connectTimeout(SECONDS_TIMEOUT, TimeUnit.SECONDS)
+        .readTimeout(SECONDS_TIMEOUT, TimeUnit.SECONDS)
+        .writeTimeout(SECONDS_TIMEOUT, TimeUnit.SECONDS);
 
     private static final Retrofit.Builder builder = new Retrofit.Builder()
             .baseUrl(BASE_URL)

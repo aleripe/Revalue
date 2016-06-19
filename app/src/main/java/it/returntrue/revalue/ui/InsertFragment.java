@@ -2,14 +2,17 @@ package it.returntrue.revalue.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -44,8 +47,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.squareup.otto.Subscribe;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -68,10 +73,12 @@ public class InsertFragment extends BaseFragment {
     private static final String EXTRA_PICTURE = "picture";
     private static final int PICTURE_SIZE = 2000;
 
+    private ProgressDialog mProgressDialog;
     private ArrayAdapter<CategoryModel> mAdapter;
     private SupportMapFragment mMapFragment;
     private Bitmap mPicture;
     private String mPictureData;
+    private Uri mPictureUri;
 
     @Bind(R.id.label_title) TextView mLabelTitle;
     @Bind(R.id.text_title) EditText mTextTitle;
@@ -206,6 +213,9 @@ public class InsertFragment extends BaseFragment {
 
     @Subscribe
     public void onInsertItemSuccess(InsertItemEvent.OnSuccess onSuccess) {
+        // Closes progress dialog
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+
         Toast.makeText(getContext(), R.string.item_saved, Toast.LENGTH_LONG).show();
 
         Intent intent = new Intent(getActivity(), MainActivity.class);
@@ -214,6 +224,9 @@ public class InsertFragment extends BaseFragment {
 
     @Subscribe
     public void onInsertItemFailure(InsertItemEvent.OnFailure onFailure) {
+        // Closes progress dialog
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+
         Toast.makeText(getContext(), R.string.could_not_save_item, Toast.LENGTH_LONG).show();
     }
 
@@ -227,15 +240,20 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void actionCameraResult(Intent data) {
-        mPicture = resizeImage((Bitmap)data.getExtras().get("data"), PICTURE_SIZE);
+        try {
+            mPicture = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mPictureUri);
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
         previewPicture();
     }
 
     private void actionGalleryResult(Intent data) {
         if (data != null) {
             try {
-                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(
-                        getContext().getContentResolver(), data.getData()), PICTURE_SIZE);
+                mPicture = MediaStore.Images.Media.getBitmap(
+                        getContext().getContentResolver(), data.getData());
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -300,7 +318,16 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void dispatchCameraIntent() {
+        File file = new File(Environment.getExternalStorageDirectory() +
+                "/DCIM/", getString(R.string.app_name) + "_" + new Date().getTime() + ".jpg");
+
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        if (file != null) {
+            mPictureUri = Uri.fromFile(file);
+            intent.putExtra(MediaStore.EXTRA_OUTPUT, mPictureUri);
+        }
+
         startActivityForResult(intent, ACTION_CAMERA);
     }
 
@@ -316,48 +343,51 @@ public class InsertFragment extends BaseFragment {
             return;
         }
 
-        // Creates item model
-        ItemModel itemModel = new ItemModel();
-        itemModel.Title = mTextTitle.getText().toString();
-        itemModel.Description = mTextDescription.getText().toString();
-        itemModel.ShowOnMap = mSwitchLocation.isChecked();
-        itemModel.CategoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
-        itemModel.PictureData = mPictureData;
-        setLocationOnItem(itemModel);
+        mMapFragment.getMapAsync(new OnMapReadyCallback() {
+            @Override
+            public void onMapReady(GoogleMap googleMap) {
+                mProgressDialog = ProgressDialog.show(getContext(),
+                        getString(R.string.loading), getString(R.string.uploading_data));
 
-        if (!validateItem(itemModel)) {
-            Toast.makeText(getContext(), R.string.item_validation_failed, Toast.LENGTH_LONG).show();
-            return;
-        }
+                // Creates item model
+                ItemModel itemModel = new ItemModel();
+                itemModel.Title = mTextTitle.getText().toString();
+                itemModel.Description = mTextDescription.getText().toString();
+                itemModel.ShowOnMap = mSwitchLocation.isChecked();
+                itemModel.CategoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
+                itemModel.PictureData = mPictureData;
+                setLocationOnItem(itemModel, googleMap);
 
-        // Saves item
-        BusProvider.bus().post(new InsertItemEvent.OnStart(itemModel));
+                if (!validateItem(itemModel)) {
+                    Toast.makeText(getContext(), R.string.item_validation_failed, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
+                // Saves item
+                BusProvider.bus().post(new InsertItemEvent.OnStart(itemModel));
+            }
+        });
     }
 
-    private void setLocationOnItem(final ItemModel itemModel) {
+    private void setLocationOnItem(final ItemModel itemModel, final GoogleMap googleMap) {
         if (mSwitchLocation.isChecked()) {
-            mMapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
+            Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
 
-                    itemModel.Latitude = googleMap.getCameraPosition().target.latitude;
-                    itemModel.Longitude = googleMap.getCameraPosition().target.longitude;
+            itemModel.Latitude = googleMap.getCameraPosition().target.latitude;
+            itemModel.Longitude = googleMap.getCameraPosition().target.longitude;
 
-                    try {
-                        List<Address> addresses = geocoder.getFromLocation(
-                                itemModel.Latitude, itemModel.Longitude, 1);
+            try {
+                List<Address> addresses = geocoder.getFromLocation(
+                        itemModel.Latitude, itemModel.Longitude, 1);
 
-                        if (addresses != null && addresses.size() > 0) {
-                            Address address = addresses.get(0);
-                            itemModel.City = address.getLocality();
-                        }
-                    }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                if (addresses != null && addresses.size() > 0) {
+                    Address address = addresses.get(0);
+                    itemModel.City = address.getLocality();
                 }
-            });
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -399,7 +429,7 @@ public class InsertFragment extends BaseFragment {
             Bitmap bitmap = params[0];
 
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            mPicture.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
+            mPicture.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
             byte[] byteArray = byteArrayOutputStream.toByteArray();
 
             // Stores resulting conversion data

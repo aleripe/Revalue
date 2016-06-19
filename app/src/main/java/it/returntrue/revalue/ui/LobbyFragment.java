@@ -73,10 +73,6 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
-        // TODO: id duplicated
-        // Gets extra data from intent and preferences
-        mItemId = getActivity().getIntent().getIntExtra(ChatActivity.EXTRA_ITEM_ID, 0);
-
         // Binds controls
         ButterKnife.bind(this, getView());
 

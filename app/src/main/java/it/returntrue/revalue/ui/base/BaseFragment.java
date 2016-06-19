@@ -41,4 +41,8 @@ public class BaseFragment extends Fragment {
         // Listens to bus events
         BusProvider.bus().register(this);
     }
+
+    protected boolean isFragmentAvailable() {
+        return (getActivity() != null) && isAdded();
+    }
 }

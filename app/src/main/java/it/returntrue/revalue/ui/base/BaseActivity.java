@@ -36,11 +36,19 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // Setup API service
         mApplication.setupRevalueService(mSessionPreferences.getToken());
+    }
 
-        if (!checkPlayServices()) {
-            //TODO: what to do?
-            Toast.makeText(this, getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case PLAY_SERVICES_RESOLUTION_REQUEST:
+                if (resultCode == RESULT_CANCELED) {
+                    Toast.makeText(this, R.string.play_service_unavailable, Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                return;
         }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -54,6 +62,9 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
+        // Checks Play Services availability
+        checkPlayServices();
 
         // Listens to bus events
         BusProvider.bus().register(this);
@@ -72,7 +83,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(token)) Log.v(TAG, "Token: " + token);
     }
 
-    private boolean checkPlayServices() {
+    private void checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
@@ -81,8 +92,6 @@ public abstract class BaseActivity extends AppCompatActivity {
             } else {
                 finish();
             }
-            return false;
         }
-        return true;
-}
+    }
 }
