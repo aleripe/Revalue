@@ -30,7 +30,6 @@ public class RevalueApplication extends Application {
     private Double mLocationLatitude = null;
     private Double mLocationLongitude = null;
     private List<CategoryModel> mCategories = null;
-    //private Tracker mTracker;
     private RevalueService mRevalueService;
 
     @Override
@@ -147,16 +146,6 @@ public class RevalueApplication extends Application {
 
         return null;
     }
-
-    /*
-    public Tracker getTracker() {
-        if (mTracker == null) {
-            GoogleAnalytics analytics = GoogleAnalytics.getInstance(this);
-            mTracker = analytics.newTracker(R.xml.global_tracker);
-        }
-        return mTracker;
-    }
-    */
 
     public void setupRevalueService(String token) {
         if (mRevalueService == null) {
