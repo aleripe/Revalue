@@ -79,11 +79,10 @@ public abstract class BaseActivity extends AppCompatActivity {
             if (apiAvailability.isUserResolvableError(resultCode)) {
                 apiAvailability.getErrorDialog(this, resultCode, PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
-                Log.e(TAG, "This device is not supported.");
                 finish();
             }
             return false;
         }
         return true;
-    }
+}
 }

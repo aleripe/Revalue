@@ -88,5 +88,5 @@
     <string name="distance_50">50 km</string>
     <string name="distance_100">100 km</string>
     <string name="distance_200">200 km</string>
-    <string name="item_location">%1$s! / %2$d km</string>
+    <string name="item_location">%1$s / %2$d km</string>
 </resources>

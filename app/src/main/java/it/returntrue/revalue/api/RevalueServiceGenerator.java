@@ -9,7 +9,7 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
-class RevalueServiceGenerator {
+public class RevalueServiceGenerator {
     private static final String BASE_URL = "http://37.187.240.199:8080/api/";
     private static final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
 
