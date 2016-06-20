@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.api;
 
 import java.util.ArrayList;
@@ -10,12 +14,15 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+/**
+ * Provides a contract for all API calls
+ * */
 public interface RevalueServiceContract {
     @POST("accounts/login/")
     Call<TokenModel> ExternalLogin(@Body ExternalTokenModel externalTokenModel);
 
     @POST("accounts/update/")
-    Call<Void> UpdateGcmToken(@Body GcmTokenModel gcmTokenModel);
+    Call<Void> UpdateGcmToken(@Body FcmTokenModel gcmTokenModel);
 
     @GET("categories/list/")
     Call<List<CategoryModel>> GetAllCategories();

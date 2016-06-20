@@ -1,4 +1,8 @@
-package it.returntrue.revalue.gcm;
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
+package it.returntrue.revalue.fcm;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -20,8 +24,11 @@ import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.MainActivity;
 
+/**
+ * Implements a listener for FCM incoming messages
+ * */
 @SuppressWarnings("SameParameterValue")
-public class RevalueGcmListenerService extends FirebaseMessagingService {
+public class RevalueFcmListenerService extends FirebaseMessagingService {
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Map data = message.getData();

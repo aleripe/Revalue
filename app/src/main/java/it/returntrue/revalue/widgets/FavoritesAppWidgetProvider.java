@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.widgets;
 
 import android.app.PendingIntent;
@@ -9,9 +13,11 @@ import android.net.Uri;
 import android.widget.RemoteViews;
 
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.services.FavoritesRemoteViewsService;
 import it.returntrue.revalue.ui.MainActivity;
 
+/**
+ * Implements a provider to manage application widgets
+ * */
 public class FavoritesAppWidgetProvider extends AppWidgetProvider {
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {

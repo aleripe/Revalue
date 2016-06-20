@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.api;
 
 import java.io.IOException;
@@ -10,6 +14,9 @@ import okhttp3.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/**
+ * Generates a configured service for API calls
+ * */
 public class RevalueServiceGenerator {
     private static final int SECONDS_TIMEOUT = 60;
     private static final String BASE_URL = "http://37.187.240.199:8080/api/";

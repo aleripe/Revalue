@@ -1,8 +1,15 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.ExternalTokenModel;
 import it.returntrue.revalue.api.TokenModel;
 
+/**
+ * Represents a data bus event for ExternalLogin API call
+ * */
 @SuppressWarnings("ALL")
 public class ExternalLoginEvent {
     public static class OnStart {

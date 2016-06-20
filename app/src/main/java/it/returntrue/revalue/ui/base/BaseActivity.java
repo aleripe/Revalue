@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui.base;
 
 import android.content.Intent;
@@ -17,25 +21,19 @@ import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.ui.LoginActivity;
 
+/**
+ * Provides a base implementation for all application activities
+ * */
 public abstract class BaseActivity extends AppCompatActivity {
     private static final String TAG = BaseActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-
-    protected RevalueApplication mApplication;
-    protected SessionPreferences mSessionPreferences;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sets application context
-        mApplication = (RevalueApplication)getApplicationContext();
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(this);
-
         // Setup API service
-        mApplication.setupRevalueService(mSessionPreferences.getToken());
+        application().setupRevalueService(session().getToken());
     }
 
     @Override
@@ -71,7 +69,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     }
 
     protected void checkLogin() {
-        if (!mSessionPreferences.getIsLoggedIn()) {
+        if (!session().getIsLoggedIn()) {
             Intent intent = new Intent(this, LoginActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -79,11 +77,11 @@ public abstract class BaseActivity extends AppCompatActivity {
             finish();
         }
 
-        String token = mSessionPreferences.getToken();
+        String token = session().getToken();
         if (!TextUtils.isEmpty(token)) Log.v(TAG, "Token: " + token);
     }
 
-    private void checkPlayServices() {
+    protected void checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {
@@ -93,5 +91,13 @@ public abstract class BaseActivity extends AppCompatActivity {
                 finish();
             }
         }
+    }
+
+    protected RevalueApplication application() {
+        return RevalueApplication.get(getApplicationContext());
+    }
+
+    protected SessionPreferences session() {
+        return SessionPreferences.get(this);
     }
 }

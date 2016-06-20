@@ -1,6 +1,11 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue;
 
 import android.app.Application;
+import android.content.Context;
 import android.support.annotation.IntDef;
 import android.text.TextUtils;
 
@@ -13,8 +18,14 @@ import java.util.List;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.utilities.CategoryUtilities;
 
+/**
+ * Provides concrete application implementation
+ * */
 public class RevalueApplication extends Application {
+    private static RevalueApplication sApplication;
+
     // Defines allowed modes as a fake enumeration
     @IntDef({ LIST_MODE, MAP_MODE })
     public @interface Modes {}
@@ -24,13 +35,20 @@ public class RevalueApplication extends Application {
     private static final int DEFAULT_DISTANCE = 50;
 
     @Modes private int mMainMode = LIST_MODE;
-    private String mFilterTitle = null;
-    private Integer mFilterCategory = null;
+    private String mFilterTitle;
+    private Integer mFilterCategory;
     private Integer mFilterDistance = DEFAULT_DISTANCE;
-    private Double mLocationLatitude = null;
-    private Double mLocationLongitude = null;
-    private List<CategoryModel> mCategories = null;
+    private Double mLocationLatitude;
+    private Double mLocationLongitude;
+    private List<CategoryModel> mCategories;
     private RevalueService mRevalueService;
+
+    public static RevalueApplication get(Context context) {
+        if (sApplication == null) {
+            sApplication = (RevalueApplication)context;
+        }
+        return sApplication;
+    }
 
     @Override
     public void onCreate() {
@@ -69,8 +87,8 @@ public class RevalueApplication extends Application {
     }
 
     public String getFilterCategoryDescription() {
-        Integer filterCategory = getFilterCategory();
-        return (filterCategory != null) ? getCategoryName(filterCategory) : getString(R.string.text_filter_category_empty);
+        String categoryName = CategoryUtilities.getCategoryName(mCategories, getFilterCategory());
+        return (categoryName != null) ? categoryName : getString(R.string.text_filter_category_empty);
     }
 
     public void setFilterDistance(Integer distance) {
@@ -114,37 +132,6 @@ public class RevalueApplication extends Application {
 
     public List<CategoryModel> getCategories() {
         return mCategories;
-    }
-
-    private String getCategoryName(Integer id) {
-        if (id != null) {
-            for (CategoryModel categoryModel : mCategories) {
-                if (categoryModel.Id == getFilterCategory()) {
-                    return categoryModel.Name;
-                }
-            }
-        }
-
-        return getString(R.string.text_filter_category_empty);
-    }
-
-    public int getCategoryPosition(Integer id) {
-        if (id != null) {
-            for (int i = 0; i < mCategories.size(); i++) {
-                CategoryModel categoryModel = mCategories.get(i);
-                if (categoryModel.Id == id) return i + 1;
-            }
-        }
-
-        return 0;
-    }
-
-    public Integer getCategoryId(int position) {
-        if (position > 0 && position <= mCategories.size()) {
-            return mCategories.get(position - 1).Id;
-        }
-
-        return null;
     }
 
     public void setupRevalueService(String token) {

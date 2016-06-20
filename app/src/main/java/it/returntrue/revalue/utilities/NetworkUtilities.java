@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.utilities;
 
 import android.content.Context;
@@ -9,6 +13,9 @@ import org.json.JSONObject;
 import it.returntrue.revalue.R;
 import retrofit2.Response;
 
+/**
+ * Provides utilities to manipulate network
+ * */
 public class NetworkUtilities {
     private static final String KEY_MESSAGE = "Message";
 

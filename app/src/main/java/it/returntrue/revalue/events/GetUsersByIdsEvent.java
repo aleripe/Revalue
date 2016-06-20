@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
 import android.database.Cursor;
@@ -7,6 +11,9 @@ import java.util.List;
 
 import it.returntrue.revalue.api.UserModel;
 
+/**
+ * Represents a data bus event for GetUsersByIds API call
+ * */
 @SuppressWarnings("ALL")
 public class GetUsersByIdsEvent {
     public static class OnStart {

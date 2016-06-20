@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.imaging;
 
 import android.content.Context;
@@ -13,6 +17,9 @@ import com.bumptech.glide.load.engine.Resource;
 import com.bumptech.glide.load.engine.bitmap_recycle.BitmapPool;
 import com.bumptech.glide.load.resource.bitmap.BitmapResource;
 
+/**
+ * Implements a transformation to crop and circle a bitmap
+ * */
 public class CropCircleTransformation implements Transformation<Bitmap> {
     private final BitmapPool mBitmapPool;
 

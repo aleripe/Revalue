@@ -9,18 +9,10 @@ import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
 public class BaseFragment extends Fragment {
-    protected RevalueApplication mApplication;
-    protected SessionPreferences mSessionPreferences;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Sets application context
-        mApplication = (RevalueApplication)getActivity().getApplicationContext();
-
-        // Creates preferences managers
-        mSessionPreferences = new SessionPreferences(getContext());
 
         // Sets option menu
         setHasOptionsMenu(true);
@@ -42,7 +34,11 @@ public class BaseFragment extends Fragment {
         BusProvider.bus().register(this);
     }
 
-    protected boolean isFragmentAvailable() {
-        return (getActivity() != null) && isAdded();
+    protected RevalueApplication application() {
+        return RevalueApplication.get(getActivity().getApplicationContext());
+    }
+
+    protected SessionPreferences session() {
+        return SessionPreferences.get(getActivity());
     }
 }

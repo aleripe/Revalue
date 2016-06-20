@@ -62,13 +62,13 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
         super.onActivityCreated(savedInstanceState);
 
         // Gets extra data from intent or preferences
-        mSenderId = mSessionPreferences.getUserId();
+        mSenderId = session().getUserId();
 
         // Binds controls
         ButterKnife.bind(this, getView());
 
         // Creates adapter for messages
-        mMessagesAdapter = new MessagesAdapter(getContext(), mSessionPreferences);
+        mMessagesAdapter = new MessagesAdapter(getContext(), session());
 
         // Creates layout manager
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());

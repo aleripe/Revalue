@@ -171,11 +171,11 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
                 setStatus(getString(R.string.check_connection));
             } else {
                 BusProvider.bus().post(new GetItemsEvent.OnStart(mItemMode,
-                        mApplication.getLocationLatitude(),
-                        mApplication.getLocationLongitude(),
-                        mApplication.getFilterTitle(),
-                        mApplication.getFilterCategory(),
-                        mApplication.getFilterDistance()));
+                        application().getLocationLatitude(),
+                        application().getLocationLongitude(),
+                        application().getFilterTitle(),
+                        application().getFilterCategory(),
+                        application().getFilterDistance()));
             }
         }
     }
@@ -200,8 +200,8 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
         if (location != null) {
             // Stores location and stops future updates
             mLastLocation = location;
-            mApplication.setLocationLatitude(location.getLatitude());
-            mApplication.setLocationLongitude(location.getLongitude());
+            application().setLocationLatitude(location.getLatitude());
+            application().setLocationLongitude(location.getLongitude());
             stopLocationUpdates();
 
             // Updates item list

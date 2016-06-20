@@ -9,6 +9,9 @@ import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.utilities.CursorUtilities;
 import it.returntrue.revalue.utilities.DateUtilities;
 
+/**
+ * Gets message data from cursor
+ * */
 @SuppressWarnings({"ConstantConditions", "unused"})
 public final class MessageData {
 	public static Integer getItemId(Cursor cursor) {

@@ -6,6 +6,9 @@ package it.returntrue.revalue.data;
 
 import android.provider.BaseColumns;
 
+/**
+ * Provides a contract for message local entity
+ * */
 @SuppressWarnings("unused")
 public final class MessageContract {
     public static abstract class MessageEntry implements BaseColumns {

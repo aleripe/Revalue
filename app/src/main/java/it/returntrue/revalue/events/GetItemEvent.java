@@ -1,7 +1,14 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.ItemModel;
 
+/**
+ * Represents a data bus event for GetItem API call
+ * */
 @SuppressWarnings("ALL")
 public class GetItemEvent {
     public static class OnStart {

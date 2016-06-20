@@ -207,8 +207,8 @@ public class DetailFragment extends BaseFragment {
         if (NetworkUtilities.checkInternetConnection(getContext())) {
             // Gets item details
             BusProvider.bus().post(new GetItemEvent.OnStart(mId,
-                    mApplication.getLocationLatitude(),
-                    mApplication.getLocationLongitude()));
+                    application().getLocationLatitude(),
+                    application().getLocationLongitude()));
         }
         else {
             clearDetails();
@@ -244,7 +244,7 @@ public class DetailFragment extends BaseFragment {
                     googleMap.addMarker(new MarkerOptions().position(coordinates));
 
                     Circle circle = MapUtilities.getCenteredCircle(googleMap, coordinates,
-                            mApplication.getFilterDistance());
+                            application().getFilterDistance());
                     int zoom = MapUtilities.getCircleZoomLevel(circle);
 
                     if (zoom > 0) {

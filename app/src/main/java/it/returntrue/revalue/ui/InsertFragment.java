@@ -62,6 +62,7 @@ import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.InsertItemEvent;
 import it.returntrue.revalue.ui.base.BaseFragment;
+import it.returntrue.revalue.utilities.CategoryUtilities;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
@@ -133,8 +134,8 @@ public class InsertFragment extends BaseFragment {
                         googleMap.clear();
 
                         if (isChecked) {
-                            LatLng coordinates = new LatLng(mApplication.getLocationLatitude(),
-                                    mApplication.getLocationLongitude());
+                            LatLng coordinates = new LatLng(application().getLocationLatitude(),
+                                    application().getLocationLongitude());
                             googleMap.addMarker(new MarkerOptions().position(coordinates));
 
                             Circle circle = MapUtilities.getCenteredCircle(googleMap, coordinates, 5);
@@ -234,7 +235,7 @@ public class InsertFragment extends BaseFragment {
         // Creates adapter and inserts empty default value
         mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
-        mAdapter.addAll(mApplication.getCategories());
+        mAdapter.addAll(application().getCategories());
         mAdapter.insert(createEmptyCategoryModel(), 0);
         mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
     }
@@ -354,7 +355,8 @@ public class InsertFragment extends BaseFragment {
                 itemModel.Title = mTextTitle.getText().toString();
                 itemModel.Description = mTextDescription.getText().toString();
                 itemModel.ShowOnMap = mSwitchLocation.isChecked();
-                itemModel.CategoryId = mApplication.getCategoryId(mSpinnerCategory.getSelectedItemPosition());
+                itemModel.CategoryId = CategoryUtilities.getCategoryId(
+                        application().getCategories(), mSpinnerCategory.getSelectedItemPosition());
                 itemModel.PictureData = mPictureData;
                 setLocationOnItem(itemModel, googleMap);
 

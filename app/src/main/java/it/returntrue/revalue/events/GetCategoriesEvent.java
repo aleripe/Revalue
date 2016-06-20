@@ -1,8 +1,15 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
 import java.util.List;
 import it.returntrue.revalue.api.CategoryModel;
 
+/**
+ * Represents a data bus event for GetCategories API call
+ * */
 @SuppressWarnings("ALL")
 public class GetCategoriesEvent {
     public static class OnStart {

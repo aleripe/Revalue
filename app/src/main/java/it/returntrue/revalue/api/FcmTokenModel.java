@@ -5,10 +5,9 @@
 package it.returntrue.revalue.api;
 
 /**
- * Represents an external login token from data model
+ * Represents a Firebase login token from data model
  * */
 @SuppressWarnings("unused")
-public class ExternalTokenModel {
-    public String Provider;
+public class FcmTokenModel {
     public String Token;
 }

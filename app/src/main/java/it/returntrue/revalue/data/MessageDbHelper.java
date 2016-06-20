@@ -9,6 +9,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 
+/**
+ * Builds local database based on entity contracts
+ * */
 public class MessageDbHelper extends SQLiteOpenHelper {
     private static final int DATABASE_VERSION = 1;
     private static final String DATABASE_NAME = "revalue.db";

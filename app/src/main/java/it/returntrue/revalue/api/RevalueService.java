@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.api;
 
 import android.content.Context;
@@ -19,13 +23,16 @@ import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.events.SetItemAsRemovedEvent;
 import it.returntrue.revalue.events.SetItemAsRevaluedEvent;
-import it.returntrue.revalue.events.UpdateGcmTokenEvent;
+import it.returntrue.revalue.events.UpdateFcmTokenEvent;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Encapsulate all calls to service using a bus provider for communication
+ * */
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class RevalueService {
     private final Context mContext;
@@ -283,23 +290,23 @@ public class RevalueService {
     }
 
     @Subscribe
-    public void onUpdateGcmToken(final UpdateGcmTokenEvent.OnStart onStart) {
+    public void onUpdateGcmToken(final UpdateFcmTokenEvent.OnStart onStart) {
         Call<Void> call = mServiceContract.UpdateGcmToken(onStart.getTokenModel());
 
         call.enqueue(new Callback<Void>() {
             @Override
             public void onResponse(Call<Void> call, Response<Void> response) {
                 if (response.isSuccessful()) {
-                    mBus.post(new UpdateGcmTokenEvent.OnSuccess());
+                    mBus.post(new UpdateFcmTokenEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new UpdateGcmTokenEvent.OnFailure());
+                    mBus.post(new UpdateFcmTokenEvent.OnFailure());
                 }
             }
 
             @Override
             public void onFailure(Call<Void> call, Throwable t) {
-                mBus.post(new UpdateGcmTokenEvent.OnFailure());
+                mBus.post(new UpdateFcmTokenEvent.OnFailure());
             }
         });
     }

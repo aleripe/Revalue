@@ -1,4 +1,8 @@
-package it.returntrue.revalue.services;
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
+package it.returntrue.revalue.widgets;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +22,9 @@ import it.returntrue.revalue.api.RevalueServiceGenerator;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import retrofit2.Call;
 
+/**
+ * Implements a factory (adapter) for widget data
+ * */
 class FavoritesRemoteViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     private static final int MAX_ITEMS = 10;
 

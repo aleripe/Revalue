@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.services;
 
 import android.app.IntentService;
@@ -5,11 +9,14 @@ import android.content.Intent;
 import android.text.TextUtils;
 import android.util.Log;
 
-import it.returntrue.revalue.api.GcmTokenModel;
+import it.returntrue.revalue.api.FcmTokenModel;
 import it.returntrue.revalue.events.BusProvider;
-import it.returntrue.revalue.events.UpdateGcmTokenEvent;
+import it.returntrue.revalue.events.UpdateFcmTokenEvent;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
+/**
+ * Implements a service to refresh FCM token on server
+ * */
 public class RevalueGcmIntentService extends IntentService {
     private static final String TAG = RevalueGcmIntentService.class.getSimpleName();
 
@@ -26,14 +33,14 @@ public class RevalueGcmIntentService extends IntentService {
 
         // If token exists and user is logged in
         if (!TextUtils.isEmpty(token) && isLoggedIn) {
-            Log.i(TAG, "Firebird token: " + token);
+            Log.i(TAG, "FCM token: " + token);
 
             // Creates token model
-            GcmTokenModel gcmTokenModel = new GcmTokenModel();
-            gcmTokenModel.Token = token;
+            FcmTokenModel fcmTokenModel = new FcmTokenModel();
+            fcmTokenModel.Token = token;
 
             // Calls API to update Gcm registration id (token)
-            BusProvider.bus().post(new UpdateGcmTokenEvent.OnStart(gcmTokenModel));
+            BusProvider.bus().post(new UpdateFcmTokenEvent.OnStart(fcmTokenModel));
         }
     }
 }

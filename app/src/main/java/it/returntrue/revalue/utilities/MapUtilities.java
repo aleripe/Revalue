@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.utilities;
 
 import android.graphics.Color;
@@ -6,6 +10,9 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 
+/**
+ * Provides utilities to manipulate maps
+ * */
 public class MapUtilities {
     public static Circle getCenteredCircle(GoogleMap map, LatLng center, int radiusKm) {
         return map.addCircle(new CircleOptions()

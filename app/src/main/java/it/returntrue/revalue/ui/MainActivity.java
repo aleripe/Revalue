@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.content.DialogInterface;
@@ -20,10 +24,8 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.squareup.otto.Subscribe;
-
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
@@ -32,12 +34,14 @@ import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
-//import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+/**
+ * Represents the application main activity
+ * */
 @SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class MainActivity extends BaseActivity implements BaseItemsFragment.OnItemClickListener,
         NavigationView.OnNavigationItemSelectedListener {
@@ -96,31 +100,30 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
         setupSearchBox();
 
         // Sets default mode
-        setMode(mApplication.getMainMode());
+        setMode(application().getMainMode());
     }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.nav_search:
-                mDrawerLayout.closeDrawers();
                 showNearestItems();
-                return true;
+                break;
             case R.id.nav_favorites:
-                mDrawerLayout.closeDrawers();
                 showFavoriteItems();
-                return true;
+                break;
             case R.id.nav_personal:
-                mDrawerLayout.closeDrawers();
                 showPersonalItems();
-                return true;
+                break;
             case R.id.nav_logout:
-                mDrawerLayout.closeDrawers();
                 logout();
-                return true;
+                break;
             default:
                 return false;
         }
+
+        mDrawerLayout.closeDrawers();
+        return true;
     }
 
     @Override
@@ -166,7 +169,7 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
 
     @Subscribe
     public void onGetCategoriesSuccess(GetCategoriesEvent.OnSuccess onSuccess) {
-        mApplication.setCategories(onSuccess.getCategories());
+        application().setCategories(onSuccess.getCategories());
         setFilters();
     }
 
@@ -222,15 +225,15 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
     }
 
     private void logout() {
-        mSessionPreferences.logout();
+        session().logout();
         checkLogin();
     }
 
     private void setFilters() {
         mBoxSearch.setVisibility(View.VISIBLE);
-        mTextFilterTitle.setText(mApplication.getFilterTitleDescription());
-        mTextFilterCategory.setText(mApplication.getFilterCategoryDescription());
-        mTextFilterDistance.setText(mApplication.getFilterDistanceDescription());
+        mTextFilterTitle.setText(application().getFilterTitleDescription());
+        mTextFilterCategory.setText(application().getFilterCategoryDescription());
+        mTextFilterDistance.setText(application().getFilterDistanceDescription());
     }
 
     private void setNavigationViewHeader() {
@@ -240,9 +243,9 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
         TextView mLabelUsername = (TextView)header.findViewById(R.id.nav_header_label_username);
         TextView mLabelEmail = (TextView)header.findViewById(R.id.nav_header_label_email);
 
-        mLabelUsername.setText(mSessionPreferences.getAlias());
-        mLabelEmail.setText(mSessionPreferences.getUsername());
-        Glide.with(this).load(mSessionPreferences.getAvatar()).into(mImagePicture);
+        mLabelUsername.setText(session().getAlias());
+        mLabelEmail.setText(session().getUsername());
+        Glide.with(this).load(session().getAvatar()).into(mImagePicture);
     }
 
     private void setupFloatingActionButton() {
@@ -306,7 +309,7 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
                     .replace(R.id.fragment_container, mMainFragment)
                     .commit();
 
-            mApplication.setMainMode(RevalueApplication.LIST_MODE);
+            application().setMainMode(RevalueApplication.LIST_MODE);
         }
     }
 
@@ -319,7 +322,7 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
                     .replace(R.id.fragment_container, mMainFragment)
                     .commit();
 
-            mApplication.setMainMode(RevalueApplication.MAP_MODE);
+            application().setMainMode(RevalueApplication.MAP_MODE);
         }
     }
 

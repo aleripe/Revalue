@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.utilities;
 
 import java.text.DateFormat;
@@ -6,6 +10,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
+/**
+ * Provides utilities to manipulate dates
+ * */
 public class DateUtilities {
     public static String format(long milliseconds) {
         Date date = new Date(milliseconds);

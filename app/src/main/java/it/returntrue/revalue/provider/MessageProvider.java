@@ -18,6 +18,9 @@ import android.support.annotation.Nullable;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.data.MessageDbHelper;
 
+/**
+ * Implements a content provider for message management
+ */
 @SuppressWarnings("ConstantConditions")
 public class MessageProvider extends ContentProvider {
     private static final String CONTENT_AUTHORITY = "it.returntrue.revalue.provider";

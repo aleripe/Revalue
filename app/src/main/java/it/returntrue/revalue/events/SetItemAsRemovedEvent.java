@@ -1,5 +1,12 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
+/**
+ * Represents a data bus event for SetItemAsRemoved API call
+ * */
 @SuppressWarnings("ALL")
 public class SetItemAsRemovedEvent {
     public static class OnStart {

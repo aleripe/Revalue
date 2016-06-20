@@ -125,7 +125,7 @@ public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnIt
     @Override
     public void onRefresh() {
         if (NetworkUtilities.checkInternetConnection(getContext())) {
-            if (mApplication.getLocationLatitude() != null && mApplication.getLocationLongitude() != null) {
+            if (application().getLocationLatitude() != null && application().getLocationLongitude() != null) {
                 updateItems(null);
             }
             else {

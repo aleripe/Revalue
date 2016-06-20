@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.preferences;
 
 import android.content.Context;
@@ -15,6 +19,15 @@ public class SessionPreferences {
     private static final String KEY_ALIAS = "alias";
     private static final String KEY_AVATAR = "avatar";
     private static final String KEY_FIREBIRD_TOKEN = "firebird_token";
+
+    private static SessionPreferences sSessionPreferences;
+
+    public static SessionPreferences get(Context context) {
+        if (sSessionPreferences == null) {
+            sSessionPreferences = new SessionPreferences(context);
+        }
+        return sSessionPreferences;
+    }
 
     private final SharedPreferences mPreferences;
 

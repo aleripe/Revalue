@@ -21,10 +21,11 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
+import it.returntrue.revalue.preferences.SessionPreferences;
+import it.returntrue.revalue.utilities.CategoryUtilities;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FiltersFragment extends DialogFragment {
-    private RevalueApplication mApplication;
     private DialogInterface.OnDismissListener mOnDismissListener;
     private HashMap<Integer, Integer> mRadioButtons;
     private ArrayAdapter<CategoryModel> mAdapter;
@@ -44,13 +45,10 @@ public class FiltersFragment extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sets application context
-        mApplication = (RevalueApplication)getActivity().getApplicationContext();
-
         // Creates adapter and inserts empty default value
         mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
-        mAdapter.addAll(mApplication.getCategories());
+        mAdapter.addAll(application().getCategories());
         mAdapter.insert(createEmptyCategoryModel(), 0);
         mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
@@ -76,9 +74,10 @@ public class FiltersFragment extends DialogFragment {
         mSpinnerCategory.setAdapter(mAdapter);
 
         // Fills previous values
-        mTextTitle.setText(mApplication.getFilterTitle());
-        mSpinnerCategory.setSelection(mApplication.getCategoryPosition(mApplication.getFilterCategory()));
-        mRadioDistance.check(mRadioButtons.get(mApplication.getFilterDistance()));
+        mTextTitle.setText(application().getFilterTitle());
+        mSpinnerCategory.setSelection(CategoryUtilities.getCategoryPosition(
+                application().getCategories(), application().getFilterCategory()));
+        mRadioDistance.check(mRadioButtons.get(application().getFilterDistance()));
 
         return new AlertDialog.Builder(getActivity())
                 .setTitle(R.string.search_filters)
@@ -86,10 +85,11 @@ public class FiltersFragment extends DialogFragment {
                 .setPositiveButton(android.R.string.ok,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                mApplication.setFilterTitle(mTextTitle.getText().toString());
-                                mApplication.setFilterCategory(mApplication.getCategoryId(
+                                application().setFilterTitle(mTextTitle.getText().toString());
+                                application().setFilterCategory(CategoryUtilities.getCategoryId(
+                                        application().getCategories(),
                                         mSpinnerCategory.getSelectedItemPosition()));
-                                mApplication.setFilterDistance(mRadioButtons.get(
+                                application().setFilterDistance(mRadioButtons.get(
                                         mRadioDistance.getCheckedRadioButtonId()));
                             }
                         }
@@ -98,7 +98,7 @@ public class FiltersFragment extends DialogFragment {
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                mApplication.clearFilters();
+                                application().clearFilters();
                             }
                         })
                 .setNegativeButton(R.string.cancel,
@@ -129,5 +129,13 @@ public class FiltersFragment extends DialogFragment {
         category.Id = 0;
         category.Name = getString(R.string.text_filter_category_empty);
         return category;
+    }
+
+    protected RevalueApplication application() {
+        return RevalueApplication.get(getActivity().getApplicationContext());
+    }
+
+    protected SessionPreferences session() {
+        return SessionPreferences.get(getActivity());
     }
 }

@@ -30,7 +30,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ExternalTokenModel;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.ExternalLoginEvent;
-import it.returntrue.revalue.events.UpdateGcmTokenEvent;
+import it.returntrue.revalue.events.UpdateFcmTokenEvent;
 import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.utilities.NetworkUtilities;
@@ -100,7 +100,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Subscribe
     public void onExternalLoginSuccess(ExternalLoginEvent.OnSuccess onSuccess) {
         // Authenticate the user
-        mSessionPreferences.login(
+        session().login(
                 onSuccess.getTokenModel().getUserId(),
                 onSuccess.getTokenModel().getUsername(),
                 onSuccess.getTokenModel().getAccessToken(),
@@ -108,7 +108,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 onSuccess.getTokenModel().getAvatar());
 
         // Updates service with authentication token
-        mApplication.updateRevalueService(mSessionPreferences.getToken());
+        application().updateRevalueService(session().getToken());
 
         // Registers to send or retrieve messages
         startService(new Intent(LoginActivity.this, RevalueGcmIntentService.class));
@@ -124,7 +124,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     @Subscribe
-    public void onUpdateGcmTokenSuccess(UpdateGcmTokenEvent.OnSuccess onSuccess) {
+    public void onUpdateGcmTokenSuccess(UpdateFcmTokenEvent.OnSuccess onSuccess) {
         // Starts main activity
         startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
@@ -134,7 +134,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     }
 
     @Subscribe
-    public void onUpdateGcmTokenFailure(UpdateGcmTokenEvent.OnFailure onFailure) {
+    public void onUpdateGcmTokenFailure(UpdateFcmTokenEvent.OnFailure onFailure) {
         // Displays error status
         mLabelStatus.setText(R.string.could_not_register_messaging_token);
 

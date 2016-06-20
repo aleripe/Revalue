@@ -19,7 +19,7 @@ import it.returntrue.revalue.data.MessageData;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
 /**
- * Adapts data returned from cursor to show in a RecyclerView
+ * Adapts messages returned from cursor to show in a RecyclerView
  * */
 public class MessagesAdapter extends RecyclerView.Adapter<MessagesAdapter.ViewHolder> {
     private static final int ITEM_RECEIVED = 1;

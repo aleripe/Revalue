@@ -26,7 +26,7 @@ import it.returntrue.revalue.data.MessageData;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
 /**
- * Adapts data returned from cursor to show in a RecyclerView
+ * Adapts chats returned from cursor to show in a RecyclerView
  * */
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> {
     private final SessionPreferences mSessionPreferences;

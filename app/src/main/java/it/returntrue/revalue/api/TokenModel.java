@@ -1,8 +1,15 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.api;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Represents a token from data model
+ * */
 @SuppressWarnings("unused")
 public class TokenModel {
     @SerializedName("userId")

@@ -1,5 +1,12 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.api;
 
+/**
+ * Represents an item from data model
+ * */
 @SuppressWarnings("unused")
 public class ItemModel {
     public int Id;

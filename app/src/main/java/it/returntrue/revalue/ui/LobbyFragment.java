@@ -77,7 +77,7 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
         ButterKnife.bind(this, getView());
 
         // Creates adapter for chats
-        mChatsAdapter = new ChatsAdapter(getContext(), mSessionPreferences);
+        mChatsAdapter = new ChatsAdapter(getContext(), session());
         mChatsAdapter.setOnItemClickListener(this);
 
         // Creates layout manager
@@ -105,7 +105,7 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
     @Override
     public void onLoadFinished(Loader<Cursor> loader, final Cursor data) {
         ArrayList<Integer> userIds = new ArrayList<>();
-        int currentUserId = mSessionPreferences.getUserId();
+        int currentUserId = session().getUserId();
 
         for (data.moveToFirst(); !data.isAfterLast(); data.moveToNext()) {
             int senderId = MessageData.getSenderId(data);

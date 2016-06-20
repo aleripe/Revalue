@@ -23,7 +23,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ItemModel;
 
 /**
- * Adapts data returned from cursor to show in a RecyclerView
+ * Adapts items returned from cursor to show in a RecyclerView
  * */
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
     private OnItemClickListener mOnItemClickListener;

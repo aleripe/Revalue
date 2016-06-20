@@ -1,7 +1,14 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
 import it.returntrue.revalue.api.MessageModel;
 
+/**
+ * Represents a data bus event for SendMessage API call
+ * */
 @SuppressWarnings("ALL")
 public class SendMessageEvent {
     public static class OnStart {

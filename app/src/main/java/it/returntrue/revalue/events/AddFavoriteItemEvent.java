@@ -1,5 +1,12 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.events;
 
+/**
+ * Represents a data bus event for AddFavoriteItem API call
+ * */
 @SuppressWarnings("ALL")
 public class AddFavoriteItemEvent {
     public static class OnStart {

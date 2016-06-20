@@ -1,7 +1,14 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.utilities;
 
 import android.support.annotation.IntDef;
 
+/**
+ * Contains constants for general use
+ * */
 public final class Constants {
     @IntDef({ NEAREST_ITEMS_MODE, FAVORITE_ITEMS_MODE, PERSONAL_MOVIES_MODE })
     public @interface ItemMode {}
