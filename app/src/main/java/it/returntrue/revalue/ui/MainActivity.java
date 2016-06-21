@@ -253,6 +253,11 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
         mFloatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (!application().isLocationAvailable()) {
+                    Toast.makeText(MainActivity.this, R.string.waiting_gps_fix, Toast.LENGTH_LONG).show();
+                    return;
+                }
+
                 // Opens insert activity
                 Intent intent = new Intent(MainActivity.this, InsertActivity.class);
                 startActivity(intent);

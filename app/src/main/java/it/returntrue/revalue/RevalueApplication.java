@@ -23,6 +23,7 @@ import it.returntrue.revalue.utilities.CategoryUtilities;
 /**
  * Provides concrete application implementation
  * */
+@SuppressWarnings("BooleanMethodIsAlwaysInverted")
 public class RevalueApplication extends Application {
     private static RevalueApplication sApplication;
 
@@ -124,6 +125,10 @@ public class RevalueApplication extends Application {
 
     public Double getLocationLongitude() {
         return mLocationLongitude;
+    }
+
+    public boolean isLocationAvailable() {
+        return (getLocationLatitude() != null) && (getLocationLongitude() != null);
     }
 
     public void setCategories(List<CategoryModel> categories) {

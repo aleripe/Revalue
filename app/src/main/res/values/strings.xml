@@ -46,6 +46,7 @@
     <string name="share_with">Share with</string>
     <string name="nav_personal">My items</string>
     <string name="content_provider_authority" translatable="false">it.returntrue.revalue.provider</string>
+    <string name="file_provider_authority" translatable="false">it.returntrue.revalue.fileprovider</string>
     <string name="loading">Loading</string>
     <string name="waiting_gps_fix">Waiting for a GPS fix…</string>
     <string name="generic_error">An error occurred</string>

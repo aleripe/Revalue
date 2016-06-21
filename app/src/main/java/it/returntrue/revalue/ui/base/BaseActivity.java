@@ -81,7 +81,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         if (!TextUtils.isEmpty(token)) Log.v(TAG, "Token: " + token);
     }
 
-    protected void checkPlayServices() {
+    private void checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);
         if (resultCode != ConnectionResult.SUCCESS) {

@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
@@ -18,6 +19,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Base64;
@@ -50,6 +52,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -66,20 +69,20 @@ import it.returntrue.revalue.utilities.CategoryUtilities;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
-@SuppressWarnings({"SameParameterValue", "UnusedParameters", "WeakerAccess", "unused"})
+@SuppressWarnings({"SameParameterValue", "UnusedParameters", "WeakerAccess", "unused", "BooleanMethodIsAlwaysInverted"})
 public class InsertFragment extends BaseFragment {
     private static final int ACTION_CAMERA = 1;
     private static final int ACTION_GALLERY = 2;
     private static final int PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 1;
     private static final String EXTRA_PICTURE = "picture";
-    private static final int PICTURE_SIZE = 2000;
+    private static final int PICTURE_SIZE = 1000;
 
     private ProgressDialog mProgressDialog;
     private ArrayAdapter<CategoryModel> mAdapter;
     private SupportMapFragment mMapFragment;
     private Bitmap mPicture;
     private String mPictureData;
-    private Uri mPictureUri;
+    private String mPicturePath;
 
     @Bind(R.id.label_title) TextView mLabelTitle;
     @Bind(R.id.text_title) EditText mTextTitle;
@@ -232,6 +235,11 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void setupAdapter() {
+        if (application().getCategories() == null) {
+            startActivity(new Intent(getActivity(), MainActivity.class));
+            getActivity().finish();
+        }
+
         // Creates adapter and inserts empty default value
         mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
@@ -241,28 +249,21 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void actionCameraResult(Intent data) {
-        try {
-            mPicture = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mPictureUri);
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
+        mPicture = resizeImage(BitmapFactory.decodeFile(mPicturePath), PICTURE_SIZE);
         previewPicture();
     }
 
     private void actionGalleryResult(Intent data) {
         if (data != null) {
             try {
-                mPicture = MediaStore.Images.Media.getBitmap(
-                        getContext().getContentResolver(), data.getData());
+                mPicture = resizeImage(MediaStore.Images.Media.getBitmap(
+                        getContext().getContentResolver(), data.getData()), PICTURE_SIZE);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        if (mPicture != null) {
-            mButtonChoosePicture.setImageBitmap(mPicture);
-        }
+        previewPicture();
     }
 
     private void previewPicture() {
@@ -319,23 +320,40 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void dispatchCameraIntent() {
-        File file = new File(Environment.getExternalStorageDirectory() +
-                "/DCIM/", getString(R.string.app_name) + "_" + new Date().getTime() + ".jpg");
-
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-        if (file != null) {
-            mPictureUri = Uri.fromFile(file);
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, mPictureUri);
-        }
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            File file = null;
 
-        startActivityForResult(intent, ACTION_CAMERA);
+            try {
+                file = createImageFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            if (file != null) {
+                Uri photoURI = FileProvider.getUriForFile(getContext(),
+                        getString(R.string.file_provider_authority), file);
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(intent, ACTION_CAMERA);
+            }
+        }
     }
 
     private void dispatchGalleryIntent() {
         Intent intent = new Intent(Intent.ACTION_PICK,
                 android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         startActivityForResult(intent, ACTION_GALLERY);
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMddHHmmss", Locale.UK).format(new Date());
+        String imageFileName = "JPEG" + timeStamp;
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(imageFileName, ".jpg", storageDir);
+
+        mPicturePath = image.getAbsolutePath();
+        return image;
     }
 
     private void sendItem() {
