@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui.base;
 
 import android.os.Bundle;
@@ -8,6 +12,9 @@ import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
+/**
+ * Provides a base implementation for all application fragments
+ * */
 public class BaseFragment extends Fragment {
 
     @Override

@@ -1,7 +1,10 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui.base;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -23,6 +26,9 @@ import it.returntrue.revalue.events.GetItemsEvent;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+/**
+ * Provides a base implementation for item fragments (list and map)
+ * */
 public abstract class BaseItemsFragment extends BaseFragment implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener {
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
@@ -31,20 +37,10 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     private static final int INTERVAL = FASTEST_INTERVAL * 2;
 
     protected @Constants.ItemMode int mItemMode;
-    protected OnItemClickListener OnItemClickListener;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
     private Location mLastLocation;
-
-    /** Provides listeners for click events */
-    public interface OnItemClickListener {
-        void onAddFavoriteClick(int id);
-
-        void onRemoveFavoriteClick(int id);
-
-        void onItemClick(int id);
-    }
 
     public abstract void setStatus(String text);
 
@@ -67,17 +63,6 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            OnItemClickListener = (OnItemClickListener) context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnItemClickListener");
-        }
     }
 
     @Override

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.Manifest;
@@ -69,6 +73,9 @@ import it.returntrue.revalue.utilities.CategoryUtilities;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+/**
+ * Shows new item form
+ * */
 @SuppressWarnings({"SameParameterValue", "UnusedParameters", "WeakerAccess", "unused", "BooleanMethodIsAlwaysInverted"})
 public class InsertFragment extends BaseFragment {
     private static final int ACTION_CAMERA = 1;
@@ -217,20 +224,17 @@ public class InsertFragment extends BaseFragment {
 
     @Subscribe
     public void onInsertItemSuccess(InsertItemEvent.OnSuccess onSuccess) {
-        // Closes progress dialog
-        if (mProgressDialog != null) mProgressDialog.dismiss();
-
-        Toast.makeText(getContext(), R.string.item_saved, Toast.LENGTH_LONG).show();
-
         Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
+        getActivity().finish();
+
+        hideProgress();
+        Toast.makeText(getContext(), R.string.item_saved, Toast.LENGTH_LONG).show();
     }
 
     @Subscribe
     public void onInsertItemFailure(InsertItemEvent.OnFailure onFailure) {
-        // Closes progress dialog
-        if (mProgressDialog != null) mProgressDialog.dismiss();
-
+        hideProgress();
         Toast.makeText(getContext(), R.string.could_not_save_item, Toast.LENGTH_LONG).show();
     }
 
@@ -357,17 +361,17 @@ public class InsertFragment extends BaseFragment {
     }
 
     private void sendItem() {
+        showProgress();
+
         if (!NetworkUtilities.checkInternetConnection(getContext())) {
             Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            hideProgress();
             return;
         }
 
         mMapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
-                mProgressDialog = ProgressDialog.show(getContext(),
-                        getString(R.string.loading), getString(R.string.uploading_data));
-
                 // Creates item model
                 ItemModel itemModel = new ItemModel();
                 itemModel.Title = mTextTitle.getText().toString();
@@ -380,6 +384,7 @@ public class InsertFragment extends BaseFragment {
 
                 if (!validateItem(itemModel)) {
                     Toast.makeText(getContext(), R.string.item_validation_failed, Toast.LENGTH_LONG).show();
+                    hideProgress();
                     return;
                 }
 
@@ -409,6 +414,15 @@ public class InsertFragment extends BaseFragment {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void showProgress() {
+        mProgressDialog = ProgressDialog.show(getContext(),
+                getString(R.string.loading), getString(R.string.uploading_data));
+    }
+
+    private void hideProgress() {
+        if (mProgressDialog != null) mProgressDialog.dismiss();
     }
 
     private boolean validateItem(ItemModel itemModel) {

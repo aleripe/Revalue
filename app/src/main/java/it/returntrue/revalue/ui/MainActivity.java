@@ -24,8 +24,10 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
 import com.squareup.otto.Subscribe;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
@@ -34,17 +36,17 @@ import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
+import it.returntrue.revalue.events.ViewItemEvent;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
 /**
- * Represents the application main activity
+ * Shows item list or map
  * */
 @SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
-public class MainActivity extends BaseActivity implements BaseItemsFragment.OnItemClickListener,
-        NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String FRAGMENT_FILTERS = "filters";
 
     private BaseItemsFragment mMainFragment;
@@ -149,22 +151,12 @@ public class MainActivity extends BaseActivity implements BaseItemsFragment.OnIt
         }
     }
 
-    @Override
-    public void onItemClick(int id) {
+    @Subscribe
+    public void onViewItem(ViewItemEvent.OnStart onStart) {
         // Opens details activity
         Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra(DetailActivity.EXTRA_ID, id);
+        intent.putExtra(DetailActivity.EXTRA_ID, onStart.getId());
         startActivity(intent);
-    }
-
-    @Override
-    public void onAddFavoriteClick(int id) {
-        BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(id));
-    }
-
-    @Override
-    public void onRemoveFavoriteClick(int id) {
-        BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(id));
     }
 
     @Subscribe

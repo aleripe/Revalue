@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
@@ -8,6 +12,9 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
+/**
+ * Shows new item form
+ * */
 @SuppressWarnings({"ConstantConditions", "WeakerAccess", "unused"})
 public class InsertActivity extends BaseActivity {
     @Bind(R.id.toolbar) Toolbar mToolbar;

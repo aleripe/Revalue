@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
@@ -8,6 +12,9 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
+/**
+ * Shows chat interface (lobby and messages)
+ * */
 @SuppressWarnings({"FieldCanBeLocal", "ConstantConditions", "WeakerAccess", "unused"})
 public class ChatActivity extends BaseActivity implements LobbyFragment.OnItemClickListener {
     public static final String EXTRA_ITEM_ID = "item_id";

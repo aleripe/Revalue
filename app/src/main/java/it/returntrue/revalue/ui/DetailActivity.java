@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
@@ -9,6 +13,9 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
+/**
+ * Shows single item details
+ * */
 @SuppressWarnings({"ConstantConditions", "WeakerAccess", "unused"})
 public class DetailActivity extends BaseActivity {
     public static final String EXTRA_ID = "id";

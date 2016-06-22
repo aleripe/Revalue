@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.os.Bundle;
@@ -26,11 +30,10 @@ import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
 /**
- * Shows the list of items
+ * Shows a list of items
  */
 @SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
-public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnItemClickListener,
-        SwipeRefreshLayout.OnRefreshListener {
+public class ListFragment extends BaseItemsFragment implements SwipeRefreshLayout.OnRefreshListener {
     private ItemsAdapter mItemsAdapter;
 
     @Bind(R.id.swipe_refresh_layout) SwipeRefreshLayout mSwipeRefreshLayout;
@@ -58,7 +61,6 @@ public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnIt
         // Creates list objects
         mRecyclerView.setHasFixedSize(true);
         mItemsAdapter = new ItemsAdapter(getContext());
-        mItemsAdapter.setOnItemClickListener(this);
 
         // Sets RecyclerView's side objects
         mRecyclerView.setAdapter(mItemsAdapter);
@@ -75,27 +77,6 @@ public class ListFragment extends BaseItemsFragment implements ItemsAdapter.OnIt
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_main_list, menu);
         super.onCreateOptionsMenu(menu, inflater);
-    }
-
-    @Override
-    public void onAddFavoriteClick(int itemId) {
-        if (OnItemClickListener != null) {
-            OnItemClickListener.onAddFavoriteClick(itemId);
-        }
-    }
-
-    @Override
-    public void onRemoveFavoriteClick(int id) {
-        if (OnItemClickListener != null) {
-            OnItemClickListener.onRemoveFavoriteClick(id);
-        }
-    }
-
-    @Override
-    public void onItemClick(int id) {
-        if (OnItemClickListener != null) {
-            OnItemClickListener.onItemClick(id);
-        }
     }
 
     @Override

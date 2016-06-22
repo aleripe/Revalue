@@ -5,19 +5,31 @@ android {
     buildToolsVersion '24.0.0'
 
     defaultConfig {
-        applicationId "it.returntrue.revalue"
+        applicationId 'it.returntrue.revalue'
         minSdkVersion 16
         targetSdkVersion 24
         versionCode 1
-        versionName "1.0"
+        versionName '1.0'
         multiDexEnabled true
     }
+
+    signingConfigs {
+        release {
+            keyAlias 'Revalue'
+            keyPassword 'password'
+            storeFile file('../Revalue.jks')
+            storePassword 'password'
+        }
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
+
     lintOptions {
         abortOnError false
     }

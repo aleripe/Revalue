@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.graphics.Bitmap;
@@ -29,12 +33,17 @@ import java.util.HashMap;
 
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ItemModel;
+import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetItemsEvent;
+import it.returntrue.revalue.events.ViewItemEvent;
 import it.returntrue.revalue.imaging.CropCircleTransformation;
 import it.returntrue.revalue.ui.base.BaseItemsFragment;
 import it.returntrue.revalue.utilities.Constants;
 import it.returntrue.revalue.utilities.MapUtilities;
 
+/**
+ * Shows a map of items
+ * */
 @SuppressWarnings({"UnusedParameters", "unused"})
 public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWindowClickListener {
     private static final String KEY_LATITUDE = "latitude";
@@ -167,8 +176,6 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        if (OnItemClickListener != null) {
-            OnItemClickListener.onItemClick(mMarkerIDs.get(marker));
-        }
+        BusProvider.bus().post(new ViewItemEvent.OnStart(mMarkerIDs.get(marker)));
     }
 }

@@ -21,30 +21,21 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ItemModel;
+import it.returntrue.revalue.events.AddFavoriteItemEvent;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
+import it.returntrue.revalue.events.ViewItemEvent;
 
 /**
  * Adapts items returned from cursor to show in a RecyclerView
  * */
 public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> {
-    private OnItemClickListener mOnItemClickListener;
     private final Context mContext;
     private List<ItemModel> mItems;
-
-    /** Provides listeners for click events */
-    public interface OnItemClickListener {
-        void onAddFavoriteClick(int id);
-        void onRemoveFavoriteClick(int id);
-        void onItemClick(int id);
-    }
 
     public ItemsAdapter(Context context) {
         mContext = context;
         mItems = new ArrayList<>();
-    }
-
-    /** Sets a new click events listener */
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mOnItemClickListener = listener;
     }
 
     @Override
@@ -110,27 +101,24 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             imageAddFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onAddFavoriteClick(mItems.get(getAdapterPosition()).Id);
-                    }
+                    BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(
+                            mItems.get(getAdapterPosition()).Id));
                 }
             });
 
             imageRemoveFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onRemoveFavoriteClick(mItems.get(getAdapterPosition()).Id);
-                    }
+                    BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(
+                            mItems.get(getAdapterPosition()).Id));
                 }
             });
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mOnItemClickListener != null) {
-                        mOnItemClickListener.onItemClick(mItems.get(getAdapterPosition()).Id);
-                    }
+                    BusProvider.bus().post(new ViewItemEvent.OnStart(
+                            mItems.get(getAdapterPosition()).Id));
                 }
             });
         }

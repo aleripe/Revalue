@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.Manifest;
@@ -52,6 +56,9 @@ import it.returntrue.revalue.ui.base.BaseFragment;
 import it.returntrue.revalue.utilities.MapUtilities;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+/**
+ * Shows single item details
+ * */
 @SuppressWarnings({"ConstantConditions", "UnusedParameters", "WeakerAccess", "unused"})
 public class DetailFragment extends BaseFragment {
     private static final int PERMISSIONS_REQUEST_WRITE_EXTERNAL_STORAGE = 1;
@@ -185,6 +192,7 @@ public class DetailFragment extends BaseFragment {
     public void onSetItemAsRevaluedSuccess(SetItemAsRevaluedEvent.OnSuccess onSuccess) {
         Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
+        getActivity().finish();
     }
 
     @Subscribe
@@ -196,6 +204,7 @@ public class DetailFragment extends BaseFragment {
     public void onSetItemAsRemovedSuccess(SetItemAsRemovedEvent.OnSuccess onSuccess) {
         Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
+        getActivity().finish();
     }
 
     @Subscribe

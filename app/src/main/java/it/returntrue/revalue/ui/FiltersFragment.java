@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.app.Dialog;
@@ -24,6 +28,9 @@ import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.utilities.CategoryUtilities;
 
+/**
+ * Shows the items filters
+ * */
 @SuppressWarnings({"WeakerAccess", "unused"})
 public class FiltersFragment extends DialogFragment {
     private DialogInterface.OnDismissListener mOnDismissListener;

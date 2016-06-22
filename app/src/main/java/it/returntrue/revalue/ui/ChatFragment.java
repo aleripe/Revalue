@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.content.ContentValues;
@@ -30,6 +34,9 @@ import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.base.BaseFragment;
 
+/**
+ * Shows chat messages
+ * */
 @SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int LOADER_MESSAGES = 1;

@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.content.Context;
@@ -29,6 +33,9 @@ import it.returntrue.revalue.events.GetUsersByIdsEvent;
 import it.returntrue.revalue.provider.MessageProvider;
 import it.returntrue.revalue.ui.base.BaseFragment;
 
+/**
+ * Shows item chat lobby
+ * */
 @SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
 public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>,
     ChatsAdapter.OnItemClickListener {

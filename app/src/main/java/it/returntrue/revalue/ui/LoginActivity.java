@@ -1,3 +1,7 @@
+/*
+ * Copyright (C) 2016 Alessandro Riperi
+*/
+
 package it.returntrue.revalue.ui;
 
 import android.app.ProgressDialog;
@@ -35,6 +39,9 @@ import it.returntrue.revalue.services.RevalueGcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
+/**
+ * Shows login form
+ * */
 @SuppressWarnings({"ConstantConditions", "UnusedParameters", "WeakerAccess", "unused"})
 public class LoginActivity extends BaseActivity implements View.OnClickListener {
     private static final int RC_SIGN_IN = 9001;
