@@ -41,7 +41,6 @@ public class RevalueApplication extends Application {
     private Integer mFilterDistance = DEFAULT_DISTANCE;
     private Double mLocationLatitude;
     private Double mLocationLongitude;
-    private List<CategoryModel> mCategories;
     private RevalueService mRevalueService;
 
     public static RevalueApplication get(Context context) {
@@ -87,8 +86,8 @@ public class RevalueApplication extends Application {
         return mFilterCategory;
     }
 
-    public String getFilterCategoryDescription() {
-        String categoryName = CategoryUtilities.getCategoryName(mCategories, getFilterCategory());
+    public String getFilterCategoryDescription(List<CategoryModel> categories) {
+        String categoryName = CategoryUtilities.getCategoryName(categories, getFilterCategory());
         return (categoryName != null) ? categoryName : getString(R.string.text_filter_category_empty);
     }
 
@@ -129,14 +128,6 @@ public class RevalueApplication extends Application {
 
     public boolean isLocationAvailable() {
         return (getLocationLatitude() != null) && (getLocationLongitude() != null);
-    }
-
-    public void setCategories(List<CategoryModel> categories) {
-        mCategories = categories;
-    }
-
-    public List<CategoryModel> getCategories() {
-        return mCategories;
     }
 
     public void setupRevalueService(String token) {

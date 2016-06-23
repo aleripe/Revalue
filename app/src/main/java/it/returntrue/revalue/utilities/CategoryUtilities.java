@@ -35,11 +35,11 @@ public class CategoryUtilities {
         return null;
     }
 
-    public static int getCategoryId(List<CategoryModel> categories, Integer position) {
+    public static Integer getCategoryId(List<CategoryModel> categories, Integer position) {
         if (position != null && position > 0 && position <= categories.size()) {
             return categories.get(position - 1).Id;
         }
 
-        return -1;
+        return null;
     }
 }

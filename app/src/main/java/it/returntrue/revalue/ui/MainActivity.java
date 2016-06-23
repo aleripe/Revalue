@@ -28,10 +28,13 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.squareup.otto.Subscribe;
 
+import java.util.List;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
+import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetCategoriesEvent;
@@ -50,6 +53,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private static final String FRAGMENT_FILTERS = "filters";
 
     private BaseItemsFragment mMainFragment;
+    private List<CategoryModel> mCategories;
 
     @Bind(R.id.drawer_layout) DrawerLayout mDrawerLayout;
     @Bind(R.id.nav_view) NavigationView mNavigationView;
@@ -161,7 +165,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Subscribe
     public void onGetCategoriesSuccess(GetCategoriesEvent.OnSuccess onSuccess) {
-        application().setCategories(onSuccess.getCategories());
+        mCategories = onSuccess.getCategories();
         setFilters();
     }
 
@@ -224,7 +228,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void setFilters() {
         mBoxSearch.setVisibility(View.VISIBLE);
         mTextFilterTitle.setText(application().getFilterTitleDescription());
-        mTextFilterCategory.setText(application().getFilterCategoryDescription());
+        mTextFilterCategory.setText(application().getFilterCategoryDescription(mCategories));
         mTextFilterDistance.setText(application().getFilterDistanceDescription());
     }
 

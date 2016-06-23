@@ -17,16 +17,23 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
+import android.widget.Toast;
+
+import com.squareup.otto.Subscribe;
 
 import java.util.HashMap;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.utilities.CategoryUtilities;
+import it.returntrue.revalue.utilities.NetworkUtilities;
 
 /**
  * Shows the items filters
@@ -35,6 +42,7 @@ import it.returntrue.revalue.utilities.CategoryUtilities;
 public class FiltersFragment extends DialogFragment {
     private DialogInterface.OnDismissListener mOnDismissListener;
     private HashMap<Integer, Integer> mRadioButtons;
+    private List<CategoryModel> mCategories;
     private ArrayAdapter<CategoryModel> mAdapter;
 
     @Bind(R.id.text_title) EditText mTextTitle;
@@ -52,21 +60,23 @@ public class FiltersFragment extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
-        mAdapter.clear();
-        mAdapter.addAll(application().getCategories());
-        mAdapter.insert(createEmptyCategoryModel(), 0);
-        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        loadCategories();
+    }
 
-        // Creates associations for radio buttons
-        mRadioButtons = new HashMap<>();
-        mRadioButtons.put(50, R.id.radio_distance_50);
-        mRadioButtons.put(100, R.id.radio_distance_100);
-        mRadioButtons.put(200, R.id.radio_distance_200);
-        mRadioButtons.put(R.id.radio_distance_50, 50);
-        mRadioButtons.put(R.id.radio_distance_100, 100);
-        mRadioButtons.put(R.id.radio_distance_200, 200);
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        // Stops listening to bus events
+        BusProvider.bus().unregister(this);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        // Listens to bus events
+        BusProvider.bus().register(this);
     }
 
     @NonNull
@@ -77,13 +87,17 @@ public class FiltersFragment extends DialogFragment {
         // Binds controls
         ButterKnife.bind(this, view);
 
-        // Sets adapter
-        mSpinnerCategory.setAdapter(mAdapter);
+        // Creates associations for radio buttons
+        mRadioButtons = new HashMap<>();
+        mRadioButtons.put(50, R.id.radio_distance_50);
+        mRadioButtons.put(100, R.id.radio_distance_100);
+        mRadioButtons.put(200, R.id.radio_distance_200);
+        mRadioButtons.put(R.id.radio_distance_50, 50);
+        mRadioButtons.put(R.id.radio_distance_100, 100);
+        mRadioButtons.put(R.id.radio_distance_200, 200);
 
         // Fills previous values
         mTextTitle.setText(application().getFilterTitle());
-        mSpinnerCategory.setSelection(CategoryUtilities.getCategoryPosition(
-                application().getCategories(), application().getFilterCategory()));
         mRadioDistance.check(mRadioButtons.get(application().getFilterDistance()));
 
         return new AlertDialog.Builder(getActivity())
@@ -94,7 +108,7 @@ public class FiltersFragment extends DialogFragment {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 application().setFilterTitle(mTextTitle.getText().toString());
                                 application().setFilterCategory(CategoryUtilities.getCategoryId(
-                                        application().getCategories(),
+                                        mCategories,
                                         mSpinnerCategory.getSelectedItemPosition()));
                                 application().setFilterDistance(mRadioButtons.get(
                                         mRadioDistance.getCheckedRadioButtonId()));
@@ -127,8 +141,41 @@ public class FiltersFragment extends DialogFragment {
         }
     }
 
+    @Subscribe
+    public void onGetCategoriesSuccess(GetCategoriesEvent.OnSuccess onSuccess) {
+        mCategories = onSuccess.getCategories();
+
+        // Creates adapter and inserts empty default value
+        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        mAdapter.clear();
+        mAdapter.addAll(mCategories);
+        mAdapter.insert(createEmptyCategoryModel(), 0);
+        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Sets adapter
+        mSpinnerCategory.setAdapter(mAdapter);
+
+        // Fills previous values
+        mSpinnerCategory.setSelection(CategoryUtilities.getCategoryPosition(
+                mCategories, application().getFilterCategory()));
+    }
+
+    @Subscribe
+    public void onGetCategoriesFailure(GetCategoriesEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_get_categories, Toast.LENGTH_LONG).show();
+    }
+
     public void setOnDismissListener(DialogInterface.OnDismissListener onDismissListener) {
         mOnDismissListener = onDismissListener;
+    }
+
+    private void loadCategories() {
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            BusProvider.bus().post(new GetCategoriesEvent.OnStart());
+        }
+        else {
+            Toast.makeText(getContext(), R.string.check_connection, Toast.LENGTH_LONG).show();
+        }
     }
 
     private CategoryModel createEmptyCategoryModel() {

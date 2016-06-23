@@ -67,6 +67,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.ItemModel;
 import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.GetCategoriesEvent;
 import it.returntrue.revalue.events.InsertItemEvent;
 import it.returntrue.revalue.ui.base.BaseFragment;
 import it.returntrue.revalue.utilities.CategoryUtilities;
@@ -85,6 +86,7 @@ public class InsertFragment extends BaseFragment {
     private static final int PICTURE_SIZE = 1000;
 
     private ProgressDialog mProgressDialog;
+    private List<CategoryModel> mCategories;
     private ArrayAdapter<CategoryModel> mAdapter;
     private SupportMapFragment mMapFragment;
     private Bitmap mPicture;
@@ -109,8 +111,7 @@ public class InsertFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Sets adapter
-        setupAdapter();
+        loadCategories();
     }
 
     @Override
@@ -122,9 +123,6 @@ public class InsertFragment extends BaseFragment {
 
         // Gets map reference
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
-
-        // Sets adapter
-        mSpinnerCategory.setAdapter(mAdapter);
 
         // Sets change picture button event handler to select picture
         mButtonChoosePicture.setOnClickListener(new View.OnClickListener() {
@@ -223,6 +221,26 @@ public class InsertFragment extends BaseFragment {
     }
 
     @Subscribe
+    public void onGetCategoriesSuccess(GetCategoriesEvent.OnSuccess onSuccess) {
+        mCategories = onSuccess.getCategories();
+
+        // Creates adapter and inserts empty default value
+        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        mAdapter.clear();
+        mAdapter.addAll(mCategories);
+        mAdapter.insert(createEmptyCategoryModel(), 0);
+        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Sets adapter
+        mSpinnerCategory.setAdapter(mAdapter);
+    }
+
+    @Subscribe
+    public void onGetCategoriesFailure(GetCategoriesEvent.OnFailure onFailure) {
+        Toast.makeText(getContext(), R.string.could_not_get_categories, Toast.LENGTH_LONG).show();
+    }
+
+    @Subscribe
     public void onInsertItemSuccess(InsertItemEvent.OnSuccess onSuccess) {
         Intent intent = new Intent(getActivity(), MainActivity.class);
         startActivity(intent);
@@ -238,18 +256,13 @@ public class InsertFragment extends BaseFragment {
         Toast.makeText(getContext(), R.string.could_not_save_item, Toast.LENGTH_LONG).show();
     }
 
-    private void setupAdapter() {
-        if (application().getCategories() == null) {
-            startActivity(new Intent(getActivity(), MainActivity.class));
-            getActivity().finish();
+    private void loadCategories() {
+        if (NetworkUtilities.checkInternetConnection(getContext())) {
+            BusProvider.bus().post(new GetCategoriesEvent.OnStart());
         }
-
-        // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
-        mAdapter.clear();
-        mAdapter.addAll(application().getCategories());
-        mAdapter.insert(createEmptyCategoryModel(), 0);
-        mAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        else {
+            Toast.makeText(getContext(), R.string.check_connection, Toast.LENGTH_LONG).show();
+        }
     }
 
     private void actionCameraResult(Intent data) {
@@ -377,8 +390,7 @@ public class InsertFragment extends BaseFragment {
                 itemModel.Title = mTextTitle.getText().toString();
                 itemModel.Description = mTextDescription.getText().toString();
                 itemModel.ShowOnMap = mSwitchLocation.isChecked();
-                itemModel.CategoryId = CategoryUtilities.getCategoryId(
-                        application().getCategories(), mSpinnerCategory.getSelectedItemPosition());
+                itemModel.CategoryId = CategoryUtilities.getCategoryId(mCategories, mSpinnerCategory.getSelectedItemPosition());
                 itemModel.PictureData = mPictureData;
                 setLocationOnItem(itemModel, googleMap);
 
