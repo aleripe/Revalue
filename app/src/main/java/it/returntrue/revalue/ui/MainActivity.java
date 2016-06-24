@@ -33,7 +33,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
-import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
@@ -48,9 +47,10 @@ import it.returntrue.revalue.utilities.NetworkUtilities;
 /**
  * Shows item list or map
  * */
-@SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
+@SuppressWarnings({"UnusedParameters", "WeakerAccess", "ResourceType", "unused"})
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
     private static final String FRAGMENT_FILTERS = "filters";
+    private static final String EXTRA_ITEMS_MODE = "items_mode";
 
     private BaseItemsFragment mMainFragment;
     private List<CategoryModel> mCategories;
@@ -66,17 +66,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
     @Bind(R.id.fab_chat) FloatingActionButton mFloatingActionButton;
 
-    private @Constants.ItemMode int mItemMode;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // Checks login
         checkLogin();
-
-        // Sets default item mode
-        mItemMode = Constants.NEAREST_ITEMS_MODE;
 
         // Sets layout
         setContentView(R.layout.activity_main);
@@ -99,14 +94,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         // Setups ABD to respond to toggle button
         setupActionBarDrawer();
 
-        // Sets navigation view
-        mNavigationView.setNavigationItemSelectedListener(this);
-
         // Setups search box to update list or map
         setupSearchBox();
 
         // Sets default mode
-        setMode(application().getMainMode());
+        setItemMode(application().getItemsMode());
     }
 
     @Override
@@ -176,7 +168,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Subscribe
     public void onAddFavoriteItemSuccess(AddFavoriteItemEvent.OnSuccess onSuccess) {
-        Toast.makeText(this, R.string.favorite_item_added, Toast.LENGTH_LONG).show();
+        toast(R.string.favorite_item_added);
         updateListAndMap();
     }
 
@@ -206,17 +198,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void showNearestItems() {
-        mItemMode = Constants.NEAREST_ITEMS_MODE;
+        application().setMainMode(Constants.NEAREST_ITEMS_MODE);
         updateListAndMap();
     }
 
     private void showFavoriteItems() {
-        mItemMode = Constants.FAVORITE_ITEMS_MODE;
+        application().setMainMode(Constants.FAVORITE_ITEMS_MODE);
         updateListAndMap();
     }
 
     private void showPersonalItems() {
-        mItemMode = Constants.PERSONAL_MOVIES_MODE;
+        application().setMainMode(Constants.PERSONAL_MOVIES_MODE);
         updateListAndMap();
     }
 
@@ -242,6 +234,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mLabelUsername.setText(session().getAlias());
         mLabelEmail.setText(session().getUsername());
         Glide.with(this).load(session().getAvatar()).into(mImagePicture);
+
+        // Sets navigation view
+        mNavigationView.setNavigationItemSelectedListener(this);
     }
 
     private void setupFloatingActionButton() {
@@ -250,7 +245,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             @Override
             public void onClick(View view) {
                 if (!application().isLocationAvailable()) {
-                    Toast.makeText(MainActivity.this, R.string.waiting_gps_fix, Toast.LENGTH_LONG).show();
+                    toast(R.string.waiting_gps_fix);
                     return;
                 }
 
@@ -291,12 +286,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         });
     }
 
-    private void setMode(@RevalueApplication.Modes int mode) {
+    private void setItemMode(@Constants.ItemsMode int mode) {
         switch (mode) {
-            case RevalueApplication.LIST_MODE:
+            case Constants.LIST_MODE:
                 showList();
                 break;
-            case RevalueApplication.MAP_MODE:
+            case Constants.MAP_MODE:
                 showMap();
                 break;
         }
@@ -304,43 +299,43 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     private void showList() {
         if (mFragmentContainer != null) {
-            mMainFragment = ListFragment.newInstance(mItemMode);
+            mMainFragment = ListFragment.newInstance(application().getMainMode());
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mMainFragment)
                     .commit();
 
-            application().setMainMode(RevalueApplication.LIST_MODE);
+            application().setItemsMode(Constants.LIST_MODE);
         }
     }
 
     private void showMap() {
         if (mFragmentContainer != null) {
             mAppBar.setExpanded(true);
-            mMainFragment = MapFragment.newInstance(mItemMode);
+            mMainFragment = MapFragment.newInstance(application().getMainMode());
 
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mMainFragment)
                     .commit();
 
-            application().setMainMode(RevalueApplication.MAP_MODE);
+            application().setItemsMode(Constants.MAP_MODE);
         }
     }
 
     private void updateListAndMap() {
         if (mMainFragment != null) {
-            mMainFragment.updateItems(mItemMode);
+            mMainFragment.updateItems(application().getMainMode());
         }
         else {
             Fragment listFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_list);
             Fragment mapFragment = getSupportFragmentManager().findFragmentById(R.id.fragment_map);
 
             if (listFragment != null) {
-                ((ListFragment) listFragment).updateItems(mItemMode);
+                ((ListFragment) listFragment).updateItems(application().getMainMode());
             }
 
             if (mapFragment != null) {
-                ((MapFragment) mapFragment).updateItems(mItemMode);
+                ((MapFragment) mapFragment).updateItems(application().getMainMode());
             }
         }
     }

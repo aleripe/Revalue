@@ -58,7 +58,7 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
 
     public MapFragment() { }
 
-    public static MapFragment newInstance(@Constants.ItemMode int itemMode) {
+    public static MapFragment newInstance(@Constants.MainMode int itemMode) {
         MapFragment fragment = new MapFragment();
         fragment.mItemMode = itemMode;
         return fragment;
@@ -79,15 +79,27 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+        // Binds controls
+        mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
+
+        // TODO: doesn't work, save into RevalueApplication
         // Restores saved state
         if (savedInstanceState != null) {
             mLatitude = savedInstanceState.getDouble(KEY_LATITUDE);
             mLongitude = savedInstanceState.getDouble(KEY_LONGITUDE);
             mZoom = savedInstanceState.getFloat(KEY_ZOOM);
-        }
 
-        // Binds controls
-        mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
+            mMapFragment.getMapAsync(new OnMapReadyCallback() {
+                @Override
+                public void onMapReady(GoogleMap googleMap) {
+                    CameraPosition cameraPosition = new CameraPosition.Builder()
+                            .target(new LatLng(mLatitude, mLongitude))
+                            .zoom(mZoom)
+                            .build();
+                    googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                }
+            });
+        }
     }
 
     @Subscribe

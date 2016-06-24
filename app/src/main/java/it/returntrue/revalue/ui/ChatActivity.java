@@ -7,16 +7,18 @@ package it.returntrue.revalue.ui;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import com.squareup.otto.Subscribe;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.events.ViewChatEvent;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
 /**
  * Shows chat interface (lobby and messages)
  * */
 @SuppressWarnings({"FieldCanBeLocal", "ConstantConditions", "WeakerAccess", "unused"})
-public class ChatActivity extends BaseActivity implements LobbyFragment.OnItemClickListener {
+public class ChatActivity extends BaseActivity {
     public static final String EXTRA_ITEM_ID = "item_id";
     public static final String EXTRA_USER_ID = "user_id";
     public static final String EXTRA_USER_ALIAS = "user_alias";
@@ -77,11 +79,11 @@ public class ChatActivity extends BaseActivity implements LobbyFragment.OnItemCl
         }
     }
 
-    @Override
-    public void onItemClick(int receiverId) {
+    @Subscribe
+    public void onViewChat(ViewChatEvent.OnStart onStart) {
         getSupportFragmentManager().beginTransaction()
                 .addToBackStack(FRAGMENT_LOBBY)
-                .replace(R.id.fragment_container, ChatFragment.newInstance(mItemId, receiverId))
+                .replace(R.id.fragment_container, ChatFragment.newInstance(mItemId, onStart.getUserId()))
                 .commit();
     }
 }

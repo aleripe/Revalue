@@ -20,7 +20,6 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -108,18 +107,14 @@ public class InsertFragment extends BaseFragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        loadCategories();
-    }
-
-    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_insert, container, false);
 
         // Binds controls
         ButterKnife.bind(this, view);
+
+        // Loads categories
+        loadCategories();
 
         // Gets map reference
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);

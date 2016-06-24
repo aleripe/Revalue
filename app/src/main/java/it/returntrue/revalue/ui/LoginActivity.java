@@ -8,6 +8,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -32,10 +33,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.ExternalTokenModel;
+import it.returntrue.revalue.api.TokenModel;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.ExternalLoginEvent;
 import it.returntrue.revalue.events.UpdateFcmTokenEvent;
-import it.returntrue.revalue.services.RevalueGcmIntentService;
+import it.returntrue.revalue.services.RevalueFcmIntentService;
 import it.returntrue.revalue.ui.base.BaseActivity;
 import it.returntrue.revalue.utilities.NetworkUtilities;
 
@@ -106,28 +108,28 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     @Subscribe
     public void onExternalLoginSuccess(ExternalLoginEvent.OnSuccess onSuccess) {
-        // Authenticate the user
-        session().login(
-                onSuccess.getTokenModel().getUserId(),
-                onSuccess.getTokenModel().getUsername(),
-                onSuccess.getTokenModel().getAccessToken(),
-                onSuccess.getTokenModel().getAlias(),
-                onSuccess.getTokenModel().getAvatar());
+        TokenModel tokenModel = onSuccess.getTokenModel();
+
+        // Authenticates the user
+        session().login(tokenModel.getUserId(), tokenModel.getUsername(),
+                tokenModel.getAccessToken(), tokenModel.getAlias(),
+                tokenModel.getAvatar());
 
         // Updates service with authentication token
         application().updateRevalueService(session().getToken());
 
-        // Registers to send or retrieve messages
-        startService(new Intent(LoginActivity.this, RevalueGcmIntentService.class));
+        // Registers to send or retrieve messages using Firebase
+        Intent intent = new Intent(LoginActivity.this, RevalueFcmIntentService.class);
+        startService(intent);
     }
 
     @Subscribe
     public void onExternalLoginFailure(ExternalLoginEvent.OnFailure onFailure) {
         // Displays error status
-        mLabelStatus.setText(onFailure.getMessage());
+        setStatus(onFailure.getMessage());
 
-        // Closes progress dialog
-        if (mProgressDialog != null) mProgressDialog.dismiss();
+        // Hides progress dialog
+        hideProgress();
     }
 
     @Subscribe
@@ -136,17 +138,17 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
 
-        // Closes progress dialog
-        if (mProgressDialog != null) mProgressDialog.dismiss();
+        // Hides progress dialog
+        hideProgress();
     }
 
     @Subscribe
     public void onUpdateGcmTokenFailure(UpdateFcmTokenEvent.OnFailure onFailure) {
         // Displays error status
-        mLabelStatus.setText(R.string.could_not_register_messaging_token);
+        setStatus(R.string.could_not_register_messaging_token);
 
-        // Closes progress dialog
-        if (mProgressDialog != null) mProgressDialog.dismiss();
+        // Hides progress dialog
+        hideProgress();
     }
 
     private void setupFacebook() {
@@ -185,17 +187,18 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
-            mProgressDialog = ProgressDialog.show(this,
-                    getString(R.string.loading), getString(R.string.authenticating_user));
             GoogleSignInAccount account = result.getSignInAccount();
             login(getString(R.string.provider_google), account.getIdToken());
         } else {
-            mLabelStatus.setText(R.string.login_failed);
+            setStatus(R.string.login_failed);
         }
     }
 
     private void login(String provider, String token) {
         if (checkInternetConnection()) {
+            // Shows progress bar
+            showProgress();
+
             // Creates external token
             ExternalTokenModel externalTokenModel = new ExternalTokenModel();
             externalTokenModel.Provider = provider;
@@ -206,9 +209,27 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         }
     }
 
+    private void setStatus(@StringRes int resId) {
+        mLabelStatus.setText(resId);
+    }
+
+    private void setStatus(String message) {
+        mLabelStatus.setText(message);
+    }
+
+    private void showProgress() {
+        mProgressDialog = ProgressDialog.show(this,
+                getString(R.string.loading),
+                getString(R.string.authenticating_user));
+    }
+
+    private void hideProgress() {
+        if (mProgressDialog != null) mProgressDialog.dismiss();
+    }
+
     private boolean checkInternetConnection() {
         if (!NetworkUtilities.checkInternetConnection(this)) {
-            mLabelStatus.setText(R.string.check_connection);
+            setStatus(R.string.check_connection);
             return false;
         }
 
@@ -218,26 +239,24 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     private class FacebookCallbacks implements FacebookCallback<LoginResult> {
         @Override
         public void onSuccess(LoginResult loginResult) {
-            mProgressDialog = ProgressDialog.show(LoginActivity.this,
-                    getString(R.string.loading), getString(R.string.authenticating_user));
             login(getString(R.string.provider_facebook), loginResult.getAccessToken().getToken());
         }
 
         @Override
         public void onCancel() {
-            mLabelStatus.setText(R.string.login_canceled);
+            setStatus(R.string.login_canceled);
         }
 
         @Override
         public void onError(FacebookException error) {
-            mLabelStatus.setText(R.string.login_failed);
+            setStatus(R.string.login_failed);
         }
     }
 
     private class GoogleCallbacks implements GoogleApiClient.OnConnectionFailedListener {
         @Override
         public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-            mLabelStatus.setText(R.string.login_failed);
+            setStatus(R.string.login_failed);
         }
     }
 }

@@ -108,7 +108,7 @@
             </intent-filter>
         </service>
         <service
-            android:name=".services.RevalueGcmIntentService"
+            android:name=".services.RevalueFcmIntentService"
             android:exported="false"/>
         <service
             android:name=".widgets.FavoritesRemoteViewsService"

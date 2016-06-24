@@ -60,23 +60,16 @@ public class FiltersFragment extends DialogFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        loadCategories();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
         // Stops listening to bus events
-        BusProvider.bus().unregister(this);
+        BusProvider.bus().register(this);
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
+    public void onDestroy() {
+        super.onDestroy();
 
         // Listens to bus events
-        BusProvider.bus().register(this);
+        BusProvider.bus().unregister(this);
     }
 
     @NonNull
@@ -86,6 +79,9 @@ public class FiltersFragment extends DialogFragment {
 
         // Binds controls
         ButterKnife.bind(this, view);
+
+        // Starts loading of categories
+        loadCategories();
 
         // Creates associations for radio buttons
         mRadioButtons = new HashMap<>();

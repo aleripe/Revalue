@@ -36,7 +36,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
     private static final int FASTEST_INTERVAL = 1000;
     private static final int INTERVAL = FASTEST_INTERVAL * 2;
 
-    protected @Constants.ItemMode int mItemMode;
+    protected @Constants.MainMode int mItemMode;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -140,7 +140,7 @@ public abstract class BaseItemsFragment extends BaseFragment implements GoogleAp
         }
     }
 
-    public void updateItems(@Constants.ItemMode Integer itemMode) {
+    public void updateItems(@Constants.MainMode Integer itemMode) {
         if (itemMode != null) {
             mItemMode = itemMode;
         }

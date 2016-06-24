@@ -10,7 +10,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
 
 import it.returntrue.revalue.preferences.SessionPreferences;
-import it.returntrue.revalue.services.RevalueGcmIntentService;
+import it.returntrue.revalue.services.RevalueFcmIntentService;
 
 /**
  * Implements a listener for FCM token refreshing
@@ -21,7 +21,7 @@ public class RevalueIDListenerService extends FirebaseInstanceIdService {
         SessionPreferences sessionPreferences = new SessionPreferences(this);
         sessionPreferences.setFirebirdToken(FirebaseInstanceId.getInstance().getToken());
 
-        Intent intent = new Intent(this, RevalueGcmIntentService.class);
+        Intent intent = new Intent(this, RevalueFcmIntentService.class);
         startService(intent);
     }
 }

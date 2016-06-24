@@ -30,10 +30,6 @@ public class InsertActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         // Sets toolbar
-        setupToolbar();
-    }
-
-    private void setupToolbar() {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }

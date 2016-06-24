@@ -34,18 +34,10 @@ public class DetailActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         // Sets toolbar
-        setupToolbar();
-
-        // Setups FAB to go to chat
-        setupFloatingActionButton();
-    }
-
-    private void setupToolbar() {
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-    }
 
-    private void setupFloatingActionButton() {
+        // Setups FAB to go to chat
         mFabChat.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

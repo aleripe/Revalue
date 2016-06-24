@@ -7,7 +7,6 @@ package it.returntrue.revalue.ui.base;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-
 import it.returntrue.revalue.RevalueApplication;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.preferences.SessionPreferences;
@@ -23,22 +22,17 @@ public class BaseFragment extends Fragment {
 
         // Sets option menu
         setHasOptionsMenu(true);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-
-        // Stops listening to bus events
-        BusProvider.bus().unregister(this);
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
 
         // Listens to bus events
         BusProvider.bus().register(this);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        // Stops listening to bus events
+        BusProvider.bus().unregister(this);
     }
 
     protected RevalueApplication application() {

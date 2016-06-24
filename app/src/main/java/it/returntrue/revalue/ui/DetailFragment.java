@@ -15,6 +15,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -149,8 +150,7 @@ public class DetailFragment extends BaseFragment {
                     share();
                 }
                 else {
-                    Toast.makeText(getContext(), getString(R.string.could_not_share_item),
-                            Toast.LENGTH_LONG).show();
+                    toast(R.string.could_not_share_item);
                 }
             }
         }
@@ -163,29 +163,29 @@ public class DetailFragment extends BaseFragment {
 
     @Subscribe
     public void onGetItemFailure(GetItemEvent.OnFailure onFailure) {
-        Toast.makeText(getContext(), R.string.could_not_get_item, Toast.LENGTH_LONG).show();
+        toast(R.string.could_not_get_item);
     }
 
     @Subscribe
     public void onAddFavoriteItemSuccess(AddFavoriteItemEvent.OnSuccess onSuccess) {
-        Toast.makeText(getContext(), R.string.favorite_item_added, Toast.LENGTH_LONG).show();
+        toast(R.string.favorite_item_added);
         getDetails();
     }
 
     @Subscribe
     public void onAddFavoriteItemFailure(AddFavoriteItemEvent.OnFailure onFailure) {
-        Toast.makeText(getContext(), R.string.could_not_add_favorite_item, Toast.LENGTH_LONG).show();
+        toast(R.string.could_not_add_favorite_item);
     }
 
     @Subscribe
     public void onRemoveFavoriteItemSuccess(RemoveFavoriteItemEvent.OnSuccess onSuccess) {
-        Toast.makeText(getContext(), R.string.favorite_item_removed, Toast.LENGTH_LONG).show();
+        toast(R.string.favorite_item_removed);
         getDetails();
     }
 
     @Subscribe
     public void onRemoveFavoriteItemFailure(RemoveFavoriteItemEvent.OnFailure onFailure) {
-        Toast.makeText(getContext(), R.string.could_not_remove_favorite_item, Toast.LENGTH_LONG).show();
+        toast(R.string.could_not_remove_favorite_item);
     }
 
     @Subscribe
@@ -197,7 +197,7 @@ public class DetailFragment extends BaseFragment {
 
     @Subscribe
     public void onSetItemAsRevaluedFailure(SetItemAsRemovedEvent.OnFailure onFailure) {
-        Toast.makeText(getContext(), R.string.could_not_revalue_item, Toast.LENGTH_LONG).show();
+        toast(R.string.could_not_revalue_item);
     }
 
     @Subscribe
@@ -209,7 +209,7 @@ public class DetailFragment extends BaseFragment {
 
     @Subscribe
     public void onSetItemAsRemovedFailure(SetItemAsRemovedEvent.OnFailure onFailure) {
-        Toast.makeText(getContext(), R.string.could_not_remove_item, Toast.LENGTH_LONG).show();
+        toast(R.string.could_not_remove_item);
     }
 
     private void getDetails() {
@@ -276,7 +276,7 @@ public class DetailFragment extends BaseFragment {
             // Adds favorite
             BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(mId));
         } else {
-            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            toast(R.string.check_connection);
         }
     }
 
@@ -285,7 +285,7 @@ public class DetailFragment extends BaseFragment {
             // Removes favorite
             BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(mId));
         } else {
-            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            toast(R.string.check_connection);
         }
     }
 
@@ -302,7 +302,7 @@ public class DetailFragment extends BaseFragment {
 
     private void setItemAsRevalued() {
         if (!NetworkUtilities.checkInternetConnection(getContext())) {
-            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            toast(R.string.check_connection);
             return;
         }
 
@@ -321,7 +321,7 @@ public class DetailFragment extends BaseFragment {
 
     private void setItemAsRemoved() {
         if (!NetworkUtilities.checkInternetConnection(getContext())) {
-            Toast.makeText(getContext(), getString(R.string.check_connection), Toast.LENGTH_LONG).show();
+            toast(R.string.check_connection);
             return;
         }
 
@@ -384,5 +384,9 @@ public class DetailFragment extends BaseFragment {
                         }
                     });
         }
+    }
+
+    protected void toast(@StringRes int resId) {
+        Toast.makeText(getContext(), resId, Toast.LENGTH_SHORT).show();
     }
 }

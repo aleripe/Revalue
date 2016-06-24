@@ -17,10 +17,10 @@ import it.returntrue.revalue.preferences.SessionPreferences;
 /**
  * Implements a service to refresh FCM token on server
  * */
-public class RevalueGcmIntentService extends IntentService {
-    private static final String TAG = RevalueGcmIntentService.class.getSimpleName();
+public class RevalueFcmIntentService extends IntentService {
+    private static final String TAG = RevalueFcmIntentService.class.getSimpleName();
 
-    public RevalueGcmIntentService() {
+    public RevalueFcmIntentService() {
         super(TAG);
     }
 

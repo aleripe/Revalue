@@ -6,7 +6,6 @@ package it.returntrue.revalue;
 
 import android.app.Application;
 import android.content.Context;
-import android.support.annotation.IntDef;
 import android.text.TextUtils;
 
 import com.facebook.FacebookSdk;
@@ -19,6 +18,7 @@ import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.api.RevalueService;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.utilities.CategoryUtilities;
+import it.returntrue.revalue.utilities.Constants;
 
 /**
  * Provides concrete application implementation
@@ -27,15 +27,12 @@ import it.returntrue.revalue.utilities.CategoryUtilities;
 public class RevalueApplication extends Application {
     private static RevalueApplication sApplication;
 
-    // Defines allowed modes as a fake enumeration
-    @IntDef({ LIST_MODE, MAP_MODE })
-    public @interface Modes {}
-    public static final int LIST_MODE = 1;
-    public static final int MAP_MODE = 2;
 
     private static final int DEFAULT_DISTANCE = 50;
 
-    @Modes private int mMainMode = LIST_MODE;
+    @Constants.MainMode private int mMainMode = Constants.NEAREST_ITEMS_MODE;
+    @Constants.ItemsMode
+    private int mItemsMode = Constants.LIST_MODE;
     private String mFilterTitle;
     private Integer mFilterCategory;
     private Integer mFilterDistance = DEFAULT_DISTANCE;
@@ -56,12 +53,20 @@ public class RevalueApplication extends Application {
         initialize();
     }
 
-    public void setMainMode(@Modes int mode) {
+    public @Constants.MainMode int getMainMode() {
+        return mMainMode;
+    }
+
+    public void setMainMode(@Constants.MainMode int mode) {
         mMainMode = mode;
     }
 
-    public @Modes int getMainMode() {
-        return mMainMode;
+    public @Constants.ItemsMode int getItemsMode() {
+        return mItemsMode;
+    }
+
+    public void setItemsMode(@Constants.ItemsMode int mode) {
+        mItemsMode = mode;
     }
 
     public void setFilterTitle(String title) {

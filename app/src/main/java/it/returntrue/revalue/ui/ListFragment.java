@@ -42,7 +42,7 @@ public class ListFragment extends BaseItemsFragment implements SwipeRefreshLayou
 
     public ListFragment() { }
 
-    public static ListFragment newInstance(@Constants.ItemMode int itemMode) {
+    public static ListFragment newInstance(@Constants.MainMode int itemMode) {
         ListFragment fragment = new ListFragment();
         fragment.mItemMode = itemMode;
         return fragment;
@@ -80,7 +80,7 @@ public class ListFragment extends BaseItemsFragment implements SwipeRefreshLayou
     }
 
     @Override
-    public void updateItems(@Constants.ItemMode Integer itemMode) {
+    public void updateItems(@Constants.MainMode Integer itemMode) {
         mSwipeRefreshLayout.setRefreshing(true);
         super.updateItems(itemMode);
     }

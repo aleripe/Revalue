@@ -39,6 +39,8 @@ public class RevalueService {
     private final RevalueServiceContract mServiceContract;
     private final Bus mBus;
 
+    private List<CategoryModel> mCategories;
+
     public RevalueService(Context context, Bus bus, String token) {
         mContext = context;
         mServiceContract = RevalueServiceGenerator.createService(token);
@@ -68,13 +70,19 @@ public class RevalueService {
 
     @Subscribe
     public void onGetAllCategories(GetCategoriesEvent.OnStart onStart) {
+        if (mCategories != null) {
+            mBus.post(new GetCategoriesEvent.OnSuccess(mCategories));
+            return;
+        }
+
         Call<List<CategoryModel>> call = mServiceContract.GetAllCategories();
 
         call.enqueue(new Callback<List<CategoryModel>>() {
             @Override
             public void onResponse(Call<List<CategoryModel>> call, Response<List<CategoryModel>> response) {
                 if (response.isSuccessful()) {
-                    mBus.post(new GetCategoriesEvent.OnSuccess(response.body()));
+                    mCategories = response.body();
+                    mBus.post(new GetCategoriesEvent.OnSuccess(mCategories));
                 }
                 else {
                     mBus.post(new GetCategoriesEvent.OnFailure());

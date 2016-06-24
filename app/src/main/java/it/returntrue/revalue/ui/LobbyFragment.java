@@ -4,7 +4,6 @@
 
 package it.returntrue.revalue.ui;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -37,20 +36,13 @@ import it.returntrue.revalue.ui.base.BaseFragment;
  * Shows item chat lobby
  * */
 @SuppressWarnings({"UnusedParameters", "WeakerAccess", "unused"})
-public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor>,
-    ChatsAdapter.OnItemClickListener {
+public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderCallbacks<Cursor> {
     private static final int LOADER_CHATS = 1;
 
-    private OnItemClickListener mOnItemClickListener;
     private int mItemId;
     private ChatsAdapter mChatsAdapter;
 
     @Bind(R.id.list_messages) RecyclerView mRecyclerView;
-
-    /** Provides listeners for click events */
-    public interface OnItemClickListener {
-        void onItemClick(int id);
-    }
 
     public LobbyFragment() { }
 
@@ -58,17 +50,6 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
         LobbyFragment lobbyFragment = new LobbyFragment();
         lobbyFragment.setItemId(itemId);
         return lobbyFragment;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-        try {
-            mOnItemClickListener = (OnItemClickListener)context;
-        } catch (ClassCastException e) {
-            throw new ClassCastException(context.toString() + " must implement OnItemClickListener");
-        }
     }
 
     @Override
@@ -85,7 +66,6 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
 
         // Creates adapter for chats
         mChatsAdapter = new ChatsAdapter(getContext(), session());
-        mChatsAdapter.setOnItemClickListener(this);
 
         // Creates layout manager
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
@@ -128,13 +108,6 @@ public class LobbyFragment extends BaseFragment implements LoaderManager.LoaderC
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mChatsAdapter.setCursor(null);
-    }
-
-    @Override
-    public void onItemClick(int id) {
-        if (mOnItemClickListener != null) {
-            mOnItemClickListener.onItemClick(id);
-        }
     }
 
     @Subscribe

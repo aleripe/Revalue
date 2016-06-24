@@ -23,6 +23,8 @@ import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
 import it.returntrue.revalue.api.UserModel;
 import it.returntrue.revalue.data.MessageData;
+import it.returntrue.revalue.events.BusProvider;
+import it.returntrue.revalue.events.ViewChatEvent;
 import it.returntrue.revalue.preferences.SessionPreferences;
 
 /**
@@ -33,21 +35,10 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
     private final Context mContext;
     private Cursor mCursor;
     private HashMap<Integer, UserModel> mUsers;
-    private OnItemClickListener mOnItemClickListener;
-
-    /** Provides listeners for click events */
-    public interface OnItemClickListener {
-        void onItemClick(int id);
-    }
 
     public ChatsAdapter(Context context, SessionPreferences sessionPreferences) {
         mContext = context;
         mSessionPreferences = sessionPreferences;
-    }
-
-    /** Sets a new click events listener */
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mOnItemClickListener = listener;
     }
 
     public void setCursor(Cursor cursor) {
@@ -109,15 +100,14 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    if (mOnItemClickListener != null) {
-                        mCursor.moveToPosition(getAdapterPosition());
+                    mCursor.moveToPosition(getAdapterPosition());
 
-                        int userId = mSessionPreferences.getUserId();
-                        int senderId = MessageData.getSenderId(mCursor);
-                        int receiverId = MessageData.getReceiverId(mCursor);
+                    int userId = mSessionPreferences.getUserId();
+                    int senderId = MessageData.getSenderId(mCursor);
+                    int receiverId = MessageData.getReceiverId(mCursor);
+                    int otherId = (userId != senderId) ? senderId : receiverId;
 
-                        mOnItemClickListener.onItemClick((userId != senderId) ? senderId : receiverId);
-                    }
+                    BusProvider.bus().post(new ViewChatEvent.OnStart(otherId));
                 }
             });
         }

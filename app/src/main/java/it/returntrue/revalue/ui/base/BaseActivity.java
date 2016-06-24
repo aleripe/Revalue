@@ -7,9 +7,8 @@ package it.returntrue.revalue.ui.base;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -34,24 +33,14 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // Setup API service
         application().setupRevalueService(session().getToken());
+
+        // Listens to bus events
+        BusProvider.bus().register(this);
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case PLAY_SERVICES_RESOLUTION_REQUEST:
-                if (resultCode == RESULT_CANCELED) {
-                    Toast.makeText(this, R.string.play_service_unavailable, Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-                return;
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
+        super.onDestroy();
 
         // Stops listening to bus events
         BusProvider.bus().unregister(this);
@@ -63,9 +52,19 @@ public abstract class BaseActivity extends AppCompatActivity {
 
         // Checks Play Services availability
         checkPlayServices();
+    }
 
-        // Listens to bus events
-        BusProvider.bus().register(this);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case PLAY_SERVICES_RESOLUTION_REQUEST:
+                if (resultCode == RESULT_CANCELED) {
+                    toast(R.string.play_service_unavailable);
+                    finish();
+                }
+                return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     protected void checkLogin() {
@@ -76,9 +75,6 @@ public abstract class BaseActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-
-        String token = session().getToken();
-        if (!TextUtils.isEmpty(token)) Log.v(TAG, "Token: " + token);
     }
 
     private void checkPlayServices() {
@@ -99,5 +95,9 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     protected SessionPreferences session() {
         return SessionPreferences.get(this);
+    }
+
+    protected void toast(@StringRes int resId) {
+        Toast.makeText(this, resId, Toast.LENGTH_SHORT).show();
     }
 }

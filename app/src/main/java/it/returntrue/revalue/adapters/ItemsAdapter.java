@@ -101,24 +101,24 @@ public class ItemsAdapter extends RecyclerView.Adapter<ItemsAdapter.ViewHolder> 
             imageAddFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(
-                            mItems.get(getAdapterPosition()).Id));
+                    int itemId = mItems.get(getAdapterPosition()).Id;
+                    BusProvider.bus().post(new AddFavoriteItemEvent.OnStart(itemId));
                 }
             });
 
             imageRemoveFavorite.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(
-                            mItems.get(getAdapterPosition()).Id));
+                    int itemId = mItems.get(getAdapterPosition()).Id;
+                    BusProvider.bus().post(new RemoveFavoriteItemEvent.OnStart(itemId));
                 }
             });
 
             view.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    BusProvider.bus().post(new ViewItemEvent.OnStart(
-                            mItems.get(getAdapterPosition()).Id));
+                    int itemId = mItems.get(getAdapterPosition()).Id;
+                    BusProvider.bus().post(new ViewItemEvent.OnStart(itemId));
                 }
             });
         }
