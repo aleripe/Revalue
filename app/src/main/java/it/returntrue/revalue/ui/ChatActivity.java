@@ -11,6 +11,7 @@ import com.squareup.otto.Subscribe;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.events.LoginRequestedEvent;
 import it.returntrue.revalue.events.ViewChatEvent;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
@@ -80,10 +81,15 @@ public class ChatActivity extends BaseActivity {
     }
 
     @Subscribe
-    public void onViewChat(ViewChatEvent.OnStart onStart) {
+    public void onLoginRequestedStart(LoginRequestedEvent.OnStart onStart) {
+        logout();
+    }
+
+    @Subscribe
+    public void onViewChatStart(ViewChatEvent.OnStart onStart) {
         getSupportFragmentManager().beginTransaction()
                 .addToBackStack(FRAGMENT_LOBBY)
                 .replace(R.id.fragment_container, ChatFragment.newInstance(mItemId, onStart.getUserId()))
-                .commit();
+                .commitAllowingStateLoss();
     }
 }

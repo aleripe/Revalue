@@ -11,7 +11,6 @@ import com.squareup.otto.Subscribe;
 
 import java.util.List;
 
-import it.returntrue.revalue.R;
 import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.ExternalLoginEvent;
 import it.returntrue.revalue.events.GetCategoriesEvent;
@@ -19,6 +18,7 @@ import it.returntrue.revalue.events.GetItemEvent;
 import it.returntrue.revalue.events.GetItemsEvent;
 import it.returntrue.revalue.events.GetUsersByIdsEvent;
 import it.returntrue.revalue.events.InsertItemEvent;
+import it.returntrue.revalue.events.LoginRequestedEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.SendMessageEvent;
 import it.returntrue.revalue.events.SetItemAsRemovedEvent;
@@ -56,14 +56,13 @@ public class RevalueService {
                 if (response.isSuccessful()) {
                     mBus.post(new ExternalLoginEvent.OnSuccess(response.body()));
                 } else {
-                    mBus.post(new ExternalLoginEvent.OnFailure(
-                            NetworkUtilities.parseError(mContext, response)));
+                    mBus.post(new ExternalLoginEvent.OnFailure());
                 }
             }
 
             @Override
             public void onFailure(Call<TokenModel> call, Throwable t) {
-                mBus.post(new ExternalLoginEvent.OnFailure(mContext.getString(R.string.call_failed)));
+                mBus.post(new ExternalLoginEvent.OnFailure());
             }
         });
     }
@@ -85,7 +84,13 @@ public class RevalueService {
                     mBus.post(new GetCategoriesEvent.OnSuccess(mCategories));
                 }
                 else {
-                    mBus.post(new GetCategoriesEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new GetCategoriesEvent.OnFailure());
+                    }
                 }
             }
 
@@ -133,7 +138,13 @@ public class RevalueService {
                     mBus.post(new GetItemsEvent.OnSuccess(response.body()));
                 }
                 else {
-                    mBus.post(new GetItemsEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new GetItemsEvent.OnFailure());
+                    }
                 }
             }
 
@@ -158,7 +169,13 @@ public class RevalueService {
                     mBus.post(new GetItemEvent.OnSuccess(response.body()));
                 }
                 else {
-                    mBus.post(new GetItemEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new GetItemEvent.OnFailure());
+                    }
                 }
             }
 
@@ -180,7 +197,13 @@ public class RevalueService {
                     mBus.post(new InsertItemEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new InsertItemEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new InsertItemEvent.OnFailure());
+                    }
                 }
             }
 
@@ -201,7 +224,13 @@ public class RevalueService {
                     mBus.post(new AddFavoriteItemEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new AddFavoriteItemEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new AddFavoriteItemEvent.OnFailure());
+                    }
                 }
             }
 
@@ -222,7 +251,13 @@ public class RevalueService {
                     mBus.post(new RemoveFavoriteItemEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new RemoveFavoriteItemEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new RemoveFavoriteItemEvent.OnFailure());
+                    }
                 }
             }
 
@@ -243,7 +278,13 @@ public class RevalueService {
                     mBus.post(new SetItemAsRevaluedEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new SetItemAsRevaluedEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new SetItemAsRevaluedEvent.OnFailure());
+                    }
                 }
             }
 
@@ -264,7 +305,13 @@ public class RevalueService {
                     mBus.post(new SetItemAsRemovedEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new SetItemAsRemovedEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new SetItemAsRemovedEvent.OnFailure());
+                    }
                 }
             }
 
@@ -286,7 +333,13 @@ public class RevalueService {
                     mBus.post(new GetUsersByIdsEvent.OnSuccess(response.body(), onStart.getCursor()));
                 }
                 else {
-                    mBus.post(new GetUsersByIdsEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new GetUsersByIdsEvent.OnFailure());
+                    }
                 }
             }
 
@@ -308,7 +361,13 @@ public class RevalueService {
                     mBus.post(new UpdateFcmTokenEvent.OnSuccess());
                 }
                 else {
-                    mBus.post(new UpdateFcmTokenEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new UpdateFcmTokenEvent.OnFailure());
+                    }
                 }
             }
 
@@ -330,7 +389,13 @@ public class RevalueService {
                     mBus.post(new SendMessageEvent.OnSuccess(response.body()));
                 }
                 else {
-                    mBus.post(new SendMessageEvent.OnFailure());
+                    APIError apiError = NetworkUtilities.parseError(mContext, response);
+                    if (apiError.Code == 401) {
+                        mBus.post(new LoginRequestedEvent.OnStart());
+                    }
+                    else {
+                        mBus.post(new SendMessageEvent.OnFailure());
+                    }
                 }
             }
 

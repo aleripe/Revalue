@@ -77,6 +77,12 @@ public abstract class BaseActivity extends AppCompatActivity {
         }
     }
 
+    protected void logout() {
+        application().updateRevalueService(null);
+        session().logout();
+        checkLogin();
+    }
+
     private void checkPlayServices() {
         GoogleApiAvailability apiAvailability = GoogleApiAvailability.getInstance();
         int resultCode = apiAvailability.isGooglePlayServicesAvailable(this);

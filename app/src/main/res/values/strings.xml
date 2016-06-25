@@ -91,4 +91,5 @@
     <string name="item_location">%1$s / %2$d km</string>
     <string name="play_service_unavailable">Google Play Services must be installed</string>
     <string name="uploading_data">Uploading data to server…</string>
+    <string name="new_message_received">New message received</string>
 </resources>

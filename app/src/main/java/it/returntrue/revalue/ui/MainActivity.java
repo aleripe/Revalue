@@ -37,6 +37,7 @@ import it.returntrue.revalue.api.CategoryModel;
 import it.returntrue.revalue.events.AddFavoriteItemEvent;
 import it.returntrue.revalue.events.BusProvider;
 import it.returntrue.revalue.events.GetCategoriesEvent;
+import it.returntrue.revalue.events.LoginRequestedEvent;
 import it.returntrue.revalue.events.RemoveFavoriteItemEvent;
 import it.returntrue.revalue.events.ViewItemEvent;
 import it.returntrue.revalue.ui.base.BaseActivity;
@@ -148,7 +149,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     @Subscribe
-    public void onViewItem(ViewItemEvent.OnStart onStart) {
+    public void onLoginRequestedStart(LoginRequestedEvent.OnStart onStart) {
+        logout();
+    }
+
+    @Subscribe
+    public void onViewItemStart(ViewItemEvent.OnStart onStart) {
         // Opens details activity
         Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(DetailActivity.EXTRA_ID, onStart.getId());
@@ -210,11 +216,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void showPersonalItems() {
         application().setMainMode(Constants.PERSONAL_MOVIES_MODE);
         updateListAndMap();
-    }
-
-    private void logout() {
-        session().logout();
-        checkLogin();
     }
 
     private void setFilters() {

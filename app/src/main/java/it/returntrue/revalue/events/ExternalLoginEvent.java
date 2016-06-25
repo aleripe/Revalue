@@ -36,15 +36,5 @@ public class ExternalLoginEvent {
         }
     }
 
-    public static class OnFailure {
-        private final String mMessage;
-
-        public OnFailure(String message) {
-            mMessage = message;
-        }
-
-        public String getMessage() {
-            return mMessage;
-        }
-    }
+    public static class OnFailure { }
 }

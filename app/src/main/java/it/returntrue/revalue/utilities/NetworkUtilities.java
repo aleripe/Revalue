@@ -8,9 +8,8 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
-import org.json.JSONObject;
-
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.api.APIError;
 import retrofit2.Response;
 
 /**
@@ -19,14 +18,17 @@ import retrofit2.Response;
 public class NetworkUtilities {
     private static final String KEY_MESSAGE = "Message";
 
-    public static String parseError(Context context, Response response) {
+    public static APIError parseError(Context context, Response response) {
+        APIError apiError = new APIError();
         try {
-            JSONObject error = new JSONObject(response.errorBody().string());
-            return error.getString(KEY_MESSAGE);
+            apiError.Code = response.code();
+            apiError.Message = response.message();
         }
         catch (Exception e) {
-            return context.getString(R.string.generic_error);
+            apiError.Code = 500;
+            apiError.Message = context.getString(R.string.generic_error);
         }
+        return apiError;
     }
 
     public static boolean checkInternetConnection(Context context) {

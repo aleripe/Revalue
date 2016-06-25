@@ -22,7 +22,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.provider.MessageProvider;
-import it.returntrue.revalue.ui.MainActivity;
+import it.returntrue.revalue.ui.DetailActivity;
 
 /**
  * Implements a listener for FCM incoming messages
@@ -49,17 +49,19 @@ public class RevalueFcmListenerService extends FirebaseMessagingService {
         values.put(MessageEntry.COLUMN_DATE, date);
         getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
-        sendNotification("New message received", text, date);
+        sendNotification(getString(R.string.new_message_received), text, date, id);
     }
 
-    private void sendNotification(String title, String text, long date) {
+    private void sendNotification(String title, String text, long date, int itemId) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.addLine(text);
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent intent = new Intent(this, DetailActivity.class);
+        intent.putExtra(DetailActivity.EXTRA_ID, itemId);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
 
         final PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);

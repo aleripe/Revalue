@@ -8,9 +8,13 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+
+import com.squareup.otto.Subscribe;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import it.returntrue.revalue.R;
+import it.returntrue.revalue.events.LoginRequestedEvent;
 import it.returntrue.revalue.ui.base.BaseActivity;
 
 /**
@@ -46,5 +50,10 @@ public class DetailActivity extends BaseActivity {
                 detailFragment.goToChatActivity();
             }
         });
+    }
+
+    @Subscribe
+    public void onLoginRequestedStart(LoginRequestedEvent.OnStart onStart) {
+        logout();
     }
 }

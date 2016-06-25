@@ -126,7 +126,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Subscribe
     public void onExternalLoginFailure(ExternalLoginEvent.OnFailure onFailure) {
         // Displays error status
-        setStatus(onFailure.getMessage());
+        setStatus(R.string.call_failed);
 
         // Hides progress dialog
         hideProgress();
