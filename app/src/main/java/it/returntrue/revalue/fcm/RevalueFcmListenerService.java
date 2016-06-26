@@ -29,6 +29,8 @@ import it.returntrue.revalue.ui.ChatActivity;
  * */
 @SuppressWarnings("SameParameterValue")
 public class RevalueFcmListenerService extends FirebaseMessagingService {
+    private static final int NOTIFICATION_MESSAGE = 100;
+
     @Override
     public void onMessageReceived(RemoteMessage message) {
         Map data = message.getData();
@@ -70,11 +72,11 @@ public class RevalueFcmListenerService extends FirebaseMessagingService {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 
-        final PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        PendingIntent resultPendingIntent = PendingIntent.getActivity(
+                this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_ONE_SHOT);
 
-        Notification notification;
-        notification = builder.setSmallIcon(R.mipmap.ic_launcher).setTicker(title).setWhen(0)
+        Notification notification = builder
+                .setTicker(title)
                 .setAutoCancel(true)
                 .setContentTitle(title)
                 .setContentIntent(resultPendingIntent)
@@ -88,6 +90,6 @@ public class RevalueFcmListenerService extends FirebaseMessagingService {
 
         NotificationManager notificationManager =
                 (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.notify(100, notification);
+        notificationManager.notify(NOTIFICATION_MESSAGE, notification);
     }
 }

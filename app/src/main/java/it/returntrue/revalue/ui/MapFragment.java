@@ -152,9 +152,11 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
 
     @Override
     public void onCameraChange(CameraPosition cameraPosition) {
-        application().setMapLatitude(cameraPosition.target.latitude);
-        application().setMapLongitude(cameraPosition.target.longitude);
-        application().setMapZoom(cameraPosition.zoom);
+        if (mMarkerIDs.size() > 0) {
+            application().setMapLatitude(cameraPosition.target.latitude);
+            application().setMapLongitude(cameraPosition.target.longitude);
+            application().setMapZoom(cameraPosition.zoom);
+        }
     }
 
     @Override

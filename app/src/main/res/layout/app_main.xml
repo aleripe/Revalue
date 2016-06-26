@@ -27,7 +27,8 @@
                 android:layout_marginRight="16dp"
                 android:layout_marginBottom="16dp"
                 android:layout_marginTop="?attr/actionBarSize"
-                android:visibility="gone">
+                android:visibility="gone"
+                android:focusable="true">
                 <ImageView
                     android:id="@+id/image_search_filter"
                     android:layout_width="wrap_content"
@@ -90,7 +91,7 @@
     </android.support.design.widget.AppBarLayout>
     <include layout="@layout/content_main"/>
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_chat"
+        android:id="@+id/fab_insert"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"

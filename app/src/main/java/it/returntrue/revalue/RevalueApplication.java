@@ -60,9 +60,7 @@ public class RevalueApplication extends Application {
 
     public void setMainMode(@Constants.MainMode int mode) {
         mMainMode = mode;
-        mMapLatitude = null;
-        mMapLongitude = null;
-        mMapZoom = null;
+        clearMap();
     }
 
     public @Constants.ItemsMode int getItemsMode() {
@@ -117,6 +115,7 @@ public class RevalueApplication extends Application {
         setFilterTitle(null);
         setFilterCategory(null);
         setFilterDistance(DEFAULT_DISTANCE);
+        clearMap();
     }
 
     public void setLocationLatitude(Double latitude) {
@@ -157,6 +156,12 @@ public class RevalueApplication extends Application {
 
     public Float getMapZoom() {
         return mMapZoom;
+    }
+
+    public void clearMap() {
+        setMapLatitude(null);
+        setMapLongitude(null);
+        setMapZoom(null);
     }
 
     public boolean isLocationAvailable() {

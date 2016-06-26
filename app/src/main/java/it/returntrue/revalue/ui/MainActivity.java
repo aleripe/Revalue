@@ -70,7 +70,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Bind(R.id.text_filter_category) TextView mTextFilterCategory;
     @Bind(R.id.text_filter_distance) TextView mTextFilterDistance;
     @Bind(R.id.fragment_container) @Nullable FrameLayout mFragmentContainer;
-    @Bind(R.id.fab_chat) FloatingActionButton mFloatingActionButton;
+    @Bind(R.id.fab_insert) FloatingActionButton mFloatingActionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
