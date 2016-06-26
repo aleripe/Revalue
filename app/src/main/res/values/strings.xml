@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Revalue</string>
     <string name="title_activity_main">Revalue</string>
     <string name="sign_in_with_google">Sign in with Google</string>
@@ -30,8 +30,8 @@
     <string name="cancel">Cancel</string>
     <string name="distance">Distance</string>
     <string name="facebook_app_id" translatable="false">1556315897995518</string>
-    <string name="google_client_id" translatable="false">559968920325-fgf6frk206vt01a4m4n0e3c0kvi8hcui.apps.googleusercontent.com</string>
-    <string name="google_key" translatable="false">AIzaSyAh70ETfM-SwaWrsmk-o_uVkm909Vs4Q4w</string>
+    <string name="google_client_id" translatable="false" tools:ignore="TypographyDashes">20530864566-0nludnpa9t2rdvffluns01fb23c9j6fm.apps.googleusercontent.com</string>
+    <string name="google_key" translatable="false">AIzaSyDDIOWU043bRgg82OkMlsHJkUbS3YkSMhM</string>
     <string name="call_failed">Call to server failed</string>
     <string name="login_canceled">Login process canceled</string>
     <string name="login_failed">Login process failed</string>
@@ -91,5 +91,5 @@
     <string name="item_location">%1$s / %2$d km</string>
     <string name="play_service_unavailable">Google Play Services must be installed</string>
     <string name="uploading_data">Uploading data to server…</string>
-    <string name="new_message_received">New message received</string>
+    <string name="you">You</string>
 </resources>

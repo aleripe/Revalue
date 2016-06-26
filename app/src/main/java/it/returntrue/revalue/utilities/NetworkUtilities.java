@@ -16,8 +16,6 @@ import retrofit2.Response;
  * Provides utilities to manipulate network
  * */
 public class NetworkUtilities {
-    private static final String KEY_MESSAGE = "Message";
-
     public static APIError parseError(Context context, Response response) {
         APIError apiError = new APIError();
         try {

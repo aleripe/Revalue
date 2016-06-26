@@ -46,7 +46,7 @@ public class DetailActivity extends BaseActivity {
             @Override
             public void onClick(View view) {
                 DetailFragment detailFragment =
-                        (DetailFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_detail);
+                        (DetailFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_detail);
                 detailFragment.goToChatActivity();
             }
         });

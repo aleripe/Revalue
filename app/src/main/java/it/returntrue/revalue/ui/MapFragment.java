@@ -45,16 +45,11 @@ import it.returntrue.revalue.utilities.MapUtilities;
  * Shows a map of items
  * */
 @SuppressWarnings({"UnusedParameters", "unused"})
-public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWindowClickListener {
-    private static final String KEY_LATITUDE = "latitude";
-    private static final String KEY_LONGITUDE = "longitude";
-    private static final String KEY_ZOOM = "zoom";
-
+public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWindowClickListener,
+    OnMapReadyCallback, GoogleMap.OnCameraChangeListener {
     private SupportMapFragment mMapFragment;
+    private GoogleMap mGoogleMap;
     private final HashMap<Marker, Integer> mMarkerIDs = new HashMap<>();
-    private double mLatitude;
-    private double mLongitude;
-    private float mZoom;
 
     public MapFragment() { }
 
@@ -81,81 +76,63 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
 
         // Binds controls
         mMapFragment = (SupportMapFragment)getChildFragmentManager().findFragmentById(R.id.map);
-
-        // TODO: doesn't work, save into RevalueApplication
-        // Restores saved state
-        if (savedInstanceState != null) {
-            mLatitude = savedInstanceState.getDouble(KEY_LATITUDE);
-            mLongitude = savedInstanceState.getDouble(KEY_LONGITUDE);
-            mZoom = savedInstanceState.getFloat(KEY_ZOOM);
-
-            mMapFragment.getMapAsync(new OnMapReadyCallback() {
-                @Override
-                public void onMapReady(GoogleMap googleMap) {
-                    CameraPosition cameraPosition = new CameraPosition.Builder()
-                            .target(new LatLng(mLatitude, mLongitude))
-                            .zoom(mZoom)
-                            .build();
-                    googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                }
-            });
-        }
+        mMapFragment.getMapAsync(this);
     }
 
     @Subscribe
     public void onGetItemsSuccess(final GetItemsEvent.OnSuccess onSuccess) {
-        if (!mMapFragment.isAdded()) return;
+        if (!mMapFragment.isAdded() || (mGoogleMap == null)) return;
 
-        mMapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(final GoogleMap googleMap) {
-                googleMap.clear();
-                googleMap.setOnInfoWindowClickListener(MapFragment.this);
+        mGoogleMap.clear();
 
-                for (final ItemModel itemModel : onSuccess.getItems()) {
-                    if (!itemModel.ShowOnMap) continue;
+        for (final ItemModel itemModel : onSuccess.getItems()) {
+            if (!itemModel.ShowOnMap) continue;
 
-                    Glide.with(getContext())
-                            .load(itemModel.MarkerUrl)
-                            .asBitmap()
-                            .diskCacheStrategy(DiskCacheStrategy.NONE)
-                            .skipMemoryCache(true)
-                            .transform(new CropCircleTransformation(getContext()))
-                            .into(new SimpleTarget<Bitmap>() {
-                                @Override
-                                public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
-                                    if (!mMapFragment.isAdded()) return;
+            Glide.with(getContext())
+                    .load(itemModel.MarkerUrl)
+                    .asBitmap()
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
+                    .transform(new CropCircleTransformation(getContext()))
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(Bitmap bitmap, GlideAnimation<? super Bitmap> glideAnimation) {
+                            if (!mMapFragment.isAdded() || (mGoogleMap == null)) return;
 
-                                    final Marker marker = googleMap.addMarker(new MarkerOptions()
-                                            .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
-                                            .title(itemModel.Title)
-                                            .snippet(getString(R.string.item_location,
-                                                    itemModel.City, (int) (itemModel.Distance / 1000)))
-                                            .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
-                                    mMarkerIDs.put(marker, itemModel.Id);
-                                }
-                            });
-                }
+                            final Marker marker = mGoogleMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(itemModel.Latitude, itemModel.Longitude))
+                                    .title(itemModel.Title)
+                                    .snippet(getString(R.string.item_location,
+                                            itemModel.City, (int) (itemModel.Distance / 1000)))
+                                    .icon(BitmapDescriptorFactory.fromBitmap(bitmap)));
+                            mMarkerIDs.put(marker, itemModel.Id);
+                        }
+                    });
+        }
 
-                LatLng position = new LatLng(
-                        application().getLocationLatitude(), application().getLocationLongitude());
+        // Restores saved state
+        Double mapLatitude = application().getMapLatitude();
+        Double mapLongitude = application().getMapLongitude();
+        Float mapZoom = application().getMapZoom();
 
-                if (mLatitude != 0 && mLongitude != 0) {
-                    position = new LatLng(mLatitude, mLongitude);
-                }
+        if (mapLatitude != null && mapLongitude != null && mapZoom != null) {
+            CameraPosition cameraPosition = new CameraPosition.Builder()
+                    .target(new LatLng(mapLatitude, mapLongitude))
+                    .zoom(mapZoom)
+                    .build();
+            mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
+        else {
+            LatLng position = new LatLng(
+                    application().getLocationLatitude(),
+                    application().getLocationLongitude());
 
-                Circle circle = MapUtilities.getCenteredCircle(googleMap, position,
-                        application().getFilterDistance());
+            Circle circle = MapUtilities.getCenteredCircle(mGoogleMap, position,
+                    application().getFilterDistance());
 
-                if (mZoom == 0) {
-                    mZoom = MapUtilities.getCircleZoomLevel(circle);
-                }
-
-                if (mZoom > 0) {
-                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, mZoom));
-                }
-            }
-        });
+            int zoom = MapUtilities.getCircleZoomLevel(circle);
+            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(position, zoom));
+        }
     }
 
     @Subscribe
@@ -169,25 +146,21 @@ public class MapFragment extends BaseItemsFragment implements GoogleMap.OnInfoWi
     }
 
     @Override
-    public void onSaveInstanceState(final Bundle outState) {
-        mMapFragment.getMapAsync(new OnMapReadyCallback() {
-            @Override
-            public void onMapReady(GoogleMap googleMap) {
-                CameraPosition camera = googleMap.getCameraPosition();
-
-                if (camera != null) {
-                    outState.putDouble(KEY_LATITUDE, camera.target.latitude);
-                    outState.putDouble(KEY_LONGITUDE, camera.target.longitude);
-                    outState.putFloat(KEY_ZOOM, camera.zoom);
-                }
-            }
-        });
-
-        super.onSaveInstanceState(outState);
+    public void onInfoWindowClick(Marker marker) {
+        BusProvider.bus().post(new ViewItemEvent.OnStart(mMarkerIDs.get(marker)));
     }
 
     @Override
-    public void onInfoWindowClick(Marker marker) {
-        BusProvider.bus().post(new ViewItemEvent.OnStart(mMarkerIDs.get(marker)));
+    public void onCameraChange(CameraPosition cameraPosition) {
+        application().setMapLatitude(cameraPosition.target.latitude);
+        application().setMapLongitude(cameraPosition.target.longitude);
+        application().setMapZoom(cameraPosition.zoom);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mGoogleMap = googleMap;
+        mGoogleMap.setOnInfoWindowClickListener(this);
+        mGoogleMap.setOnCameraChangeListener(this);
     }
 }

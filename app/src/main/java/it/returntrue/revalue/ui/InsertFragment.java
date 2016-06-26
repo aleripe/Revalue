@@ -86,7 +86,6 @@ public class InsertFragment extends BaseFragment {
 
     private ProgressDialog mProgressDialog;
     private List<CategoryModel> mCategories;
-    private ArrayAdapter<CategoryModel> mAdapter;
     private SupportMapFragment mMapFragment;
     private Bitmap mPicture;
     private String mPictureData;
@@ -220,7 +219,8 @@ public class InsertFragment extends BaseFragment {
         mCategories = onSuccess.getCategories();
 
         // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        ArrayAdapter<CategoryModel> mAdapter = new ArrayAdapter<>(
+                getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
         mAdapter.addAll(mCategories);
         mAdapter.insert(createEmptyCategoryModel(), 0);

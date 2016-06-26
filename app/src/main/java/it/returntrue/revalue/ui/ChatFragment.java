@@ -45,6 +45,7 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
     private int mReceiverId;
     private int mSenderId;
     private MessagesAdapter mMessagesAdapter;
+    private LinearLayoutManager mLinearLayoutManager;
 
     @Bind(R.id.list_messages) RecyclerView mRecyclerView;
     @Bind(R.id.text_message) EditText mTextMessage;
@@ -78,12 +79,11 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
         mMessagesAdapter = new MessagesAdapter(getContext(), session());
 
         // Creates layout manager
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
-        linearLayoutManager.setStackFromEnd(true);
+        mLinearLayoutManager = new LinearLayoutManager(getContext());
+        mLinearLayoutManager.setStackFromEnd(true);
 
         // Sets list properties
-        mRecyclerView.setHasFixedSize(true);
-        mRecyclerView.setLayoutManager(linearLayoutManager);
+        mRecyclerView.setLayoutManager(mLinearLayoutManager);
         mRecyclerView.setAdapter(mMessagesAdapter);
 
         // Sets listeners
@@ -134,6 +134,7 @@ public class ChatFragment extends BaseFragment implements LoaderManager.LoaderCa
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
         mMessagesAdapter.setCursor(data);
+        mLinearLayoutManager.scrollToPosition(data.getCount() - 1);
     }
 
     @Override

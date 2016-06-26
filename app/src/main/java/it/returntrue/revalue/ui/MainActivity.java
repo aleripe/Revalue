@@ -6,6 +6,7 @@ package it.returntrue.revalue.ui;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
@@ -13,6 +14,8 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -26,6 +29,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
 import com.squareup.otto.Subscribe;
 
 import java.util.List;
@@ -228,13 +233,24 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     private void setNavigationViewHeader() {
         View header = mNavigationView.getHeaderView(0);
 
-        ImageView mImagePicture = (ImageView)header.findViewById(R.id.nav_header_image_picture);
+        final ImageView mImagePicture = (ImageView)header.findViewById(R.id.nav_header_image_picture);
         TextView mLabelUsername = (TextView)header.findViewById(R.id.nav_header_label_username);
         TextView mLabelEmail = (TextView)header.findViewById(R.id.nav_header_label_email);
 
         mLabelUsername.setText(session().getAlias());
         mLabelEmail.setText(session().getUsername());
-        Glide.with(this).load(session().getAvatar()).into(mImagePicture);
+
+        Glide.with(this)
+                .load(session().getAvatar())
+                .asBitmap()
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        RoundedBitmapDrawable drawable = RoundedBitmapDrawableFactory.create(getResources(), resource);
+                        drawable.setCornerRadius(Math.max(resource.getWidth(), resource.getHeight()) / 2.0f);
+                        mImagePicture.setImageDrawable(drawable);
+                    }
+                });
 
         // Sets navigation view
         mNavigationView.setNavigationItemSelectedListener(this);

@@ -43,7 +43,6 @@ public class FiltersFragment extends DialogFragment {
     private DialogInterface.OnDismissListener mOnDismissListener;
     private HashMap<Integer, Integer> mRadioButtons;
     private List<CategoryModel> mCategories;
-    private ArrayAdapter<CategoryModel> mAdapter;
 
     @Bind(R.id.text_title) EditText mTextTitle;
     @Bind(R.id.spinner_category) Spinner mSpinnerCategory;
@@ -142,7 +141,8 @@ public class FiltersFragment extends DialogFragment {
         mCategories = onSuccess.getCategories();
 
         // Creates adapter and inserts empty default value
-        mAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1);
+        ArrayAdapter<CategoryModel> mAdapter = new ArrayAdapter<>(
+                getContext(), android.R.layout.simple_list_item_1);
         mAdapter.clear();
         mAdapter.addAll(mCategories);
         mAdapter.insert(createEmptyCategoryModel(), 0);

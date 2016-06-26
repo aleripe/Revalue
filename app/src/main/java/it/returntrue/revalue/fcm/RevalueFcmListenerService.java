@@ -22,7 +22,7 @@ import it.returntrue.revalue.R;
 import it.returntrue.revalue.data.MessageContract.MessageEntry;
 import it.returntrue.revalue.preferences.SessionPreferences;
 import it.returntrue.revalue.provider.MessageProvider;
-import it.returntrue.revalue.ui.DetailActivity;
+import it.returntrue.revalue.ui.ChatActivity;
 
 /**
  * Implements a listener for FCM incoming messages
@@ -38,8 +38,11 @@ public class RevalueFcmListenerService extends FirebaseMessagingService {
 
         int id = Integer.parseInt(String.valueOf(data.get("id")));
         int userId = Integer.parseInt(String.valueOf(data.get("userId")));
+        String userAlias = String.valueOf(data.get("userAlias"));
+        String title = String.valueOf(data.get("title"));
         String text = String.valueOf(data.get("text"));
         long date = Long.parseLong(String.valueOf(data.get("date")));
+        boolean isOwned = Boolean.parseBoolean(String.valueOf(data.get("isOwned")));
 
         ContentValues values = new ContentValues(2);
         values.put(MessageEntry.COLUMN_ITEM_ID, id);
@@ -49,17 +52,21 @@ public class RevalueFcmListenerService extends FirebaseMessagingService {
         values.put(MessageEntry.COLUMN_DATE, date);
         getContentResolver().insert(MessageProvider.buildMessageUri(), values);
 
-        sendNotification(getString(R.string.new_message_received), text, date, id);
+        sendNotification(title, userAlias + ": " + text, date, id, userId, userAlias, isOwned);
     }
 
-    private void sendNotification(String title, String text, long date, int itemId) {
+    private void sendNotification(String title, String text, long date, int itemId,
+                                  int userId, String userAlias, boolean isOwned) {
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
 
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.addLine(text);
 
-        Intent intent = new Intent(this, DetailActivity.class);
-        intent.putExtra(DetailActivity.EXTRA_ID, itemId);
+        Intent intent = new Intent(this, ChatActivity.class);
+        intent.putExtra(ChatActivity.EXTRA_ITEM_ID, itemId);
+        intent.putExtra(ChatActivity.EXTRA_USER_ID, userId);
+        intent.putExtra(ChatActivity.EXTRA_USER_ALIAS, userAlias);
+        intent.putExtra(ChatActivity.EXTRA_IS_OWNED, isOwned);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 

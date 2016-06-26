@@ -24,7 +24,6 @@ import it.returntrue.revalue.ui.LoginActivity;
  * Provides a base implementation for all application activities
  * */
 public abstract class BaseActivity extends AppCompatActivity {
-    private static final String TAG = BaseActivity.class.getSimpleName();
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     @Override

@@ -1,53 +1,50 @@
 {
   "project_info": {
-    "project_number": "559968920325",
-    "firebase_url": "https://revalue-1276.firebaseio.com",
-    "project_id": "revalue-1276",
-    "storage_bucket": "revalue-1276.appspot.com"
+    "project_number": "20530864566",
+    "firebase_url": "https://revalue-1354.firebaseio.com",
+    "project_id": "revalue-1354",
+    "storage_bucket": "revalue-1354.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:559968920325:android:a76cc0c2f109b871",
+        "mobilesdk_app_id": "1:20530864566:android:a76cc0c2f109b871",
         "android_client_info": {
           "package_name": "it.returntrue.revalue"
         }
       },
       "oauth_client": [
         {
-          "client_id": "559968920325-vtlclvqbn8b32kvkhugq98oike0lnu22.apps.googleusercontent.com",
+          "client_id": "20530864566-3chm4jd39j449cp0aaebgrl3r1i24ut9.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "it.returntrue.revalue",
-            "certificate_hash": "B103F97C20069B8BAC00E7B361872CCF0E6565CE"
+            "certificate_hash": "2FF4BB0ECA72B3173CB4FB7A4EEF4248AE711A0B"
           }
         },
         {
-          "client_id": "559968920325-efhek7lgqefg56g1k81m3l3o97tnlvkt.apps.googleusercontent.com",
+          "client_id": "20530864566-a472rkvldvukdjd7c4c2u267ar3p8k1o.apps.googleusercontent.com",
           "client_type": 3
         },
         {
-          "client_id": "559968920325-fgf6frk206vt01a4m4n0e3c0kvi8hcui.apps.googleusercontent.com",
+          "client_id": "20530864566-0nludnpa9t2rdvffluns01fb23c9j6fm.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBMFPyXsWzQxwpk147NnNXQ-8_73W0DEnU"
+          "current_key": "AIzaSyDDIOWU043bRgg82OkMlsHJkUbS3YkSMhM"
         }
       ],
       "services": {
         "analytics_service": {
-          "status": 2,
-          "analytics_property": {
-            "tracking_id": "UA-78507217-1"
-          }
+          "status": 1
         },
         "appinvite_service": {
           "status": 2,
           "other_platform_oauth_client": [
             {
-              "client_id": "559968920325-efhek7lgqefg56g1k81m3l3o97tnlvkt.apps.googleusercontent.com",
+              "client_id": "20530864566-a472rkvldvukdjd7c4c2u267ar3p8k1o.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

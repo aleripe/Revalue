@@ -8,13 +8,19 @@ android {
         applicationId 'it.returntrue.revalue'
         minSdkVersion 16
         targetSdkVersion 24
-        versionCode 1
-        versionName '1.0'
+        versionCode 5
+        versionName '1.4'
         multiDexEnabled true
     }
 
     signingConfigs {
         release {
+            keyAlias 'Revalue'
+            keyPassword 'password'
+            storeFile file('../Revalue.jks')
+            storePassword 'password'
+        }
+        debug {
             keyAlias 'Revalue'
             keyPassword 'password'
             storeFile file('../Revalue.jks')
@@ -26,7 +32,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.release
+        }
+        debug {
+            //noinspection GroovyAssignabilityCheck
+            signingConfig signingConfigs.debug
         }
     }
 

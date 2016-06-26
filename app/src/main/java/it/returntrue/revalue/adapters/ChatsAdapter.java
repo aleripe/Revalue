@@ -73,14 +73,17 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsAdapter.ViewHolder> 
         int senderId = MessageData.getSenderId(mCursor);
         int receiverId = MessageData.getReceiverId(mCursor);
         UserModel user = mUsers.get((currentUserId != senderId) ? senderId : receiverId);
+        String prefix = (currentUserId == senderId) ? mContext.getString(R.string.you) + ": " : "";
+        String date = MessageData.getDate(mCursor);
+        String text = prefix + MessageData.getText(mCursor);
 
         Glide.with(mContext)
                 .load(user.Avatar)
                 .into(holder.imageAvatar);
 
         holder.textAlias.setText(user.Alias);
-        holder.textDate.setText(MessageData.getDate(mCursor));
-        holder.textText.setText(MessageData.getText(mCursor));
+        holder.textDate.setText(date);
+        holder.textText.setText(text);
     }
 
     /** Represents a ViewHolder for a RecyclerView item */

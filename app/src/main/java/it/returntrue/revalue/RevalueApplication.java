@@ -27,17 +27,18 @@ import it.returntrue.revalue.utilities.Constants;
 public class RevalueApplication extends Application {
     private static RevalueApplication sApplication;
 
-
     private static final int DEFAULT_DISTANCE = 50;
 
     @Constants.MainMode private int mMainMode = Constants.NEAREST_ITEMS_MODE;
-    @Constants.ItemsMode
-    private int mItemsMode = Constants.LIST_MODE;
+    @Constants.ItemsMode private int mItemsMode = Constants.LIST_MODE;
     private String mFilterTitle;
     private Integer mFilterCategory;
     private Integer mFilterDistance = DEFAULT_DISTANCE;
     private Double mLocationLatitude;
     private Double mLocationLongitude;
+    private Double mMapLatitude;
+    private Double mMapLongitude;
+    private Float mMapZoom;
     private RevalueService mRevalueService;
 
     public static RevalueApplication get(Context context) {
@@ -59,6 +60,9 @@ public class RevalueApplication extends Application {
 
     public void setMainMode(@Constants.MainMode int mode) {
         mMainMode = mode;
+        mMapLatitude = null;
+        mMapLongitude = null;
+        mMapZoom = null;
     }
 
     public @Constants.ItemsMode int getItemsMode() {
@@ -129,6 +133,30 @@ public class RevalueApplication extends Application {
 
     public Double getLocationLongitude() {
         return mLocationLongitude;
+    }
+
+    public void setMapLatitude(Double latitude) {
+        mMapLatitude = latitude;
+    }
+
+    public Double getMapLatitude() {
+        return mMapLatitude;
+    }
+
+    public void setMapLongitude(Double longitude) {
+        mMapLongitude = longitude;
+    }
+
+    public Double getMapLongitude() {
+        return mMapLongitude;
+    }
+
+    public void setMapZoom(Float zoom) {
+        mMapZoom = zoom;
+    }
+
+    public Float getMapZoom() {
+        return mMapZoom;
     }
 
     public boolean isLocationAvailable() {
